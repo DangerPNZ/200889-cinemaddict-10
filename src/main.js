@@ -1,24 +1,24 @@
 const templates = {
-      filmCard: () => 
-        `<article class="film-card">
-          <h3 class="film-card__title">The Dance of Life</h3>
-          <p class="film-card__rating">8.3</p>
-          <p class="film-card__info">
-              <span class="film-card__year">1929</span>
-              <span class="film-card__duration">1h 55m</span>
-              <span class="film-card__genre">Musical</span>
-          </p>
-          <img src="./images/posters/the-dance-of-life.jpg" alt="" class="film-card__poster">
-          <p class="film-card__description">Burlesque comic Ralph "Skid" Johnson (Skelly), and specialty dancer Bonny Lee King (Carroll), end up together on a cold, rainy night at a tr…</p>
-          <a class="film-card__comments">5 comments</a>
-          <form class="film-card__controls">
-              <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
-              <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
-              <button class="film-card__controls-item button film-card__controls-item--favorite">Mark as favorite</button>
-          </form>
-        </article>`
+    getFilmCard: () => 
+      `<article class="film-card">
+        <h3 class="film-card__title">The Dance of Life</h3>
+        <p class="film-card__rating">8.3</p>
+        <p class="film-card__info">
+            <span class="film-card__year">1929</span>
+            <span class="film-card__duration">1h 55m</span>
+            <span class="film-card__genre">Musical</span>
+        </p>
+        <img src="./images/posters/the-dance-of-life.jpg" alt="" class="film-card__poster">
+        <p class="film-card__description">Burlesque comic Ralph "Skid" Johnson (Skelly), and specialty dancer Bonny Lee King (Carroll), end up together on a cold, rainy night at a tr…</p>
+        <a class="film-card__comments">5 comments</a>
+        <form class="film-card__controls">
+            <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
+            <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
+            <button class="film-card__controls-item button film-card__controls-item--favorite">Mark as favorite</button>
+        </form>
+      </article>`
     ,
-    filmPopup: () => `
+    getFilmPopup: () => `
     <section class="film-details">
       <form class="film-details__inner" action="" method="get">
         <div class="form-details__top-container">
@@ -188,7 +188,7 @@ const templates = {
         </div>
       </form>
     </section>`,
-    menu: () => `
+    getMenu: () => `
     <nav class="main-navigation">
         <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
         <a href="#watchlist" class="main-navigation__item">Watchlist <span class="main-navigation__item-count">13</span></a>
@@ -207,9 +207,9 @@ const templates = {
             <a href="#" class="sort__button">Sort by rating</a>
         </li>
     </ul>`,
-    search: () => `<h2 class="films-list__title">Loading...</h2>`,
-    showMoreBtn: () => `<button class="films-list__show-more">Show more</button>`,
-    userRank: () => `
+    getSearch: () => `<h2 class="films-list__title">Loading...</h2>`,
+    getShowMoreBtn: () => `<button class="films-list__show-more">Show more</button>`,
+    getUserRank: () => `
     <section class="header__profile profile">
        <p class="profile__rating">Movie Buff</p>
        <img class="profile__avatar" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
@@ -226,27 +226,27 @@ const multipleInsertMarkups = (quantity, element, template, where = `beforeEnd`)
 const header = document.querySelector('.header');
 const main = document.querySelector('.main');
 const body = document.querySelector('body');
-insertMarkup(main, templates.menu());
+insertMarkup(main, templates.getMenu());
 const films= document.createElement('section');
 films.classList.add('films');
 const filmsList = document.createElement('section');
 filmsList.classList.add('films-list');
-insertMarkup(filmsList, templates.search());
+insertMarkup(filmsList, templates.getSearch());
 const filmsListContainer = document.createElement('div');
 filmsListContainer.classList.add('films-list__container');
-multipleInsertMarkups(5, filmsListContainer, templates.filmCard());
+multipleInsertMarkups(5, filmsListContainer, templates.getFilmCard());
 filmsList.appendChild(filmsListContainer);
-insertMarkup(filmsList, templates.showMoreBtn());
+insertMarkup(filmsList, templates.getShowMoreBtn());
 films.appendChild(filmsList);
 main.appendChild(films);
-insertMarkup(body, templates.filmPopup());
-insertMarkup(header, templates.userRank());
+insertMarkup(body, templates.getFilmPopup());
+insertMarkup(header, templates.getUserRank());
 const topRated = document.createElement('section');
 const topRatedHeading = document.createElement('h2');
 topRated.appendChild(topRatedHeading);
 const topRatedFilmsContainer = document.createElement('article');
 topRated.appendChild(topRatedFilmsContainer);
-multipleInsertMarkups(2, topRatedFilmsContainer, templates.filmCard());
+multipleInsertMarkups(2, topRatedFilmsContainer, templates.getFilmCard());
 topRatedFilmsContainer.classList.add('films-list__container');
 insertMarkup(topRatedHeading, `Top rated`);
 topRatedHeading.classList.add('films-list__title');
@@ -256,7 +256,7 @@ const mostCommentedHeading = document.createElement('h2');
 mostCommented.appendChild(mostCommentedHeading);
 const mostCommentedFilmsContainer = document.createElement('article');
 mostCommented.appendChild(mostCommentedFilmsContainer);
-multipleInsertMarkups(2, mostCommentedFilmsContainer, templates.filmCard());
+multipleInsertMarkups(2, mostCommentedFilmsContainer, templates.getFilmCard());
 mostCommentedFilmsContainer.classList.add('films-list__container');
 insertMarkup(mostCommentedHeading, `Most commented`);
 mostCommentedHeading.classList.add('films-list__title');
