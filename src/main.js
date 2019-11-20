@@ -239,7 +239,7 @@ filmsList.appendChild(filmsListContainer);
 insertMarkup(filmsList, templates.showMoreBtn());
 films.appendChild(filmsList);
 main.appendChild(films);
-// insertMarkup(body, templates.filmPopup());
+insertMarkup(body, templates.filmPopup());
 insertMarkup(header, templates.userRank());
 const topRated = document.createElement('section');
 const topRatedHeading = document.createElement('h2');
