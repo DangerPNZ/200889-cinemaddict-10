@@ -1,4 +1,4 @@
-import {getRandomNum} from '../methods/random-num';
+import {getRandomNum} from '../utils/random-num.js';
 let randomText = `It was possible that this would kill the project. 
 After all, if it was such a great idea, why wouldn't Malcolm's company offer on it? 
 I was afraid that if Steve had any doubts whatsoever, this decision would confirm and magnify them. 
@@ -226,7 +226,7 @@ const createRandomCommentsData = (commentsSum) => {
   }
   return comments;
 };
-export const generateFilmCardData = () => {
+const generateFilmCardData = () => {
   const releaseYear = getReleaseYear();
   const genre = getGenre();
   const commentsSum = getCommentsSum();
@@ -251,4 +251,11 @@ export const generateFilmCardData = () => {
     ifFavorites: getRandomBoolean(),
     comments: createRandomCommentsData(commentsSum)
   };
+};
+export const createFilmsDataList = (amount) => {
+  const filmsDataList = [];
+  for (let i = 0; i < amount; i++) {
+    filmsDataList.push(generateFilmCardData());
+  }
+  return filmsDataList;
 };

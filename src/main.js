@@ -11,8 +11,9 @@ import {getFilmsSectionContainer} from './components/films-section-container.js'
 import {getFilmsListSection} from './components/films-list-section.js';
 import {getFilmsListContainer} from './components/films-list-container.js';
 import {getFilmsExtraSection} from './components/films-extra-section.js';
-import {generateFilmCardData} from './components/film-card-data.js';
-import {getRandomNum} from './methods/random-num';
+import {createFilmsDataList} from './components/films-data-list.js';
+import {getRandomNum} from './utils/random-num.js';
+import {compare} from './utils/compare.js';
 
 const elements = {
   header: document.querySelector(`.header`),
@@ -43,18 +44,10 @@ const insertElementInMarkup = (element, container, where = `append`) => {
       break;
   }
 };
-
 const multipleInsertElementsInMarkup = (template, templatesData, container) => {
   for (const templateDataItem of templatesData) {
     container.insertAdjacentHTML(`beforeEnd`, template(templateDataItem));
   }
-};
-const createFilmsDataList = (sum) => {
-  const filmsDataList = [];
-  for (let i = 0; i < sum; i++) {
-    filmsDataList.push(generateFilmCardData());
-  }
-  return filmsDataList;
 };
 const totalFilmsData = createFilmsDataList(12);
 
@@ -99,7 +92,6 @@ elements.mostCommentedHeading = createNewElement(getMostCommentedSectionHeading(
 elements.mostCommentedFilmsContainer = createNewElement(getFilmsListContainer());
 elements.footerFilmTotalSum = document.querySelector(`.footer__statistics p`);
 
-
 insertElementInMarkup(elements.menu, elements.main);
 insertElementInMarkup(elements.sort, elements.main);
 insertElementInMarkup(elements.films, elements.main);
@@ -107,34 +99,20 @@ insertElementInMarkup(elements.filmsList, elements.films);
 insertElementInMarkup(elements.search, elements.filmsList);
 insertElementInMarkup(elements.filmsListContainer, elements.filmsList);
 elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
-elements.filmPopup = createNewElement(getFilmPopup(totalFilmsData[0]));
+// elements.filmPopup = createNewElement(getFilmPopup(totalFilmsData[0]));
 outputFilmParts();
 insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
-insertElementInMarkup(elements.filmPopup, elements.body);
+// insertElementInMarkup(elements.filmPopup, elements.body);
 insertElementInMarkup(elements.userRank, elements.header);
-const compare = (property) => {
-  return (a, b) => {
-    if (a[property] < b[property]) {
-      return 1;
-    }
-    if (a[property] > b[property]) {
-      return -1;
-    }
-    return 0;
-  };
-};
 
+const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
 const addElementsInExtraSection = (sortParameter, extraSection) => {
   const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
   const filtredCardDataByParameter = sortedCardsDataByParameter.filter((item) => {
     return item[sortParameter] > 0;
   });
   if (filtredCardDataByParameter.length) {
-    const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
-    const topElementsByParameter = [];
-    for (let i = 0; i < MAX_ELEMENTS_IN_EXTRA_SECTION && i < filtredCardDataByParameter.length; i++) {
-      topElementsByParameter.push(filtredCardDataByParameter[i]);
-    }
+    const topElementsByParameter = filtredCardDataByParameter.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
     if (sortParameter === `ratingVal`) {
       insertElementInMarkup(elements.topRated, elements.films);
       insertElementInMarkup(elements.topRatedHeading, elements.topRated);
