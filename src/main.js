@@ -5,8 +5,7 @@ import {getSort} from './components/sort.js';
 import {getSearchHeading} from './components/search-heading.js';
 import {getShowMoreBtn} from './components/show-more-btn.js';
 import {getUserRank} from './components/user-rank.js';
-import {getTopRatedSectionHeading} from './components/top-rated-section-heading.js';
-import {getMostCommentedSectionHeading} from './components/most-commented-section-heading.js';
+import {getExtraSectionHeading} from './components/extra-section-heading.js';
 import {getFilmsSectionContainer} from './components/films-section-container.js';
 import {getFilmsListSection} from './components/films-list-section.js';
 import {getFilmsListContainer} from './components/films-list-container.js';
@@ -50,15 +49,6 @@ const multipleInsertElementsInMarkup = (template, templatesData, container) => {
   }
 };
 const totalFilmsData = createFilmsDataList(12);
-
-elements.menu = createNewElement(getNav(totalFilmsData));
-elements.sort = createNewElement(getSort());
-elements.films = createNewElement(getFilmsSectionContainer());
-elements.filmsList = createNewElement(getFilmsListSection());
-elements.search = createNewElement(getSearchHeading());
-elements.filmsListContainer = createNewElement(getFilmsListContainer());
-elements.showMoreBtn = createNewElement(getShowMoreBtn());
-
 const filmsDataForOutput = []; // массив для создания карточек на странице
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
@@ -75,6 +65,14 @@ const outputFilmParts = () => {
   }
   multipleInsertElementsInMarkup(getFilmCard, filmsDataForOutput, elements.filmsListContainer);
 };
+elements.menu = createNewElement(getNav(totalFilmsData));
+elements.sort = createNewElement(getSort());
+elements.films = createNewElement(getFilmsSectionContainer());
+elements.filmsList = createNewElement(getFilmsListSection());
+elements.search = createNewElement(getSearchHeading());
+elements.filmsListContainer = createNewElement(getFilmsListContainer());
+elements.showMoreBtn = createNewElement(getShowMoreBtn());
+
 elements.showMoreBtn.addEventListener(`click`, () => {
   elements.filmsListContainer.innerHTML = ``;
   outputFilmParts();
@@ -84,12 +82,6 @@ const MIN_WATCHED_FILMS_SUM = 0;
 const MAX_WATCHED_FILMS_SUM = 100;
 const watchedFilmsSum = getRandomNum(MIN_WATCHED_FILMS_SUM, MAX_WATCHED_FILMS_SUM);
 elements.userRank = createNewElement(getUserRank(watchedFilmsSum));
-elements.topRated = createNewElement(getFilmsExtraSection());
-elements.topRatedFilmsContainer = createNewElement(getFilmsListContainer());
-elements.topRatedHeading = createNewElement(getTopRatedSectionHeading());
-elements.mostCommented = createNewElement(getFilmsExtraSection());
-elements.mostCommentedHeading = createNewElement(getMostCommentedSectionHeading());
-elements.mostCommentedFilmsContainer = createNewElement(getFilmsListContainer());
 elements.footerFilmTotalSum = document.querySelector(`.footer__statistics p`);
 
 insertElementInMarkup(elements.menu, elements.main);
@@ -99,31 +91,39 @@ insertElementInMarkup(elements.filmsList, elements.films);
 insertElementInMarkup(elements.search, elements.filmsList);
 insertElementInMarkup(elements.filmsListContainer, elements.filmsList);
 elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
-// elements.filmPopup = createNewElement(getFilmPopup(totalFilmsData[0]));
+elements.filmPopup = createNewElement(getFilmPopup(totalFilmsData[0]));
 outputFilmParts();
 insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
-// insertElementInMarkup(elements.filmPopup, elements.body);
+insertElementInMarkup(elements.filmPopup, elements.body);
 insertElementInMarkup(elements.userRank, elements.header);
 
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
-const addElementsInExtraSection = (sortParameter, extraSection) => {
+const topRatedHeadingText = `Top rated`;
+const mostCommentedHeadingText = `Most commented`;
+const addElementsInExtraSection = (sortParameter) => {
   const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
   const filtredCardDataByParameter = sortedCardsDataByParameter.filter((item) => {
     return item[sortParameter] > 0;
   });
   if (filtredCardDataByParameter.length) {
     const topElementsByParameter = filtredCardDataByParameter.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
-    if (sortParameter === `ratingVal`) {
-      insertElementInMarkup(elements.topRated, elements.films);
-      insertElementInMarkup(elements.topRatedHeading, elements.topRated);
-      insertElementInMarkup(elements.topRatedFilmsContainer, elements.topRated);
-    } else if (sortParameter === `commentsSum`) {
-      insertElementInMarkup(elements.mostCommented, elements.films);
-      insertElementInMarkup(elements.mostCommentedHeading, elements.mostCommented);
-      insertElementInMarkup(elements.mostCommentedFilmsContainer, elements.mostCommented);
+    let headingText = ``;
+    switch (sortParameter) {
+      case `ratingVal`:
+        headingText = topRatedHeadingText;
+        break;
+      case `commentsSum`:
+        headingText = mostCommentedHeadingText;
+        break;
     }
-    multipleInsertElementsInMarkup(getFilmCard, topElementsByParameter, extraSection);
+    const extraSection = createNewElement(getFilmsExtraSection());
+    const extraSectionHeading = createNewElement(getExtraSectionHeading(headingText));
+    const extraSectionFilmsContainer = createNewElement(getFilmsListContainer());
+    insertElementInMarkup(extraSectionHeading, extraSection);
+    insertElementInMarkup(extraSectionFilmsContainer, extraSection);
+    multipleInsertElementsInMarkup(getFilmCard, topElementsByParameter, extraSectionFilmsContainer);
+    insertElementInMarkup(extraSection, elements.films);
   }
 };
-addElementsInExtraSection(`ratingVal`, elements.topRatedFilmsContainer);
-addElementsInExtraSection(`commentsSum`, elements.mostCommentedFilmsContainer);
+addElementsInExtraSection(`ratingVal`);
+addElementsInExtraSection(`commentsSum`);
