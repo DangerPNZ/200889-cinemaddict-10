@@ -60,7 +60,7 @@ const addPopupHandlers = (popup, filmPoster, filmName, filmToCommentsLink, popup
   filmName.addEventListener(`click`, showPopup);
   filmToCommentsLink.addEventListener(`click`, showPopup);
   popupCloseBtn.addEventListener(`click`, removePopup);
-}
+};
 const outputFilmParts = () => {
   let steps = FILMS_PART_FOR_RENDER_ON_PAGE;
   for (; steps !== 0; steps--) {
