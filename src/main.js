@@ -100,13 +100,16 @@ insertElementInMarkup(elements.userRank, elements.header);
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
 const topRatedHeadingText = `Top rated`;
 const mostCommentedHeadingText = `Most commented`;
-const addElementsInExtraSection = (sortParameter) => {
+const getExtraSectionFilmsCardsData = (sortParameter) => {
   const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
-  const filtredCardDataByParameter = sortedCardsDataByParameter.filter((item) => {
+  return sortedCardsDataByParameter.filter((item) => {
     return item[sortParameter] > 0;
   });
-  if (filtredCardDataByParameter.length) {
-    const topElementsByParameter = filtredCardDataByParameter.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
+};
+const createExtraSection = (sortParameter, container) => {
+  const extraSectionFilmsCardsData = getExtraSectionFilmsCardsData(sortParameter);
+  if (extraSectionFilmsCardsData.length) {
+    const topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
     let headingText = ``;
     switch (sortParameter) {
       case `ratingVal`:
@@ -122,8 +125,8 @@ const addElementsInExtraSection = (sortParameter) => {
     insertElementInMarkup(extraSectionHeading, extraSection);
     insertElementInMarkup(extraSectionFilmsContainer, extraSection);
     multipleInsertElementsInMarkup(getFilmCard, topElementsByParameter, extraSectionFilmsContainer);
-    insertElementInMarkup(extraSection, elements.films);
+    insertElementInMarkup(extraSection, container);
   }
 };
-addElementsInExtraSection(`ratingVal`);
-addElementsInExtraSection(`commentsSum`);
+createExtraSection(`ratingVal`, elements.films);
+createExtraSection(`commentsSum`, elements.films);
