@@ -49,6 +49,18 @@ const multipleInsertElementsInMarkup = (ElementGeneratedClass, dataElements, con
 const totalFilmsData = createFilmsDataList(12);
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
+const addPopupHandlers = (popup, filmPoster, filmName, filmToCommentsLink, popupCloseBtn) => {
+  const removePopup = () => {
+    elements.body.removeChild(popup);
+  };
+  const showPopup = () => {
+    insertElementInMarkup(popup, elements.body);
+  };
+  filmPoster.addEventListener(`click`, showPopup);
+  filmName.addEventListener(`click`, showPopup);
+  filmToCommentsLink.addEventListener(`click`, showPopup);
+  popupCloseBtn.addEventListener(`click`, removePopup);
+}
 const outputFilmParts = () => {
   let steps = FILMS_PART_FOR_RENDER_ON_PAGE;
   for (; steps !== 0; steps--) {
@@ -56,20 +68,11 @@ const outputFilmParts = () => {
     const thisFilmData = totalFilmsData[index];
     const filmCard = new FilmCard(thisFilmData).getElement();
     const filmPopup = new FilmPopup(thisFilmData).getElement();
-    const thisfilmPoster = filmCard.querySelector(`.film-card__poster`);
-    const thisfilmName = filmCard.querySelector(`.film-card__title`);
+    const thisFilmPoster = filmCard.querySelector(`.film-card__poster`);
+    const thisFilmName = filmCard.querySelector(`.film-card__title`);
     const thisFilmToCommentsLink = filmCard.querySelector(`.film-card__comments`);
     const thisPopupCloseBtn = filmPopup.querySelector(`.film-details__close-btn`);
-    const removePopup = () => {
-      elements.body.removeChild(filmPopup);
-    };
-    const showPopup = () => {
-      insertElementInMarkup(filmPopup, elements.body);
-    };
-    thisfilmPoster.addEventListener(`click`, showPopup);
-    thisfilmName.addEventListener(`click`, showPopup);
-    thisFilmToCommentsLink.addEventListener(`click`, showPopup);
-    thisPopupCloseBtn.addEventListener(`click`, removePopup);
+    addPopupHandlers(filmPopup, thisFilmPoster, thisFilmName, thisFilmToCommentsLink, thisPopupCloseBtn);
 
     insertElementInMarkup(filmCard, elements.filmsListContainer);
     filmsInThePage++;
