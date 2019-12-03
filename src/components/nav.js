@@ -1,4 +1,6 @@
-export const getNav = (totalFilmsData) => {
+import {createElement} from './utils.js';
+
+const getNav = (totalFilmsData) => {
   const inWatchlistFilms = totalFilmsData.filter((item) => {
     return item.isInWatchlist;
   });
@@ -17,3 +19,22 @@ export const getNav = (totalFilmsData) => {
       <a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
   </nav>`;
 };
+
+export default class Nav {
+  constructor(totalFilmsData) {
+    this._totalFilmsData = totalFilmsData;
+    this._element = null;
+  }
+  getTemplate() {
+    return getNav(this._totalFilmsData);
+  }
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+  removeElement() {
+    this._element = null;
+  }
+}

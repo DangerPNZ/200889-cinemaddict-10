@@ -1,4 +1,4 @@
-import {getRandomNum} from '../utils/random-num.js';
+import {getRandomNum} from './utils.js';
 let randomText = `It was possible that this would kill the project. 
 After all, if it was such a great idea, why wouldn't Malcolm's company offer on it? 
 I was afraid that if Steve had any doubts whatsoever, this decision would confirm and magnify them. 

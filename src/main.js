@@ -1,28 +1,23 @@
-import {getFilmCard} from './components/film-card.js';
-import {getFilmPopup} from './components/film-popup.js';
-import {getNav} from './components/nav.js';
-import {getSort} from './components/sort.js';
-import {getSearchHeading} from './components/search-heading.js';
-import {getShowMoreBtn} from './components/show-more-btn.js';
-import {getUserRank} from './components/user-rank.js';
-import {getExtraSectionHeading} from './components/extra-section-heading.js';
-import {getFilmsSectionContainer} from './components/films-section-container.js';
-import {getFilmsListSection} from './components/films-list-section.js';
-import {getFilmsListContainer} from './components/films-list-container.js';
-import {getFilmsExtraSection} from './components/films-extra-section.js';
+import FilmCard from './components/film-card.js';
+import FilmPopup from './components/film-popup.js';
+import Nav from './components/nav.js';
+import Sort from './components/sort.js';
+import SearchHeading from './components/search-heading.js';
+import ShowMoreBtn from './components/show-more-btn.js';
+import UserRank from './components/user-rank.js';
+import ExtraSectionHeading from './components/extra-section-heading.js';
+import FilmsSectionContainer from './components/films-section-container.js';
+import FilmsListSection from './components/films-list-section.js';
+import FilmsListContainer from './components/films-list-container.js';
+import FilmsExtraSection from './components/films-extra-section.js';
 import {createFilmsDataList} from './components/films-data-list.js';
-import {getRandomNum} from './utils/random-num.js';
-import {compare} from './utils/compare.js';
+import {getRandomNum} from './components/utils.js';
+import {compare} from './components/utils.js';
 
 const elements = {
   header: document.querySelector(`.header`),
   main: document.querySelector(`.main`),
   body: document.body
-};
-const createNewElement = (templateContent) => {
-  const element = document.createElement(`template`);
-  element.innerHTML = templateContent;
-  return element.content.firstElementChild;
 };
 const insertElementInMarkup = (element, container, where = `append`) => {
   switch (where) {
@@ -43,45 +38,63 @@ const insertElementInMarkup = (element, container, where = `append`) => {
       break;
   }
 };
-const multipleInsertElementsInMarkup = (template, templatesData, container) => {
-  for (const templateDataItem of templatesData) {
-    container.insertAdjacentHTML(`beforeEnd`, template(templateDataItem));
+const multipleInsertElementsInMarkup = (ElementGeneratedClass, dataElements, container, where = `append`) => {
+  for (const oneDataElement of dataElements) {
+    const element = new ElementGeneratedClass(oneDataElement).getElement();
+    insertElementInMarkup(element, container, where);
   }
 };
+
+
 const totalFilmsData = createFilmsDataList(12);
-const filmsDataForOutput = []; // массив для создания карточек на странице
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
 const outputFilmParts = () => {
   let steps = FILMS_PART_FOR_RENDER_ON_PAGE;
-  for (filmsInThePage; steps !== 0; steps--) {
+  for (; steps !== 0; steps--) {
     const index = filmsInThePage;
-    filmsDataForOutput.push(totalFilmsData[index]);
+    const thisFilmData = totalFilmsData[index];
+    const filmCard = new FilmCard(thisFilmData).getElement();
+    const filmPopup = new FilmPopup(thisFilmData);
+    const thisfilmPoster = filmCard.querySelector(`.film-card__poster`);
+    const thisfilmName = filmCard.querySelector(`.film-card__title`);
+    const thisFilmToCommentsLink = filmCard.querySelector(`.film-card__comments`);
+    const thisPopupCloseBtn = filmPopup.getElement().querySelector(`.film-details__close-btn`);
+    const removePopup = () => {
+      elements.body.removeChild(filmPopup.getElement());
+    };
+    const showPopup = () => {
+      insertElementInMarkup(filmPopup.getElement(), elements.body);
+    };
+    thisfilmPoster.addEventListener(`click`, showPopup);
+    thisfilmName.addEventListener(`click`, showPopup);
+    thisFilmToCommentsLink.addEventListener(`click`, showPopup);
+    thisPopupCloseBtn.addEventListener(`click`, removePopup);
+
+    insertElementInMarkup(filmCard, elements.filmsListContainer);
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {
       elements.showMoreBtn.style.display = `none`;
       break;
     }
   }
-  multipleInsertElementsInMarkup(getFilmCard, filmsDataForOutput, elements.filmsListContainer);
 };
-elements.menu = createNewElement(getNav(totalFilmsData));
-elements.sort = createNewElement(getSort());
-elements.films = createNewElement(getFilmsSectionContainer());
-elements.filmsList = createNewElement(getFilmsListSection());
-elements.search = createNewElement(getSearchHeading());
-elements.filmsListContainer = createNewElement(getFilmsListContainer());
-elements.showMoreBtn = createNewElement(getShowMoreBtn());
+elements.menu = new Nav(totalFilmsData).getElement();
+elements.sort = new Sort().getElement();
+elements.films = new FilmsSectionContainer().getElement();
+elements.filmsList = new FilmsListSection().getElement();
+elements.search = new SearchHeading().getElement();
+elements.filmsListContainer = new FilmsListContainer().getElement();
+elements.showMoreBtn = new ShowMoreBtn().getElement();
 
 elements.showMoreBtn.addEventListener(`click`, () => {
-  elements.filmsListContainer.innerHTML = ``;
   outputFilmParts();
 });
 
 const MIN_WATCHED_FILMS_SUM = 0;
 const MAX_WATCHED_FILMS_SUM = 100;
 const watchedFilmsSum = getRandomNum(MIN_WATCHED_FILMS_SUM, MAX_WATCHED_FILMS_SUM);
-elements.userRank = createNewElement(getUserRank(watchedFilmsSum));
+elements.userRank = new UserRank(watchedFilmsSum).getElement();
 elements.footerFilmTotalSum = document.querySelector(`.footer__statistics p`);
 
 insertElementInMarkup(elements.menu, elements.main);
@@ -91,10 +104,8 @@ insertElementInMarkup(elements.filmsList, elements.films);
 insertElementInMarkup(elements.search, elements.filmsList);
 insertElementInMarkup(elements.filmsListContainer, elements.filmsList);
 elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
-elements.filmPopup = createNewElement(getFilmPopup(totalFilmsData[0]));
 outputFilmParts();
 insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
-insertElementInMarkup(elements.filmPopup, elements.body);
 insertElementInMarkup(elements.userRank, elements.header);
 
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
@@ -119,12 +130,12 @@ const createExtraSection = (sortParameter, container) => {
         headingText = mostCommentedHeadingText;
         break;
     }
-    const extraSection = createNewElement(getFilmsExtraSection());
-    const extraSectionHeading = createNewElement(getExtraSectionHeading(headingText));
-    const extraSectionFilmsContainer = createNewElement(getFilmsListContainer());
-    insertElementInMarkup(extraSectionHeading, extraSection);
+    const extraSection = new FilmsExtraSection().getElement();
+    const extraSectionHeading = new ExtraSectionHeading(headingText);
+    const extraSectionFilmsContainer = new FilmsListContainer().getElement();
+    insertElementInMarkup(extraSectionHeading.getElement(), extraSection);
     insertElementInMarkup(extraSectionFilmsContainer, extraSection);
-    multipleInsertElementsInMarkup(getFilmCard, topElementsByParameter, extraSectionFilmsContainer);
+    multipleInsertElementsInMarkup(FilmCard, topElementsByParameter, extraSectionFilmsContainer);
     insertElementInMarkup(extraSection, container);
   }
 };
