@@ -55,16 +55,16 @@ const outputFilmParts = () => {
     const index = filmsInThePage;
     const thisFilmData = totalFilmsData[index];
     const filmCard = new FilmCard(thisFilmData).getElement();
-    const filmPopup = new FilmPopup(thisFilmData);
+    const filmPopup = new FilmPopup(thisFilmData).getElement();
     const thisfilmPoster = filmCard.querySelector(`.film-card__poster`);
     const thisfilmName = filmCard.querySelector(`.film-card__title`);
     const thisFilmToCommentsLink = filmCard.querySelector(`.film-card__comments`);
-    const thisPopupCloseBtn = filmPopup.getElement().querySelector(`.film-details__close-btn`);
+    const thisPopupCloseBtn = filmPopup.querySelector(`.film-details__close-btn`);
     const removePopup = () => {
-      elements.body.removeChild(filmPopup.getElement());
+      elements.body.removeChild(filmPopup);
     };
     const showPopup = () => {
-      insertElementInMarkup(filmPopup.getElement(), elements.body);
+      insertElementInMarkup(filmPopup, elements.body);
     };
     thisfilmPoster.addEventListener(`click`, showPopup);
     thisfilmName.addEventListener(`click`, showPopup);
