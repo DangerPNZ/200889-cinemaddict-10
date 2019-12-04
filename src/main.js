@@ -48,18 +48,6 @@ const totalFilmsData = createFilmsDataList(12);
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
 
-// const addFilmCardHandlers = (filmCard, popup) => {
-//   const filmPoster = filmCard.querySelector(`.film-card__poster`);
-//   const filmName = filmCard.querySelector(`.film-card__title`);
-//   const filmToCommentsLink = filmCard.querySelector(`.film-card__comments`);
-//   const popupCloseBtn = popup.querySelector(`.film-details__close-btn`);
-
-//   filmPoster.addEventListener(`click`, showPopup);
-//   filmName.addEventListener(`click`, showPopup);
-//   filmToCommentsLink.addEventListener(`click`, showPopup);
-//   popupCloseBtn.addEventListener(`click`, removePopup);
-// };
-
 const outputFilmParts = () => {
   for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
     const index = filmsInThePage;
@@ -67,13 +55,13 @@ const outputFilmParts = () => {
     const filmCard = new FilmCard(thisFilmData);
     const filmPopup = new FilmPopup(thisFilmData);
     const removePopup = () => {
-      elements.body.removeChild(filmPopup.getElement());
+      filmPopup.removeElement();
     };
     const showPopup = () => {
       insertElementInMarkup(filmPopup.getElement(), elements.body);
     };
-    filmCard.setPopupHandlerForPopupCallElements(showPopup);
-    filmPopup.setHandlerForPopupCloseElement(removePopup);
+    filmCard.setClickHandler(showPopup);
+    filmPopup.setCloseHandler(removePopup);
     insertElementInMarkup(filmCard.getElement(), elements.filmsListContainer);
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {

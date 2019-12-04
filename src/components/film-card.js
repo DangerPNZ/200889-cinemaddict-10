@@ -31,12 +31,12 @@ const getFilmCard = (filmData) => {
   </article>`;
 };
 export default class FilmCard {
-  constructor(filmData) {
+  constructor(data) {
     this._element = null;
-    this._filmData = filmData;
+    this._data = data;
   }
   getTemplate() {
-    return getFilmCard(this._filmData);
+    return getFilmCard(this._data);
   }
   getElement() {
     if (!this._element) {
@@ -53,7 +53,7 @@ export default class FilmCard {
     const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
     return [poster, heading, toCommentsLink];
   }
-  setPopupHandlerForPopupCallElements(handler) {
+  setClickHandler(handler) {
     const elementsForPopupCall = this.getPopupCallElements();
     for (const element of elementsForPopupCall) {
       element.addEventListener(`click`, handler);

@@ -235,12 +235,12 @@ const getFilmPopup = (filmData) => {
 };
 
 export default class FilmPopup {
-  constructor(filmData) {
-    this._filmData = filmData;
+  constructor(data) {
+    this._data = data;
     this._element = null;
   }
   getTemplate() {
-    return getFilmPopup(this._filmData);
+    return getFilmPopup(this._data);
   }
   getElement() {
     if (!this._element) {
@@ -249,13 +249,14 @@ export default class FilmPopup {
     return this._element;
   }
   removeElement() {
+    document.body.removeChild(this._element);
     this._element = null;
   }
-  getPopupCloseElement() {
+  getCloseElement() {
     return this.getElement().querySelector(`.film-details__close-btn`);
   }
-  setHandlerForPopupCloseElement(handler, element) {
-    const popupCloseElement = this.getPopupCloseElement();
+  setCloseHandler(handler) {
+    const popupCloseElement = this.getCloseElement();
     popupCloseElement.addEventListener(`click`, handler);
   }
 }
