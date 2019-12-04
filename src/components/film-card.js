@@ -47,4 +47,16 @@ export default class FilmCard {
   removeElement() {
     this._element = null;
   }
+  getPopupCallElements() {
+    const poster = this.getElement().querySelector(`.film-card__poster`);
+    const heading = this.getElement().querySelector(`.film-card__title`);
+    const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
+    return [poster, heading, toCommentsLink];
+  }
+  setPopupHandlerForPopupCallElements(handler) {
+    const elementsForPopupCall = this.getPopupCallElements();
+    for (const element of elementsForPopupCall) {
+      element.addEventListener(`click`, handler);
+    }
+  }
 }

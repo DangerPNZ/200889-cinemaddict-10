@@ -5,10 +5,8 @@ import Sort from './components/sort.js';
 import SearchHeading from './components/search-heading.js';
 import ShowMoreBtn from './components/show-more-btn.js';
 import UserRank from './components/user-rank.js';
-// import ExtraSectionHeading from './components/extra-section-heading.js';
 import FilmsSectionContainer from './components/films-section-container.js';
 import FilmsListSection from './components/films-list-section.js';
-// import FilmsListContainer from './components/films-list-container.js';
 import FilmsExtraSection from './components/films-extra-section.js';
 import {createFilmsDataList} from './components/films-data-list.js';
 import {getRandomNum} from './components/utils.js';
@@ -49,30 +47,35 @@ const multipleInsertElementsInMarkup = (ElementGeneratedClass, dataElements, con
 const totalFilmsData = createFilmsDataList(12);
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
-const addFilmCardHandlers = (filmCard, popup) => {
-  const filmPoster = filmCard.querySelector(`.film-card__poster`);
-  const filmName = filmCard.querySelector(`.film-card__title`);
-  const filmToCommentsLink = filmCard.querySelector(`.film-card__comments`);
-  const popupCloseBtn = popup.querySelector(`.film-details__close-btn`);
-  const removePopup = () => {
-    elements.body.removeChild(popup);
-  };
-  const showPopup = () => {
-    insertElementInMarkup(popup, elements.body);
-  };
-  filmPoster.addEventListener(`click`, showPopup);
-  filmName.addEventListener(`click`, showPopup);
-  filmToCommentsLink.addEventListener(`click`, showPopup);
-  popupCloseBtn.addEventListener(`click`, removePopup);
-};
+
+
+// const addFilmCardHandlers = (filmCard, popup) => {
+//   const filmPoster = filmCard.querySelector(`.film-card__poster`);
+//   const filmName = filmCard.querySelector(`.film-card__title`);
+//   const filmToCommentsLink = filmCard.querySelector(`.film-card__comments`);
+//   const popupCloseBtn = popup.querySelector(`.film-details__close-btn`);
+
+//   filmPoster.addEventListener(`click`, showPopup);
+//   filmName.addEventListener(`click`, showPopup);
+//   filmToCommentsLink.addEventListener(`click`, showPopup);
+//   popupCloseBtn.addEventListener(`click`, removePopup);
+// };
+
 const outputFilmParts = () => {
   for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
     const index = filmsInThePage;
     const thisFilmData = totalFilmsData[index];
-    const filmCard = new FilmCard(thisFilmData).getElement();
-    const filmPopup = new FilmPopup(thisFilmData).getElement();
-    addFilmCardHandlers(filmCard, filmPopup);
-    insertElementInMarkup(filmCard, elements.filmsListContainer);
+    const filmCard = new FilmCard(thisFilmData);
+    const filmPopup = new FilmPopup(thisFilmData);
+    const removePopup = () => {
+      elements.body.removeChild(filmPopup.getElement());
+    };
+    const showPopup = () => {
+      insertElementInMarkup(filmPopup.getElement(), elements.body);
+    };
+    filmCard.setPopupHandlerForPopupCallElements(showPopup);
+    filmPopup.setHandlerForPopupCloseElement(removePopup);
+    insertElementInMarkup(filmCard.getElement(), elements.filmsListContainer);
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {
       elements.showMoreBtn.style.display = `none`;
@@ -80,12 +83,13 @@ const outputFilmParts = () => {
     }
   }
 };
+const filmsList = new FilmsListSection();
 elements.menu = new Nav(totalFilmsData).getElement();
 elements.sort = new Sort().getElement();
 elements.films = new FilmsSectionContainer().getElement();
-elements.filmsList = new FilmsListSection().getElement();
+elements.filmsList = filmsList.getElement();
+elements.filmsListContainer = filmsList.getContainerElement();
 elements.search = new SearchHeading().getElement();
-elements.filmsListContainer = new FilmsListSection().getContainerElement();
 elements.showMoreBtn = new ShowMoreBtn().getElement();
 
 elements.showMoreBtn.addEventListener(`click`, () => {
@@ -131,7 +135,7 @@ const createExtraSection = (sortParameter, container) => {
         break;
     }
     const extraSection = new FilmsExtraSection(headingText);
-    const extraSectionFilmsContainer = new FilmsExtraSection(headingText).getContainerElement();
+    const extraSectionFilmsContainer = extraSection.getContainerElement();
     multipleInsertElementsInMarkup(FilmCard, topElementsByParameter, extraSectionFilmsContainer);
     insertElementInMarkup(extraSection.getElement(), container);
   }

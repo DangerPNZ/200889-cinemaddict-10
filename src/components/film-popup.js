@@ -251,4 +251,11 @@ export default class FilmPopup {
   removeElement() {
     this._element = null;
   }
+  getPopupCloseElement() {
+    return this.getElement().querySelector(`.film-details__close-btn`);
+  }
+  setHandlerForPopupCloseElement(handler, element) {
+    const popupCloseElement = this.getPopupCloseElement();
+    popupCloseElement.addEventListener(`click`, handler);
+  }
 }
