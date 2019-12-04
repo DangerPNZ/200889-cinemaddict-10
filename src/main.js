@@ -48,7 +48,6 @@ const totalFilmsData = createFilmsDataList(12);
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
 
-
 // const addFilmCardHandlers = (filmCard, popup) => {
 //   const filmPoster = filmCard.querySelector(`.film-card__poster`);
 //   const filmName = filmCard.querySelector(`.film-card__title`);
