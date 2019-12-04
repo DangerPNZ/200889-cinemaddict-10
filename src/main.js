@@ -5,10 +5,10 @@ import Sort from './components/sort.js';
 import SearchHeading from './components/search-heading.js';
 import ShowMoreBtn from './components/show-more-btn.js';
 import UserRank from './components/user-rank.js';
-import ExtraSectionHeading from './components/extra-section-heading.js';
+// import ExtraSectionHeading from './components/extra-section-heading.js';
 import FilmsSectionContainer from './components/films-section-container.js';
 import FilmsListSection from './components/films-list-section.js';
-import FilmsListContainer from './components/films-list-container.js';
+// import FilmsListContainer from './components/films-list-container.js';
 import FilmsExtraSection from './components/films-extra-section.js';
 import {createFilmsDataList} from './components/films-data-list.js';
 import {getRandomNum} from './components/utils.js';
@@ -66,8 +66,7 @@ const addFilmCardHandlers = (filmCard, popup) => {
   popupCloseBtn.addEventListener(`click`, removePopup);
 };
 const outputFilmParts = () => {
-  let steps = FILMS_PART_FOR_RENDER_ON_PAGE;
-  for (; steps !== 0; steps--) {
+  for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
     const index = filmsInThePage;
     const thisFilmData = totalFilmsData[index];
     const filmCard = new FilmCard(thisFilmData).getElement();
@@ -86,7 +85,7 @@ elements.sort = new Sort().getElement();
 elements.films = new FilmsSectionContainer().getElement();
 elements.filmsList = new FilmsListSection().getElement();
 elements.search = new SearchHeading().getElement();
-elements.filmsListContainer = new FilmsListContainer().getElement();
+elements.filmsListContainer = new FilmsListSection().getContainerElement();
 elements.showMoreBtn = new ShowMoreBtn().getElement();
 
 elements.showMoreBtn.addEventListener(`click`, () => {
@@ -104,7 +103,6 @@ insertElementInMarkup(elements.sort, elements.main);
 insertElementInMarkup(elements.films, elements.main);
 insertElementInMarkup(elements.filmsList, elements.films);
 insertElementInMarkup(elements.search, elements.filmsList);
-insertElementInMarkup(elements.filmsListContainer, elements.filmsList);
 elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
 outputFilmParts();
 insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
@@ -132,13 +130,10 @@ const createExtraSection = (sortParameter, container) => {
         headingText = mostCommentedHeadingText;
         break;
     }
-    const extraSection = new FilmsExtraSection().getElement();
-    const extraSectionHeading = new ExtraSectionHeading(headingText);
-    const extraSectionFilmsContainer = new FilmsListContainer().getElement();
-    insertElementInMarkup(extraSectionHeading.getElement(), extraSection);
-    insertElementInMarkup(extraSectionFilmsContainer, extraSection);
+    const extraSection = new FilmsExtraSection(headingText);
+    const extraSectionFilmsContainer = new FilmsExtraSection(headingText).getContainerElement();
     multipleInsertElementsInMarkup(FilmCard, topElementsByParameter, extraSectionFilmsContainer);
-    insertElementInMarkup(extraSection, container);
+    insertElementInMarkup(extraSection.getElement(), container);
   }
 };
 createExtraSection(`ratingVal`, elements.films);

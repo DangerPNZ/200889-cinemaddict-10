@@ -1,12 +1,18 @@
 import {createElement} from './utils.js';
-const getFilmsExtraSection = () => `<section class="films-list--extra"></section>`;
+const getExtraSectionHeading = (headingText) => `<h2 class="films-list__title">${headingText}</h2>`;
+const getFilmsExtraSection = (headingText) => `
+<section class="films-list--extra">
+  ${getExtraSectionHeading(headingText)}
+  <div class="films-list__container"></div>
+</section>`;
 
 export default class FilmsExtraSection {
-  constructor() {
+  constructor(headingText) {
+    this._headingText = headingText;
     this._element = null;
   }
   getTemplate() {
-    return getFilmsExtraSection();
+    return getFilmsExtraSection(this._headingText);
   }
   getElement() {
     if (!this._element) {
@@ -16,5 +22,8 @@ export default class FilmsExtraSection {
   }
   removeElement() {
     this._element = null;
+  }
+  getContainerElement() {
+    return this.getElement().querySelector(`.films-list__container`);
   }
 }
