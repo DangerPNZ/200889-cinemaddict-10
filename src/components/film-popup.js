@@ -245,6 +245,7 @@ export default class FilmPopup {
   getElement() {
     if (!this._element) {
       this._element = createElement(this.getTemplate());
+      this.setCloseHandler();
     }
     return this._element;
   }
@@ -255,8 +256,8 @@ export default class FilmPopup {
   getCloseElement() {
     return this.getElement().querySelector(`.film-details__close-btn`);
   }
-  setCloseHandler(handler) {
+  setCloseHandler() {
     const popupCloseElement = this.getCloseElement();
-    popupCloseElement.addEventListener(`click`, handler);
+    popupCloseElement.addEventListener(`click`, () => this.removeElement());
   }
 }
