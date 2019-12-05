@@ -63,18 +63,8 @@ const outputFilmParts = () => {
     const thisFilmData = totalFilmsData[index];
     const filmCard = new FilmCard(thisFilmData);
     const filmPopup = new FilmPopup(thisFilmData);
-    // const removePopup = () => {
-    //   filmPopup.removeElement();
-    // };
-    // const popupEscapeBtnHandler = (event) => {
-    //   const ESCAPE_KEY_CODE = 27;
-    //   if (event.keyCode === ESCAPE_KEY_CODE) {
-    //     removePopup(popupEscapeBtnHandler);
-    //   }
-    // };
     const showPopup = () => {
       insertElementInMarkup(filmPopup.getElement(), elements.body);
-      // window.addEventListener(`keydown`, popupEscapeBtnHandler);
     };
     filmCard.setClickHandler(showPopup);
     insertElementInMarkup(filmCard.getElement(), elements.filmsListContainer);
