@@ -45,6 +45,7 @@ export default class FilmCard {
     return this._element;
   }
   removeElement() {
+    this._element.remove();
     this._element = null;
   }
   getPopupCallElements() {

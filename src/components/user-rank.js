@@ -32,6 +32,7 @@ export default class UserRank {
     return this._element;
   }
   removeElement() {
+    this._element.remove();
     this._element = null;
   }
 }

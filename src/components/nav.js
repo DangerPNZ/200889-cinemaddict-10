@@ -35,6 +35,7 @@ export default class Nav {
     return this._element;
   }
   removeElement() {
+    this._element.remove();
     this._element = null;
   }
 }

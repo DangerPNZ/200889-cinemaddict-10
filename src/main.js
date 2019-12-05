@@ -2,18 +2,20 @@ import FilmCard from './components/film-card.js';
 import FilmPopup from './components/film-popup.js';
 import Nav from './components/nav.js';
 import Sort from './components/sort.js';
-import SearchHeading from './components/search-heading.js';
+import StateHeading from './components/state-heading.js';
 import ShowMoreBtn from './components/show-more-btn.js';
 import UserRank from './components/user-rank.js';
 import FilmsSectionContainer from './components/films-section-container.js';
 import FilmsListSection from './components/films-list-section.js';
 import FilmsExtraSection from './components/films-extra-section.js';
-import NoMoviesMessage from './components/no-data-message.js';
 import {createFilmsDataList} from './components/films-data-list.js';
 import {getRandomNum} from './components/utils.js';
 import {compare} from './components/utils.js';
 
 const filmsList = new FilmsListSection();
+const showMoreBtn = new ShowMoreBtn();
+const STATE_LOAD_TEXT = `Loading...`;
+const STATE_NO_MOVIES_TEXT = `There are no movies in our database`;
 const elements = {
   header: document.querySelector(`.header`),
   main: document.querySelector(`.main`),
@@ -22,9 +24,9 @@ const elements = {
   films: new FilmsSectionContainer().getElement(),
   filmsList: filmsList.getElement(),
   filmsListContainer: filmsList.getContainerElement(),
-  search: new SearchHeading().getElement(),
-  showMoreBtn: new ShowMoreBtn().getElement(),
-  noMoviesMessage: new NoMoviesMessage().getElement()
+  searchStateHeading: new StateHeading(STATE_LOAD_TEXT).getElement(),
+  noMoviesStateHeading: new StateHeading(STATE_NO_MOVIES_TEXT).getElement(),
+  showMoreBtn: showMoreBtn.getElement()
 };
 
 const insertElementInMarkup = (element, container, where = `append`) => {
@@ -70,7 +72,7 @@ const outputFilmParts = () => {
     insertElementInMarkup(filmCard.getElement(), elements.filmsListContainer);
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {
-      elements.showMoreBtn.style.display = `none`;
+      showMoreBtn.removeElement();
       break;
     }
   }
@@ -79,16 +81,15 @@ const outputFilmParts = () => {
 elements.menu = new Nav(totalFilmsData).getElement();
 const setFilmsContainerInitialState = (allFilmsData) => {
   if (allFilmsData.length) {
-    insertElementInMarkup(elements.search, elements.filmsList, `prepend`);
+    insertElementInMarkup(elements.searchStateHeading, elements.filmsList, `prepend`);
     insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
     elements.showMoreBtn.addEventListener(`click`, () => {
       outputFilmParts();
     });
     outputFilmParts();
   } else {
-    const filmsListContainer = elements.filmsList.querySelector(`.films-list__container`);
-    elements.filmsList.removeChild(filmsListContainer);
-    insertElementInMarkup(elements.noMoviesMessage, elements.filmsList);
+    filmsList.getContainerElement().remove();
+    insertElementInMarkup(elements.noMoviesStateHeading, elements.filmsList);
   }
 };
 setFilmsContainerInitialState(totalFilmsData);
@@ -107,8 +108,8 @@ elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies insid
 insertElementInMarkup(elements.userRank, elements.header);
 
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
-const topRatedHeadingText = `Top rated`;
-const mostCommentedHeadingText = `Most commented`;
+const TOP_RATED_SECTION_HEADING_TEXT = `Top rated`;
+const MOST_COMMENTED_SECTION_HEADING_TEXT = `Most commented`;
 const getExtraSectionFilmsCardsData = (sortParameter) => {
   const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
   return sortedCardsDataByParameter.filter((item) => {
@@ -122,10 +123,10 @@ const createExtraSection = (sortParameter, container) => {
     let headingText = ``;
     switch (sortParameter) {
       case `ratingVal`:
-        headingText = topRatedHeadingText;
+        headingText = TOP_RATED_SECTION_HEADING_TEXT;
         break;
       case `commentsSum`:
-        headingText = mostCommentedHeadingText;
+        headingText = MOST_COMMENTED_SECTION_HEADING_TEXT;
         break;
     }
     const extraSection = new FilmsExtraSection(headingText);
@@ -134,5 +135,7 @@ const createExtraSection = (sortParameter, container) => {
     insertElementInMarkup(extraSection.getElement(), container);
   }
 };
-createExtraSection(`ratingVal`, elements.films);
-createExtraSection(`commentsSum`, elements.films);
+const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;
+const PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION = `commentsSum`;
+createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, elements.films);
+createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, elements.films);

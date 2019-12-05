@@ -21,6 +21,7 @@ export default class FilmsExtraSection {
     return this._element;
   }
   removeElement() {
+    this._element.remove();
     this._element = null;
   }
   getContainerElement() {

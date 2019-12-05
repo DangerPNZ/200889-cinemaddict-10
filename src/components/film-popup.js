@@ -250,7 +250,7 @@ export default class FilmPopup {
     return this._element;
   }
   removeElement(escapeHandler) {
-    document.body.removeChild(this._element);
+    this._element.remove();
     window.removeEventListener(`keydown`, escapeHandler);
     this._element = null;
   }
@@ -260,11 +260,9 @@ export default class FilmPopup {
   setCloseHandler() {
     const popupCloseElement = this.getCloseElement();
     const escapeBtnHandler = (event) => {
-      if (this._element) {
-        const ESCAPE_KEY_CODE = 27;
-        if (event.keyCode === ESCAPE_KEY_CODE) {
-          this.removeElement(escapeBtnHandler);
-        }
+      const ESCAPE_KEY_CODE = 27;
+      if (event.keyCode === ESCAPE_KEY_CODE) {
+        this.removeElement(escapeBtnHandler);
       }
     };
     popupCloseElement.addEventListener(`click`, () => this.removeElement(escapeBtnHandler));

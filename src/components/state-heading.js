@@ -1,13 +1,14 @@
 import {createElement} from './utils.js';
 
-const getNoMoviesMessage = () => `<h2 class="films-list__title">There are no movies in our database</h2>`;
+const getStateHeading = (stateInfo) => `<h2 class="films-list__title">${stateInfo}</h2>`;
 
-export default class NoMoviesMessage {
-  constructor() {
+export default class StateHeading {
+  constructor(stateText) {
+    this._stateText = stateText;
     this._element = null;
   }
   getTemplate() {
-    return getNoMoviesMessage();
+    return getStateHeading(this._stateText);
   }
   getElement() {
     if (!this._element) {
@@ -16,6 +17,7 @@ export default class NoMoviesMessage {
     return this._element;
   }
   removeElement() {
+    this._element.remove();
     this._element = null;
   }
 }
