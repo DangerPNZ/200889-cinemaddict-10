@@ -238,6 +238,7 @@ export default class FilmPopup {
   constructor(data) {
     this._data = data;
     this._element = null;
+    this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this._data);
@@ -249,23 +250,23 @@ export default class FilmPopup {
     }
     return this._element;
   }
-  removeElement(escapeHandler) {
+  removeElement() {
     this._element.remove();
-    window.removeEventListener(`keydown`, escapeHandler);
+    window.removeEventListener(`keydown`, this.escapeBtnHandler);
     this._element = null;
   }
   getCloseElement() {
     return this.getElement().querySelector(`.film-details__close-btn`);
   }
+  escapeBtnHandler(event) {
+    const ESCAPE_KEY_CODE = 27;
+    if (event.keyCode === ESCAPE_KEY_CODE) {
+      this.removeElement();
+    }
+  }
   setCloseHandler() {
     const popupCloseElement = this.getCloseElement();
-    const escapeBtnHandler = (event) => {
-      const ESCAPE_KEY_CODE = 27;
-      if (event.keyCode === ESCAPE_KEY_CODE) {
-        this.removeElement(escapeBtnHandler);
-      }
-    };
-    popupCloseElement.addEventListener(`click`, () => this.removeElement(escapeBtnHandler));
-    window.addEventListener(`keydown`, escapeBtnHandler);
+    popupCloseElement.addEventListener(`click`, () => this.removeElement());
+    window.addEventListener(`keydown`, this.escapeBtnHandler);
   }
 }
