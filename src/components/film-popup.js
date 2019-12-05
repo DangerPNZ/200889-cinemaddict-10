@@ -249,8 +249,9 @@ export default class FilmPopup {
     }
     return this._element;
   }
-  removeElement() {
+  removeElement(escapeHandler) {
     document.body.removeChild(this._element);
+    window.removeEventListener(`keydown`, escapeHandler);
     this._element = null;
   }
   getCloseElement() {
@@ -258,6 +259,15 @@ export default class FilmPopup {
   }
   setCloseHandler() {
     const popupCloseElement = this.getCloseElement();
-    popupCloseElement.addEventListener(`click`, () => this.removeElement());
+    const escapeBtnHandler = (event) => {
+      if (this._element) {
+        const ESCAPE_KEY_CODE = 27;
+        if (event.keyCode === ESCAPE_KEY_CODE) {
+          this.removeElement(escapeBtnHandler);
+        }
+      }
+    };
+    popupCloseElement.addEventListener(`click`, () => this.removeElement(escapeBtnHandler));
+    window.addEventListener(`keydown`, escapeBtnHandler);
   }
 }

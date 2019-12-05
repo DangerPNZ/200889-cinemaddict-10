@@ -8,15 +8,25 @@ import UserRank from './components/user-rank.js';
 import FilmsSectionContainer from './components/films-section-container.js';
 import FilmsListSection from './components/films-list-section.js';
 import FilmsExtraSection from './components/films-extra-section.js';
+import NoMoviesMessage from './components/no-data-message.js';
 import {createFilmsDataList} from './components/films-data-list.js';
 import {getRandomNum} from './components/utils.js';
 import {compare} from './components/utils.js';
 
+const filmsList = new FilmsListSection();
 const elements = {
   header: document.querySelector(`.header`),
   main: document.querySelector(`.main`),
-  body: document.body
+  body: document.body,
+  sort: new Sort().getElement(),
+  films: new FilmsSectionContainer().getElement(),
+  filmsList: filmsList.getElement(),
+  filmsListContainer: filmsList.getContainerElement(),
+  search: new SearchHeading().getElement(),
+  showMoreBtn: new ShowMoreBtn().getElement(),
+  noMoviesMessage: new NoMoviesMessage().getElement()
 };
+
 const insertElementInMarkup = (element, container, where = `append`) => {
   switch (where) {
     case `append`:
@@ -43,25 +53,30 @@ const multipleInsertElementsInMarkup = (ElementGeneratedClass, dataElements, con
   }
 };
 
+const totalFilmsData = createFilmsDataList(12); // []; для проверки заглушки
 
-const totalFilmsData = createFilmsDataList(12);
 const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
 let filmsInThePage = 0;
-
 const outputFilmParts = () => {
   for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
     const index = filmsInThePage;
     const thisFilmData = totalFilmsData[index];
     const filmCard = new FilmCard(thisFilmData);
     const filmPopup = new FilmPopup(thisFilmData);
-    const removePopup = () => {
-      filmPopup.removeElement();
-    };
+    // const removePopup = () => {
+    //   filmPopup.removeElement();
+    // };
+    // const popupEscapeBtnHandler = (event) => {
+    //   const ESCAPE_KEY_CODE = 27;
+    //   if (event.keyCode === ESCAPE_KEY_CODE) {
+    //     removePopup(popupEscapeBtnHandler);
+    //   }
+    // };
     const showPopup = () => {
       insertElementInMarkup(filmPopup.getElement(), elements.body);
+      // window.addEventListener(`keydown`, popupEscapeBtnHandler);
     };
     filmCard.setClickHandler(showPopup);
-    filmPopup.setCloseHandler(removePopup);
     insertElementInMarkup(filmCard.getElement(), elements.filmsListContainer);
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {
@@ -70,18 +85,23 @@ const outputFilmParts = () => {
     }
   }
 };
-const filmsList = new FilmsListSection();
-elements.menu = new Nav(totalFilmsData).getElement();
-elements.sort = new Sort().getElement();
-elements.films = new FilmsSectionContainer().getElement();
-elements.filmsList = filmsList.getElement();
-elements.filmsListContainer = filmsList.getContainerElement();
-elements.search = new SearchHeading().getElement();
-elements.showMoreBtn = new ShowMoreBtn().getElement();
 
-elements.showMoreBtn.addEventListener(`click`, () => {
-  outputFilmParts();
-});
+elements.menu = new Nav(totalFilmsData).getElement();
+const setFilmsContainerInitialState = (allFilmsData) => {
+  if (allFilmsData.length) {
+    insertElementInMarkup(elements.search, elements.filmsList, `prepend`);
+    insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
+    elements.showMoreBtn.addEventListener(`click`, () => {
+      outputFilmParts();
+    });
+    outputFilmParts();
+  } else {
+    const filmsListContainer = elements.filmsList.querySelector(`.films-list__container`);
+    elements.filmsList.removeChild(filmsListContainer);
+    insertElementInMarkup(elements.noMoviesMessage, elements.filmsList);
+  }
+};
+setFilmsContainerInitialState(totalFilmsData);
 
 const MIN_WATCHED_FILMS_SUM = 0;
 const MAX_WATCHED_FILMS_SUM = 100;
@@ -93,10 +113,7 @@ insertElementInMarkup(elements.menu, elements.main);
 insertElementInMarkup(elements.sort, elements.main);
 insertElementInMarkup(elements.films, elements.main);
 insertElementInMarkup(elements.filmsList, elements.films);
-insertElementInMarkup(elements.search, elements.filmsList);
 elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
-outputFilmParts();
-insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
 insertElementInMarkup(elements.userRank, elements.header);
 
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
