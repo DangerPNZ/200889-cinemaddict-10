@@ -45,4 +45,10 @@ export default class FilmCard extends AbstractComponent {
     const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
     return [poster, heading, toCommentsLink];
   }
+  setClickHandler(handler) {
+    const elements = this.getCallElements();
+    for (const item of elements) {
+      item.addEventListener(`click`, handler);
+    }
+  }
 }

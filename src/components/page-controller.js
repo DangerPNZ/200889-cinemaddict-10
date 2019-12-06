@@ -7,30 +7,25 @@ const checkElement = (item) => {
 };
 
 export default class pageController {
-  constructor(element, container, where = `append`) {
-    this._element = element;
-    this._container = container;
-    this._where = where;
-  }
-  render() {
-    const element = checkElement(this._element);
-    const containerForElement = checkElement(this._container);
+  render(elementNodeOrComponent, containerNodeOrComponent, where = `append`) {
+    const elementNode = checkElement(elementNodeOrComponent);
+    const containerNode = checkElement(containerNodeOrComponent);
 
-    switch (this._where) {
+    switch (where) {
       case `append`:
-        containerForElement.append(element);
+        containerNode.append(elementNode);
         break;
       case `prepend`:
-        containerForElement.prepend(element);
+        containerNode.prepend(elementNode);
         break;
       case `before`:
-        containerForElement.before(element);
+        containerNode.before(elementNode);
         break;
       case `after`:
-        containerForElement.after(element);
+        containerNode.after(elementNode);
         break;
       case `replaceWith`:
-        containerForElement.replaceWith(element);
+        containerNode.replaceWith(elementNode);
         break;
     }
   }

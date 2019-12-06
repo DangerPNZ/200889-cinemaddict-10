@@ -3,9 +3,8 @@ import FilmPopup from './components/film-popup.js';
 import Nav from './components/nav.js';
 import Sort from './components/sort.js';
 import StateHeading from './components/state-heading.js';
-import ShowMoreBtn from './components/show-more-btn.js';
 import UserRank from './components/user-rank.js';
-import FilmsSectionContainer from './components/films-section-container.js';
+import Films from './components/films.js';
 import FilmsListSection from './components/films-list-section.js';
 import FilmsExtraSection from './components/films-extra-section.js';
 import PageController from './components/page-controller';
@@ -14,25 +13,26 @@ import {getRandomNum} from './components/utils.js';
 import {compare} from './components/utils.js';
 import {removeIt} from './utils/remove-it.js';
 
+const pageController = new PageController();
 const STATE_LOAD_TEXT = `Loading...`;
 const STATE_NO_MOVIES_TEXT = `There are no movies in our database`;
 const filmsListSection = new FilmsListSection();
-const elements = {
+const elementsAndComponents = {
   header: document.querySelector(`.header`),
   main: document.querySelector(`.main`),
   body: document.body,
   sort: new Sort(),
-  films: new FilmsSectionContainer(),
-  filmsList: filmsListSection,
-  filmsListContainer: filmsListSection.getContainerElement(),
-  showMoreBtn: new ShowMoreBtn(),
+  films: new Films(),
+  filmsSection: filmsListSection,
+  filmsSectionMoviesContainer: filmsListSection.getContainerElement(),
+  showMoreBtn: filmsListSection.getShowMoreBtn(),
   searchStateHeading: new StateHeading(STATE_LOAD_TEXT),
   noMoviesStateHeading: new StateHeading(STATE_NO_MOVIES_TEXT),
 };
-const multipleInsertElementsInMarkup = (ElementGeneratedClass, dataElements, container, where = `append`) => {
+const multipleInsertElementsInMarkup = (ElementGenerator, dataElements, container, where = `append`) => {
   for (const oneDataElement of dataElements) {
-    const element = new ElementGeneratedClass(oneDataElement);
-    new PageController(element, container, where).render();
+    const element = new ElementGenerator(oneDataElement);
+    pageController.render(element, container, where);
   }
 };
 
@@ -47,28 +47,29 @@ const outputFilmParts = () => {
     const filmCard = new FilmCard(thisFilmData);
     const filmPopup = new FilmPopup(thisFilmData);
     const showPopup = () => {
-      new PageController(filmPopup, elements.body).render();
+      pageController.render(filmPopup.setCloseHandler(), elementsAndComponents.body);
     };
     filmCard.setClickHandler(showPopup);
-    new PageController(filmCard, elements.filmsListContainer).render();
+    pageController.render(filmCard, elementsAndComponents.filmsSectionMoviesContainer);
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {
-      removeIt(elements.showMoreBtn);
+      removeIt(elementsAndComponents.showMoreBtn);
       break;
     }
   }
 };
 
-elements.menu = new Nav(totalFilmsData).getElement();
+elementsAndComponents.menu = new Nav(totalFilmsData).getElement();
 const setFilmsContainerInitialState = (allFilmsData) => {
   if (allFilmsData.length) {
-    new PageController(elements.searchStateHeading, elements.filmsList, `prepend`).render();
-    new PageController(elements.showMoreBtn, elements.filmsList).render();
-    elements.showMoreBtn.setClickHandler(outputFilmParts);
+    pageController.render(elementsAndComponents.searchStateHeading, elementsAndComponents.filmsSection, `prepend`);
+    pageController.render(elementsAndComponents.showMoreBtn, elementsAndComponents.filmsSection);
+    elementsAndComponents.filmsSection.setHandlerForShowMoreBtn(outputFilmParts);
     outputFilmParts();
   } else {
-    removeIt(elements.filmsListContainer);
-    new PageController(elements.noMoviesStateHeading, elements.filmsList).render();
+    removeIt(elementsAndComponents.showMoreBtn);
+    removeIt(elementsAndComponents.filmsSectionMoviesContainer);
+    pageController.render(elementsAndComponents.noMoviesStateHeading, elementsAndComponents.filmsSection);
   }
 };
 setFilmsContainerInitialState(totalFilmsData);
@@ -76,15 +77,15 @@ setFilmsContainerInitialState(totalFilmsData);
 const MIN_WATCHED_FILMS_SUM = 0;
 const MAX_WATCHED_FILMS_SUM = 100;
 const watchedFilmsSum = getRandomNum(MIN_WATCHED_FILMS_SUM, MAX_WATCHED_FILMS_SUM);
-elements.userRank = new UserRank(watchedFilmsSum).getElement();
-elements.footerFilmTotalSum = document.querySelector(`.footer__statistics p`);
+elementsAndComponents.userRank = new UserRank(watchedFilmsSum).getElement();
+elementsAndComponents.footerFilmTotalSum = document.querySelector(`.footer__statistics p`);
 
-new PageController(elements.menu, elements.main).render();
-new PageController(elements.sort, elements.main).render();
-new PageController(elements.films, elements.main).render();
-new PageController(elements.filmsList, elements.films).render();
-elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
-new PageController(elements.userRank, elements.header).render();
+pageController.render(elementsAndComponents.menu, elementsAndComponents.main);
+pageController.render(elementsAndComponents.sort, elementsAndComponents.main);
+pageController.render(elementsAndComponents.films, elementsAndComponents.main);
+pageController.render(elementsAndComponents.filmsSection, elementsAndComponents.films);
+elementsAndComponents.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
+pageController.render(elementsAndComponents.userRank, elementsAndComponents.header);
 
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
 const TOP_RATED_SECTION_HEADING_TEXT = `Top rated`;
@@ -111,10 +112,10 @@ const createExtraSection = (sortParameter, container) => {
     const extraSection = new FilmsExtraSection(headingText);
     const extraSectionFilmsContainer = extraSection.getContainerElement();
     multipleInsertElementsInMarkup(FilmCard, topElementsByParameter, extraSectionFilmsContainer);
-    new PageController(extraSection, container).render();
+    pageController.render(extraSection, container);
   }
 };
 const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;
 const PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION = `commentsSum`;
-createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, elements.films);
-createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, elements.films);
+createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, elementsAndComponents.films);
+createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, elementsAndComponents.films);

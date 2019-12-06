@@ -1,9 +1,8 @@
 import AbstractComponent from './abstract-component.js';
 
-const getExtraSectionHeading = (headingText) => `<h2 class="films-list__title">${headingText}</h2>`;
 const getFilmsExtraSection = (headingText) => `
 <section class="films-list--extra">
-  ${getExtraSectionHeading(headingText)}
+  <h2 class="films-list__title">${headingText}</h2>
   <div class="films-list__container"></div>
 </section>`;
 

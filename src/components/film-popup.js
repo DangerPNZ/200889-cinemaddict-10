@@ -236,13 +236,28 @@ const getFilmPopup = (filmData) => {
 
 export default class FilmPopup extends AbstractComponent {
   constructor(data) {
-    super(true);
+    super();
     this._data = data;
+    this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this._data);
   }
-  getCloseBtn() {
-    return this._element.querySelector(`.film-details__close-btn`);
+  closeBtnHandler() {
+    this.removeElement();
+    window.removeEventListener(`keydown`, this.escapeBtnHandler);
+  }
+  escapeBtnHandler(event) {
+    const ESCAPE_KEY_CODE = 27;
+    if (event.keyCode === ESCAPE_KEY_CODE) {
+      this.removeElement();
+      window.removeEventListener(`keydown`, this.escapeBtnHandler);
+    }
+  }
+  setCloseHandler() {
+    const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
+    closeBtn.addEventListener(`click`, this.closeBtnHandler.bind(this));
+    window.addEventListener(`keydown`, this.escapeBtnHandler);
+    return this.getElement();
   }
 }
