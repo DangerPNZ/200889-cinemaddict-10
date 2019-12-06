@@ -1,4 +1,5 @@
-import {createElement} from './utils.js';
+import AbstractComponent from "./abstract-component.js";
+
 
 const getNav = (totalFilmsData) => {
   const inWatchlistFilms = totalFilmsData.filter((item) => {
@@ -20,22 +21,12 @@ const getNav = (totalFilmsData) => {
   </nav>`;
 };
 
-export default class Nav {
+export default class Nav extends AbstractComponent {
   constructor(totalFilmsData) {
+    super();
     this._totalFilmsData = totalFilmsData;
-    this._element = null;
   }
   getTemplate() {
     return getNav(this._totalFilmsData);
-  }
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
 }

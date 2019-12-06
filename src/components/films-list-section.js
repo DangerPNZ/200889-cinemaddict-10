@@ -1,4 +1,5 @@
-import {createElement} from './utils.js';
+import AbstractComponent from "./abstract-component.js";
+
 
 const getFilmsListSection = () => `
   <section class="films-list">
@@ -6,22 +7,12 @@ const getFilmsListSection = () => `
   </section>
 `;
 
-export default class FilmsListSection {
+export default class FilmsListSection extends AbstractComponent {
   constructor() {
-    this._element = null;
+    super();
   }
   getTemplate() {
     return getFilmsListSection();
-  }
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
   getContainerElement() {
     return this.getElement().querySelector(`.films-list__container`);

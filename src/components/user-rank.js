@@ -1,4 +1,4 @@
-import {createElement} from './utils.js';
+import AbstractComponent from "./abstract-component.js";
 
 const getUserRank = (watchedFilmsSum) => {
   let rank = null;
@@ -17,22 +17,12 @@ const getUserRank = (watchedFilmsSum) => {
   </section>`;
 };
 
-export default class UserRank {
+export default class UserRank extends AbstractComponent {
   constructor(watchedFilmsSum) {
+    super();
     this._watchedFilmsSum = watchedFilmsSum;
-    this._element = null;
   }
   getTemplate() {
     return getUserRank(this._watchedFilmsSum);
-  }
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-  removeElement() {
-    this._element.remove();
-    this._element = null;
   }
 }

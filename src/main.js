@@ -8,50 +8,31 @@ import UserRank from './components/user-rank.js';
 import FilmsSectionContainer from './components/films-section-container.js';
 import FilmsListSection from './components/films-list-section.js';
 import FilmsExtraSection from './components/films-extra-section.js';
+import PageController from './components/page-controller';
 import {createFilmsDataList} from './components/films-data-list.js';
 import {getRandomNum} from './components/utils.js';
 import {compare} from './components/utils.js';
+import {removeIt} from './utils/remove-it.js';
 
-const filmsList = new FilmsListSection();
-const showMoreBtn = new ShowMoreBtn();
 const STATE_LOAD_TEXT = `Loading...`;
 const STATE_NO_MOVIES_TEXT = `There are no movies in our database`;
+const filmsListSection = new FilmsListSection();
 const elements = {
   header: document.querySelector(`.header`),
   main: document.querySelector(`.main`),
   body: document.body,
-  sort: new Sort().getElement(),
-  films: new FilmsSectionContainer().getElement(),
-  filmsList: filmsList.getElement(),
-  filmsListContainer: filmsList.getContainerElement(),
-  searchStateHeading: new StateHeading(STATE_LOAD_TEXT).getElement(),
-  noMoviesStateHeading: new StateHeading(STATE_NO_MOVIES_TEXT).getElement(),
-  showMoreBtn: showMoreBtn.getElement()
-};
-
-const insertElementInMarkup = (element, container, where = `append`) => {
-  switch (where) {
-    case `append`:
-      container.append(element);
-      break;
-    case `prepend`:
-      container.prepend(element);
-      break;
-    case `before`:
-      container.before(element);
-      break;
-    case `after`:
-      container.after(element);
-      break;
-    case `replaceWith`:
-      container.replaceWith(element);
-      break;
-  }
+  sort: new Sort(),
+  films: new FilmsSectionContainer(),
+  filmsList: filmsListSection,
+  filmsListContainer: filmsListSection.getContainerElement(),
+  showMoreBtn: new ShowMoreBtn(),
+  searchStateHeading: new StateHeading(STATE_LOAD_TEXT),
+  noMoviesStateHeading: new StateHeading(STATE_NO_MOVIES_TEXT),
 };
 const multipleInsertElementsInMarkup = (ElementGeneratedClass, dataElements, container, where = `append`) => {
   for (const oneDataElement of dataElements) {
-    const element = new ElementGeneratedClass(oneDataElement).getElement();
-    insertElementInMarkup(element, container, where);
+    const element = new ElementGeneratedClass(oneDataElement);
+    new PageController(element, container, where).render();
   }
 };
 
@@ -66,13 +47,13 @@ const outputFilmParts = () => {
     const filmCard = new FilmCard(thisFilmData);
     const filmPopup = new FilmPopup(thisFilmData);
     const showPopup = () => {
-      insertElementInMarkup(filmPopup.getElement(), elements.body);
+      new PageController(filmPopup, elements.body).render();
     };
     filmCard.setClickHandler(showPopup);
-    insertElementInMarkup(filmCard.getElement(), elements.filmsListContainer);
+    new PageController(filmCard, elements.filmsListContainer).render();
     filmsInThePage++;
     if (filmsInThePage === totalFilmsData.length) {
-      showMoreBtn.removeElement();
+      removeIt(elements.showMoreBtn);
       break;
     }
   }
@@ -81,15 +62,13 @@ const outputFilmParts = () => {
 elements.menu = new Nav(totalFilmsData).getElement();
 const setFilmsContainerInitialState = (allFilmsData) => {
   if (allFilmsData.length) {
-    insertElementInMarkup(elements.searchStateHeading, elements.filmsList, `prepend`);
-    insertElementInMarkup(elements.showMoreBtn, elements.filmsList);
-    elements.showMoreBtn.addEventListener(`click`, () => {
-      outputFilmParts();
-    });
+    new PageController(elements.searchStateHeading, elements.filmsList, `prepend`).render();
+    new PageController(elements.showMoreBtn, elements.filmsList).render();
+    elements.showMoreBtn.setClickHandler(outputFilmParts);
     outputFilmParts();
   } else {
-    filmsList.getContainerElement().remove();
-    insertElementInMarkup(elements.noMoviesStateHeading, elements.filmsList);
+    removeIt(elements.filmsListContainer);
+    new PageController(elements.noMoviesStateHeading, elements.filmsList).render();
   }
 };
 setFilmsContainerInitialState(totalFilmsData);
@@ -100,12 +79,12 @@ const watchedFilmsSum = getRandomNum(MIN_WATCHED_FILMS_SUM, MAX_WATCHED_FILMS_SU
 elements.userRank = new UserRank(watchedFilmsSum).getElement();
 elements.footerFilmTotalSum = document.querySelector(`.footer__statistics p`);
 
-insertElementInMarkup(elements.menu, elements.main);
-insertElementInMarkup(elements.sort, elements.main);
-insertElementInMarkup(elements.films, elements.main);
-insertElementInMarkup(elements.filmsList, elements.films);
+new PageController(elements.menu, elements.main).render();
+new PageController(elements.sort, elements.main).render();
+new PageController(elements.films, elements.main).render();
+new PageController(elements.filmsList, elements.films).render();
 elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
-insertElementInMarkup(elements.userRank, elements.header);
+new PageController(elements.userRank, elements.header).render();
 
 const MAX_ELEMENTS_IN_EXTRA_SECTION = 2;
 const TOP_RATED_SECTION_HEADING_TEXT = `Top rated`;
@@ -132,7 +111,7 @@ const createExtraSection = (sortParameter, container) => {
     const extraSection = new FilmsExtraSection(headingText);
     const extraSectionFilmsContainer = extraSection.getContainerElement();
     multipleInsertElementsInMarkup(FilmCard, topElementsByParameter, extraSectionFilmsContainer);
-    insertElementInMarkup(extraSection.getElement(), container);
+    new PageController(extraSection, container).render();
   }
 };
 const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;

@@ -1,4 +1,5 @@
-import {createElement} from './utils.js';
+import AbstractComponent from "./abstract-component.js";
+
 const getFilmCard = (filmData) => {
   const {
     filmTitle,
@@ -30,34 +31,18 @@ const getFilmCard = (filmData) => {
         </form>
   </article>`;
 };
-export default class FilmCard {
+export default class FilmCard extends AbstractComponent {
   constructor(data) {
-    this._element = null;
+    super();
     this._data = data;
   }
   getTemplate() {
     return getFilmCard(this._data);
   }
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-  removeElement() {
-    this._element.remove();
-    this._element = null;
-  }
-  getPopupCallElements() {
+  getCallElements() {
     const poster = this.getElement().querySelector(`.film-card__poster`);
     const heading = this.getElement().querySelector(`.film-card__title`);
     const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
     return [poster, heading, toCommentsLink];
-  }
-  setClickHandler(handler) {
-    const elementsForPopupCall = this.getPopupCallElements();
-    for (const element of elementsForPopupCall) {
-      element.addEventListener(`click`, handler);
-    }
   }
 }
