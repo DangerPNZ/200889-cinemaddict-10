@@ -1,20 +1,19 @@
 import AbstractComponent from "./abstract-component.js";
 
 
-const getFilmsListSection = (filmsContainer) => `
+const getFilmsListSection = () => `
   <section class="films-list">
-    ${filmsContainer}
+    <div class="films-list__container"></div>
     <button class="films-list__show-more">Show more</button>
   </section>
 `;
 
 export default class FilmsListSection extends AbstractComponent {
-  constructor(filmsContainer) {
+  constructor() {
     super();
-    this._filmsContainer = filmsContainer;
   }
   getTemplate() {
-    return getFilmsListSection(this._filmsContainer);
+    return getFilmsListSection();
   }
   getContainerElement() {
     return this.getElement().querySelector(`.films-list__container`);

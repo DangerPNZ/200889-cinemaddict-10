@@ -26,22 +26,20 @@ const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;
 const PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION = `commentsSum`;
 
 export default class PageController {
-  constructor(moviesContainer) {
-    this._moviesContainerTemplate = moviesContainer;
-    this._filmsListSection = new FilmsListSection(this._moviesContainerTemplate);
+  constructor(applicationContainer) {
     this._components = {
       sort: new Sort(),
       films: new Films(),
-      filmsSection: this._filmsListSection,
+      filmsSection: new FilmsListSection(),
       searchStateHeading: new StateHeading(STATE_LOAD_TEXT),
       noMoviesStateHeading: new StateHeading(STATE_NO_MOVIES_TEXT)
     };
     this._elements = {
       header: document.querySelector(`.header`),
       main: document.querySelector(`.main`),
-      body: document.body,
-      filmsSectionMoviesContainer: this._filmsListSection.getContainerElement(),
-      showMoreBtn: this._filmsListSection.getShowMoreBtn(),
+      body: applicationContainer,
+      moviesContainer: this._components.filmsSection.getContainerElement(),
+      showMoreBtn: this._components.filmsSection.getShowMoreBtn(),
       userRank: new UserRank(watchedFilmsSum).getElement(),
       footerFilmTotalSum: document.querySelector(`.footer__statistics p`)
     };
@@ -54,10 +52,11 @@ export default class PageController {
       const filmCard = new FilmCard(thisFilmData);
       const filmPopup = new FilmPopup(thisFilmData);
       const showPopup = () => {
-        insertElementInMarkup(filmPopup.returnElementWithCloseHandlers(), this._elements.body);
+        insertElementInMarkup(filmPopup.getElement(), this._elements.body);
+        filmPopup.setHandlers();
       };
       filmCard.setClickHandler(showPopup);
-      insertElementInMarkup(filmCard, this._elements.filmsSectionMoviesContainer);
+      insertElementInMarkup(filmCard, this._elements.moviesContainer);
       this._filmsInThePage++;
       if (this._filmsInThePage === this._totalFilmsData.length) {
         removeIt(this._elements.showMoreBtn);
@@ -74,7 +73,7 @@ export default class PageController {
       this.outputFilmParts();
     } else {
       removeIt(this._elements.showMoreBtn);
-      removeIt(this._elements.filmsSectionMoviesContainer);
+      removeIt(this._elements.moviesContainer);
       insertElementInMarkup(this._components.noMoviesStateHeading, this._components.filmsSection);
     }
   }

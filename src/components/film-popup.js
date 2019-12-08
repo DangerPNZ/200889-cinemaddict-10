@@ -254,10 +254,9 @@ export default class FilmPopup extends AbstractComponent {
       window.removeEventListener(`keydown`, this.escapeBtnHandler);
     }
   }
-  returnElementWithCloseHandlers() {
+  setHandlers() {
     const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
     closeBtn.addEventListener(`click`, this.closeBtnHandler.bind(this));
     window.addEventListener(`keydown`, this.escapeBtnHandler);
-    return this.getElement();
   }
 }
