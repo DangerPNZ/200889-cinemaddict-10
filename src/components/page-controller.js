@@ -107,8 +107,7 @@ export default class PageController {
       removeIt(this._elements.moviesContainer);
       insertElementInMarkup(this._components.noMoviesStateHeading, this._components.filmsSection);
     }
-    sortHandler.bind(this);
-    this._components.sort.setHandlers(sortHandler);
+    this._components.sort.setHandlers(sortHandler.bind(this));
   }
   getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
     const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
