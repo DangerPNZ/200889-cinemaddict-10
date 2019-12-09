@@ -9,9 +9,6 @@ const getFilmsListSection = () => `
 `;
 
 export default class FilmsListSection extends AbstractComponent {
-  constructor() {
-    super();
-  }
   getTemplate() {
     return getFilmsListSection();
   }

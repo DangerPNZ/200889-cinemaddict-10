@@ -43,6 +43,7 @@ export default class PageController {
       userRank: new UserRank(watchedFilmsSum).getElement(),
       footerFilmTotalSum: document.querySelector(`.footer__statistics p`)
     };
+    this.outputFilmParts = this.outputFilmParts.bind(this);
     this._filmsInThePage = 0;
   }
   outputFilmParts() {
@@ -68,7 +69,6 @@ export default class PageController {
     if (allFilmsData.length) {
       insertElementInMarkup(this._components.searchStateHeading, this._components.filmsSection, `prepend`);
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
-      this.outputFilmParts = this.outputFilmParts.bind(this);
       this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
       this.outputFilmParts();
     } else {

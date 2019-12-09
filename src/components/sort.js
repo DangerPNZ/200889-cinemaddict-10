@@ -14,9 +14,6 @@ const getSort = () => `
 </ul>`;
 
 export default class Sort extends AbstractComponent {
-  constructor() {
-    super();
-  }
   getTemplate() {
     return getSort();
   }
