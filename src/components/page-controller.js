@@ -9,7 +9,6 @@ import FilmsListSection from './films-list-section.js';
 import FilmsExtraSection from './films-extra-section.js';
 import {getRandomNum} from './utils.js';
 import {insertElementInMarkup} from './utils.js';
-import {multipleInsertElementsInMarkup} from './utils.js';
 import {compare} from './utils.js';
 import {removeIt} from '../utils/remove-it.js';
 
@@ -49,7 +48,7 @@ export default class PageController {
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
-      const thisFilmData = this._totalFilmsData[index];
+      const thisFilmData = this._allFilmsData[index];
       const filmCard = new FilmCard(thisFilmData);
       const filmPopup = new FilmPopup(thisFilmData);
       const showPopup = () => {
@@ -59,7 +58,7 @@ export default class PageController {
       filmCard.setClickHandler(showPopup);
       insertElementInMarkup(filmCard, this._elements.moviesContainer);
       this._filmsInThePage++;
-      if (this._filmsInThePage === this._totalFilmsData.length) {
+      if (this._filmsInThePage === this._allFilmsData.length) {
         removeIt(this._elements.showMoreBtn);
         break;
       }
@@ -67,8 +66,40 @@ export default class PageController {
   }
   setFilmsContainerInitialState(allFilmsData) {
     if (allFilmsData.length) {
+      const sortHandler = (event) => {
+        const targenSortBtn = event.target;
+        const ACTIVE_SORT_BTN_CLASS = `sort__button--active`;
+        if (!targenSortBtn.classList.contains(ACTIVE_SORT_BTN_CLASS)) {
+          const DATA_SORT_ATTRIBUTE = `data-sorttype`;
+          const sortType = targenSortBtn.getAttribute(DATA_SORT_ATTRIBUTE);
+          const SORT_TYPE_VALUES = {
+            default: `default`,
+            byDate: `releaseDate`,
+            byRating: `ratingVal`
+          };
+          if (sortType !== SORT_TYPE_VALUES.default) {
+            if (sortType === SORT_TYPE_VALUES.byDate) {
+              this._allFilmsData = this._originalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byDate, true));
+            } else if (sortType === SORT_TYPE_VALUES.byRating) {
+              this._allFilmsData = this._originalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byRating));
+            }
+          } else {
+            this._allFilmsData = this._originalFilmsData;
+          }
+          const activeSortBtn = this._components.sort.getElement().querySelector(`.${ACTIVE_SORT_BTN_CLASS}`);
+          activeSortBtn.classList.remove(ACTIVE_SORT_BTN_CLASS);
+          targenSortBtn.classList.add(ACTIVE_SORT_BTN_CLASS);
+          this._elements.moviesContainer.innerHTML = ``;
+          this._filmsInThePage = 0;
+          this.outputFilmParts();
+        }
+      };
       insertElementInMarkup(this._components.searchStateHeading, this._components.filmsSection, `prepend`);
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
+      const sortBtns = this._components.sort.getCallElements();
+      for (const btn of sortBtns) {
+        btn.addEventListener(`click`, sortHandler);
+      }
       this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
       this.outputFilmParts();
     } else {
@@ -98,22 +129,26 @@ export default class PageController {
       }
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
-      multipleInsertElementsInMarkup(FilmCard, topElementsByParameter, extraSectionFilmsContainer);
+      topElementsByParameter.forEach((item) => {
+        const element = new FilmCard(item);
+        insertElementInMarkup(element, extraSectionFilmsContainer);
+      });
       insertElementInMarkup(extraSection, container);
     }
   }
 
   render(totalFilmsData) {
-    this._totalFilmsData = totalFilmsData;
-    this._elements.menu = new Nav(this._totalFilmsData).getElement();
-    this.setFilmsContainerInitialState(this._totalFilmsData);
+    this._originalFilmsData = totalFilmsData;
+    this._allFilmsData = totalFilmsData;
+    this._elements.menu = new Nav(this._originalFilmsData).getElement();
+    this.setFilmsContainerInitialState(this._originalFilmsData);
     insertElementInMarkup(this._elements.menu, this._elements.main);
     insertElementInMarkup(this._components.sort, this._elements.main);
     insertElementInMarkup(this._components.films, this._elements.main);
     insertElementInMarkup(this._components.filmsSection, this._components.films);
-    this._elements.footerFilmTotalSum.textContent = `${this._totalFilmsData.length} movies inside`;
+    this._elements.footerFilmTotalSum.textContent = `${this._originalFilmsData.length} movies inside`;
     insertElementInMarkup(this._elements.userRank, this._elements.header);
-    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this._totalFilmsData);
-    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this._totalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this._originalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this._originalFilmsData);
   }
 }

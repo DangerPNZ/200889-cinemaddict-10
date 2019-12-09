@@ -3,18 +3,22 @@ import AbstractComponent from "./abstract-component.js";
 const getSort = () => `
 <ul class="sort">
     <li>
-        <a href="#" id="sort-default" class="sort__button sort__button--active">Sort by default</a>
+        <a href="#" data-sorttype="default" class="sort__button sort__button--active">Sort by default</a>
     </li>
     <li>
-        <a href="#" id="sort-by-date" class="sort__button">Sort by date</a>
+        <a href="#" data-sorttype="releaseDate" class="sort__button">Sort by date</a>
     </li>
     <li>
-        <a href="#" id="sort-by-rating" class="sort__button">Sort by rating</a>
+        <a href="#" data-sorttype="ratingVal" class="sort__button">Sort by rating</a>
     </li>
 </ul>`;
 
 export default class Sort extends AbstractComponent {
   getTemplate() {
     return getSort();
+  }
+  getCallElements() {
+    const sortBtns = this.getElement().querySelectorAll(`a[data-sorttype]`);
+    return [...sortBtns];
   }
 }
