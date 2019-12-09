@@ -145,9 +145,9 @@ export default class PageController {
     insertElementInMarkup(this._components.sort, this._elements.main);
     insertElementInMarkup(this._components.films, this._elements.main);
     insertElementInMarkup(this._components.filmsSection, this._components.films);
-    this._elements.footerFilmTotalSum.textContent = `${this._originalFilmsData.length} movies inside`;
+    this._elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
     insertElementInMarkup(this._elements.userRank, this._elements.header);
-    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this._originalFilmsData);
-    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this._originalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, totalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, totalFilmsData);
   }
 }
