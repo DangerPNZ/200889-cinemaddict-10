@@ -50,7 +50,6 @@ export default class PageController {
       footerFilmTotalSum: document.querySelector(`.footer__statistics p`)
     };
     this.outputFilmParts = this.outputFilmParts.bind(this);
-    this.sortHandler = this.sortHandler.bind(this);
     this._filmsInThePage = 0;
   }
   outputFilmParts() {
@@ -72,32 +71,33 @@ export default class PageController {
       }
     }
   }
-  sortHandler(event) {
-    const targenSortBtn = event.target;
-    if (!targenSortBtn.classList.contains(ACTIVE_SORT_BTN_CLASS)) {
-      const sortType = targenSortBtn.getAttribute(DATA_SORT_ATTRIBUTE);
-      if (sortType !== SORT_TYPE_VALUES.default) {
-        if (sortType === SORT_TYPE_VALUES.byDate) {
-          this._allFilmsData = this._originalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byDate, true));
-        } else if (sortType === SORT_TYPE_VALUES.byRating) {
-          this._allFilmsData = this._originalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byRating));
+  setFilmsContainerInitialState(totalFilmsData) {
+    this._allFilmsData = totalFilmsData;
+    const sortHandler = (event) => {
+      const targenSortBtn = event.target;
+      if (!targenSortBtn.classList.contains(ACTIVE_SORT_BTN_CLASS)) {
+        const sortType = targenSortBtn.getAttribute(DATA_SORT_ATTRIBUTE);
+        if (sortType !== SORT_TYPE_VALUES.default) {
+          if (sortType === SORT_TYPE_VALUES.byDate) {
+            this._allFilmsData = totalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byDate, true));
+          } else if (sortType === SORT_TYPE_VALUES.byRating) {
+            this._allFilmsData = totalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byRating));
+          }
+        } else {
+          this._allFilmsData = totalFilmsData;
         }
-      } else {
-        this._allFilmsData = this._originalFilmsData;
+        const activeSortBtn = this._components.sort.getElement().querySelector(`.${ACTIVE_SORT_BTN_CLASS}`);
+        activeSortBtn.classList.remove(ACTIVE_SORT_BTN_CLASS);
+        targenSortBtn.classList.add(ACTIVE_SORT_BTN_CLASS);
+        this._elements.moviesContainer.innerHTML = ``;
+        this._filmsInThePage = 0;
+        this.outputFilmParts();
+        if (this._components.filmsSection.getShowMoreBtn() === null) {
+          insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
+        }
       }
-      const activeSortBtn = this._components.sort.getElement().querySelector(`.${ACTIVE_SORT_BTN_CLASS}`);
-      activeSortBtn.classList.remove(ACTIVE_SORT_BTN_CLASS);
-      targenSortBtn.classList.add(ACTIVE_SORT_BTN_CLASS);
-      this._elements.moviesContainer.innerHTML = ``;
-      this._filmsInThePage = 0;
-      this.outputFilmParts();
-      if (this._components.filmsSection.getShowMoreBtn() === null) {
-        insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
-      }
-    }
-  }
-  setFilmsContainerInitialState(allFilmsData) {
-    if (allFilmsData.length) {
+    };
+    if (this._allFilmsData) {
       insertElementInMarkup(this._components.searchStateHeading, this._components.filmsSection, `prepend`);
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
       this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
@@ -107,7 +107,8 @@ export default class PageController {
       removeIt(this._elements.moviesContainer);
       insertElementInMarkup(this._components.noMoviesStateHeading, this._components.filmsSection);
     }
-    this._components.sort.setHandlers(this.sortHandler);
+    sortHandler.bind(this);
+    this._components.sort.setHandlers(sortHandler);
   }
   getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
     const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
@@ -139,10 +140,8 @@ export default class PageController {
   }
 
   render(totalFilmsData) {
-    this._originalFilmsData = totalFilmsData;
-    this._allFilmsData = totalFilmsData;
-    this._elements.menu = new Nav(this._originalFilmsData).getElement();
-    this.setFilmsContainerInitialState(this._originalFilmsData);
+    this._elements.menu = new Nav(totalFilmsData).getElement();
+    this.setFilmsContainerInitialState(totalFilmsData);
     insertElementInMarkup(this._elements.menu, this._elements.main);
     insertElementInMarkup(this._components.sort, this._elements.main);
     insertElementInMarkup(this._components.films, this._elements.main);
