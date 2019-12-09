@@ -17,8 +17,10 @@ export default class Sort extends AbstractComponent {
   getTemplate() {
     return getSort();
   }
-  getCallElements() {
+  setHandlers(handler) {
     const sortBtns = this.getElement().querySelectorAll(`a[data-sorttype]`);
-    return [...sortBtns];
+    sortBtns.forEach((btn) =>{
+      btn.addEventListener(`click`, handler);
+    });
   }
 }
