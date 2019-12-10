@@ -1,15 +1,16 @@
-import FilmCard from './film-card.js';
-import FilmPopup from './film-popup.js';
-import Nav from './nav.js';
-import Sort from './sort.js';
-import StateHeading from './state-heading.js';
-import UserRank from './user-rank.js';
-import Films from './films.js';
-import FilmsListSection from './films-list-section.js';
-import FilmsExtraSection from './films-extra-section.js';
-import {getRandomNum} from './utils.js';
-import {insertElementInMarkup} from './utils.js';
-import {compare} from './utils.js';
+import FilmCard from '../components/film-card.js';
+import FilmPopup from '../components/film-popup.js';
+import Nav from '../components/nav.js';
+import Sort from '../components/sort.js';
+import StateHeading from '../components/state-heading.js';
+import UserRank from '../components/user-rank.js';
+import Films from '../components/films.js';
+import FilmsListSection from '../components/films-list-section.js';
+import FilmsExtraSection from '../components/films-extra-section.js';
+import MovieController from '../controllers/movie-controller.js';
+import {getRandomNum} from '../components/utils.js';
+import {insertElementInMarkup} from '../components/utils.js';
+import {compare} from '../components/utils.js';
 import {removeIt} from '../utils/remove-it.js';
 
 const STATE_LOAD_TEXT = `Loading...`;
@@ -56,14 +57,7 @@ export default class PageController {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this._allFilmsData[index];
-      const filmCard = new FilmCard(thisFilmData);
-      const filmPopup = new FilmPopup(thisFilmData);
-      const showPopup = () => {
-        insertElementInMarkup(filmPopup.getElement(), this._elements.body);
-        filmPopup.setHandlers();
-      };
-      filmCard.setClickHandler(showPopup);
-      insertElementInMarkup(filmCard, this._elements.moviesContainer);
+      new MovieController(this._elements.moviesContainer, new FilmPopup(thisFilmData)).render(thisFilmData);
       this._filmsInThePage++;
       if (this._filmsInThePage === this._allFilmsData.length) {
         removeIt(this._elements.showMoreBtn);

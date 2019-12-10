@@ -1,4 +1,4 @@
-import PageController from './components/page-controller';
+import PageController from './controllers/page-controller.js';
 import {createFilmsDataList} from './components/films-data-list.js';
 
 const totalFilmsData = createFilmsDataList(12); // []; для проверки заглушки
