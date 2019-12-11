@@ -1,5 +1,4 @@
 import FilmCard from '../components/film-card.js';
-import FilmPopup from '../components/film-popup.js';
 import Nav from '../components/nav.js';
 import Sort from '../components/sort.js';
 import StateHeading from '../components/state-heading.js';
@@ -57,7 +56,7 @@ export default class PageController {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this._allFilmsData[index];
-      new MovieController(this._elements.moviesContainer, new FilmPopup(thisFilmData)).render(thisFilmData);
+      new MovieController(this._elements.moviesContainer).render(thisFilmData);
       this._filmsInThePage++;
       if (this._filmsInThePage === this._allFilmsData.length) {
         removeIt(this._elements.showMoreBtn);

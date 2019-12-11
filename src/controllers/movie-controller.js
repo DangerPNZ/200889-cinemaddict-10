@@ -1,18 +1,19 @@
 import FilmCard from '../components/film-card.js';
+import FilmPopup from '../components/film-popup.js';
 import {insertElementInMarkup} from '../components/utils.js';
 
 export default class MovieController {
-  constructor(container, popup) {
+  constructor(container) {
     this._container = container;
-    this._popup = popup;
     this.showPopup = this.showPopup.bind(this);
   }
   showPopup() {
-    insertElementInMarkup(this._popup.getElement(), this._container);
-    this._popup.setHandlers();
+    insertElementInMarkup(this._filmPopup.getElement(), this._container);
+    this._filmPopup.setHandlers();
   }
   render(filmData) {
     this._filmCard = new FilmCard(filmData);
+    this._filmPopup = new FilmPopup(filmData);
     this._filmCard.setClickHandler(this.showPopup);
     insertElementInMarkup(this._filmCard, this._container);
   }
