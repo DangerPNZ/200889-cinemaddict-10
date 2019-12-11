@@ -248,7 +248,7 @@ const generateFilmCardData = () => {
     genres: getGenresList(genre),
     isAlready: getRandomBoolean(),
     isInWatchlist: getRandomBoolean(),
-    ifFavorites: getRandomBoolean(),
+    isFavorites: getRandomBoolean(),
     comments: createRandomCommentsData(commentsSum)
   };
 };

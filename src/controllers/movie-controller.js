@@ -15,6 +15,7 @@ export default class MovieController {
     this._filmCard = new FilmCard(filmData);
     this._filmPopup = new FilmPopup(filmData);
     this._filmCard.setClickHandler(this.showPopup);
+    this._filmCard.setStatusHandlers();
     insertElementInMarkup(this._filmCard, this._container);
   }
 }

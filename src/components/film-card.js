@@ -1,5 +1,12 @@
 import AbstractComponent from "./abstract-component.js";
 
+const setState = (parameter) => {
+  if (parameter) {
+    return ` film-card__controls-item--active`;
+  } else {
+    return ``;
+  }
+};
 const getFilmCard = (filmData) => {
   const {
     filmTitle,
@@ -9,6 +16,9 @@ const getFilmCard = (filmData) => {
     genre,
     posterSrc,
     description,
+    isAlready,
+    isInWatchlist,
+    isFavorites,
     commentsSum
   } = filmData;
 
@@ -25,9 +35,9 @@ const getFilmCard = (filmData) => {
         <p class="film-card__description">${description}</p>
         <a class="film-card__comments">${commentsSum} comments</a>
         <form class="film-card__controls">
-            <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
-            <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
-            <button class="film-card__controls-item button film-card__controls-item--favorite">Mark as favorite</button>
+            <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist${setState(isInWatchlist)}">Add to watchlist</button>
+            <button class="film-card__controls-item button film-card__controls-item--mark-as-watched${setState(isAlready)}">Mark as watched</button>
+            <button class="film-card__controls-item button film-card__controls-item--favorite${setState(isFavorites)}">Mark as favorite</button>
         </form>
   </article>`;
 };
@@ -35,6 +45,8 @@ export default class FilmCard extends AbstractComponent {
   constructor(data) {
     super();
     this._data = data;
+    this.setStatusHandlers = this.setStatusHandlers.bind(this);
+    this.statusHandler = this.statusHandler.bind(this);
   }
   getTemplate() {
     return getFilmCard(this._data);
@@ -45,10 +57,30 @@ export default class FilmCard extends AbstractComponent {
     const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
     return [poster, heading, toCommentsLink];
   }
+  getStatusControlItems() {
+    return [...this.getElement().querySelectorAll(`.film-card__controls-item`)];
+  }
   setClickHandler(handler) {
     const elements = this.getCallElements();
     for (const item of elements) {
       item.addEventListener(`click`, handler);
+    }
+  }
+  statusHandler(event) {
+    if (event.target.classList.contains(`film-card__controls-item--add-to-watchlist`)) {
+      this._data.isInWatchlist = !this._data.isInWatchlist;
+    } else if (event.target.classList.contains(`film-card__controls-item--mark-as-watched`)) {
+      this._data.isAlready = !this._data.isAlready;
+    } else if (event.target.classList.contains(`film-card__controls-item--favorite`)) {
+      this._data.isFavorites = !this._data.isFavorites;
+    }
+    console.log(this._data);
+    console.log(``);
+  }
+  setStatusHandlers() {
+    const statusBtns = this.getStatusControlItems();
+    for (const btn of statusBtns) {
+      btn.addEventListener(`click`, this.statusHandler);
     }
   }
 }

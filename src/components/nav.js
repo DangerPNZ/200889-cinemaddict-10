@@ -9,7 +9,7 @@ const getNav = (totalFilmsData) => {
     return item.isAlready;
   });
   const inFavoritesFilms = totalFilmsData.filter((item) => {
-    return item.ifFavorites;
+    return item.isFavorites;
   });
   return `
   <nav class="main-navigation">
