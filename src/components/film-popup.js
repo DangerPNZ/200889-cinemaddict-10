@@ -239,9 +239,15 @@ export default class FilmPopup extends AbstractComponent {
     super();
     this._data = data;
     this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
+    this.changeInWatchlistStatusHandler = this.changeInWatchlistStatusHandler.bind(this);
+    this.changeInAlreadyStatusHandler = this.changeInAlreadyStatusHandler.bind(this);
+    this.changeInFavoritesStatusHandler = this.changeInFavoritesStatusHandler.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this._data);
+  }
+  getStatusControlItems() {
+    return [...this.getElement().querySelectorAll(`.film-details__control-label`)];
   }
   closeBtnHandler() {
     this.removeElement();
@@ -258,5 +264,26 @@ export default class FilmPopup extends AbstractComponent {
     const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
     closeBtn.addEventListener(`click`, this.closeBtnHandler.bind(this));
     window.addEventListener(`keydown`, this.escapeBtnHandler);
+  }
+  changeInWatchlistStatusHandler() {
+    const statusBtn = this.getElement().querySelector(`.film-details__control-label--watchlist`);
+    statusBtn.addEventListener(`click`, () => {
+      this._data.isInWatchlist = !this._data.isInWatchlist;
+      this.onDataChange(this, this._data);
+    });
+  }
+  changeInAlreadyStatusHandler() {
+    const statusBtn = this.getElement().querySelector(`.film-details__control-label--watched`);
+    statusBtn.addEventListener(`click`, () => {
+      this._data.isAlready = !this._data.isAlready;
+      this.onDataChange(this, this._data);
+    });
+  }
+  changeInFavoritesStatusHandler() {
+    const statusBtn = this.getElement().querySelector(`.film-details__control-label--favorite`);
+    statusBtn.addEventListener(`click`, () => {
+      this._data.isFavorites = !this._data.isFavorites;
+      this.onDataChange(this, this._data);
+    });
   }
 }

@@ -45,8 +45,9 @@ export default class FilmCard extends AbstractComponent {
   constructor(data) {
     super();
     this._data = data;
-    this.setStatusHandlers = this.setStatusHandlers.bind(this);
-    this.statusHandler = this.statusHandler.bind(this);
+    this.changeInWatchlistStatusHandler = this.changeInWatchlistStatusHandler.bind(this);
+    this.changeInAlreadyStatusHandler = this.changeInAlreadyStatusHandler.bind(this);
+    this.changeInFavoritesStatusHandler = this.changeInFavoritesStatusHandler.bind(this);
   }
   getTemplate() {
     return getFilmCard(this._data);
@@ -66,21 +67,28 @@ export default class FilmCard extends AbstractComponent {
       item.addEventListener(`click`, handler);
     }
   }
-  statusHandler(event) {
-    if (event.target.classList.contains(`film-card__controls-item--add-to-watchlist`)) {
+  changeInWatchlistStatusHandler() {
+    const statusBtn = this.getElement().querySelector(`.film-card__controls-item--add-to-watchlist`);
+    statusBtn.addEventListener(`click`, () => {
+      event.preventDefault();
       this._data.isInWatchlist = !this._data.isInWatchlist;
-    } else if (event.target.classList.contains(`film-card__controls-item--mark-as-watched`)) {
-      this._data.isAlready = !this._data.isAlready;
-    } else if (event.target.classList.contains(`film-card__controls-item--favorite`)) {
-      this._data.isFavorites = !this._data.isFavorites;
-    }
-    console.log(this._data);
-    console.log(``);
+      this.onDataChange(this, this._data);
+    });
   }
-  setStatusHandlers() {
-    const statusBtns = this.getStatusControlItems();
-    for (const btn of statusBtns) {
-      btn.addEventListener(`click`, this.statusHandler);
-    }
+  changeInAlreadyStatusHandler() {
+    const statusBtn = this.getElement().querySelector(`.film-card__controls-item--mark-as-watched`);
+    statusBtn.addEventListener(`click`, () => {
+      event.preventDefault();
+      this._data.isAlready = !this._data.isAlready;
+      this.onDataChange(this, this._data);
+    });
+  }
+  changeInFavoritesStatusHandler() {
+    const statusBtn = this.getElement().querySelector(`.film-card__controls-item--favorite`);
+    statusBtn.addEventListener(`click`, () => {
+      event.preventDefault();
+      this._data.isFavorites = !this._data.isFavorites;
+      this.onDataChange(this, this._data);
+    });
   }
 }

@@ -52,11 +52,14 @@ export default class PageController {
     this.outputFilmParts = this.outputFilmParts.bind(this);
     this._filmsInThePage = 0;
   }
+  _onDataChange(component, componentData) {
+    //
+  }
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this._allFilmsData[index];
-      new MovieController(this._elements.moviesContainer).render(thisFilmData);
+      new MovieController(this._elements.moviesContainer, this._onDataChange).render(thisFilmData);
       this._filmsInThePage++;
       if (this._filmsInThePage === this._allFilmsData.length) {
         removeIt(this._elements.showMoreBtn);
