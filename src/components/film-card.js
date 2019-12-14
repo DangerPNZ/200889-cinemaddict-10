@@ -1,4 +1,4 @@
-import AbstractComponent from "./abstract-component.js";
+import AbstractComponent from "./abstract-smart-component.js";
 
 const setState = (parameter) => {
   if (parameter) {
@@ -90,5 +90,8 @@ export default class FilmCard extends AbstractComponent {
       this._data.isFavorites = !this._data.isFavorites;
       this.onDataChange(this, this._data);
     });
+  }
+  recoveryListeners() {
+    // fdg  
   }
 }

@@ -68,10 +68,10 @@ const getDescriptionSentences = () => {
   return descriptionFull.split(`. `);
 };
 const descriptionSentences = getDescriptionSentences();
+const MIN_WORD_SUM = 1;
+const MAX_WORD_SUM = 4;
+const wordCount = getRandomNum(MIN_WORD_SUM, MAX_WORD_SUM);
 const getFilmTitle = () => {
-  const MIN_WORD_SUM = 1;
-  const MAX_WORD_SUM = 4;
-  const wordCount = getRandomNum(MIN_WORD_SUM, MAX_WORD_SUM);
   const titleWords = [];
   for (let i = 0; i < wordCount; i++) {
     let randomWordFromTitleWords = wordsFromRandomText[getRandomNum(0, (wordsFromRandomText.length - 1))];
@@ -86,24 +86,24 @@ const getFilmTitle = () => {
   }
   return titleWords.join(``);
 };
+const MIN_RATING_VALUE = 0;
+const MAX_RATING_VALUE = 9;
 const getRatingVal = () => {
-  const MIN_RATING_VALUE = 0;
-  const MAX_RATING_VALUE = 9;
   const rating = getRandomNum(MIN_RATING_VALUE, MAX_RATING_VALUE, false);
   if (rating < 1 || rating > MAX_RATING_VALUE) {
     return Math.floor(rating);
   }
   return rating;
 };
+const FIRST_CINEMA_RELEASE_YEAR = 1895;
+const CURRENT_YEAR = new Date().getFullYear();
 const getReleaseYear = () => {
-  const FIRST_CINEMA_RELEASE_YEAR = 1895;
-  const CURRENT_YEAR = new Date().getFullYear();
   return getRandomNum(FIRST_CINEMA_RELEASE_YEAR, CURRENT_YEAR);
 };
+const MIN_DURATION = 0;
+const MAX_DURATION_IN_HOURS = 3;
+const MAX_DURATION_IN_MUNUTES = 59;
 const getFilmDuration = () => {
-  const MIN_DURATION = 0;
-  const MAX_DURATION_IN_HOURS = 3;
-  const MAX_DURATION_IN_MUNUTES = 59;
   const durationInHours = getRandomNum(MIN_DURATION, MAX_DURATION_IN_HOURS);
   const durationInMinutes = getRandomNum(MIN_DURATION, MAX_DURATION_IN_MUNUTES);
   const durationValues = [
@@ -120,9 +120,9 @@ const getPosterSrc = () => {
   const randomPosterIndex = getRandomNum(0, (postersImageNames.length - 1));
   return `./images/posters/${postersImageNames[randomPosterIndex]}`;
 };
+const MIN_SENTENCES_SUM = 1;
+const MAX_SENTENCES_SUM = 3;
 const getDescription = () => {
-  const MIN_SENTENCES_SUM = 1;
-  const MAX_SENTENCES_SUM = 3;
   const sentencesSum = getRandomNum(MIN_SENTENCES_SUM, MAX_SENTENCES_SUM);
   const generatedSentences = new Set();
   let i = 0;
@@ -135,24 +135,24 @@ const getDescription = () => {
   }
   return [...generatedSentences].join(``);
 };
+const MIN_COMMENTS_SUM = 0;
+const MAX_COMMENTS_SUM = 6;
 const getCommentsSum = () => {
-  const MIN_COMMENTS_SUM = 0;
-  const MAX_COMMENTS_SUM = 6;
   return getRandomNum(MIN_COMMENTS_SUM, MAX_COMMENTS_SUM);
 };
+const MIN_AGE_LIMIT = 0;
+const MAX_AGE_LIMIT = 18;
 const getAgeLimit = () => {
-  const MIN_AGE_LIMIT = 0;
-  const MAX_AGE_LIMIT = 18;
   return `${getRandomNum(MIN_AGE_LIMIT, MAX_AGE_LIMIT)}+`;
 };
+const LAST_ELEMENT_INDEX_OF_NAMES = randomNames.length - 1;
 const getName = () => {
-  const LAST_ELEMENT_INDEX_OF_NAMES = randomNames.length - 1;
   const randomNameIndex = getRandomNum(0, LAST_ELEMENT_INDEX_OF_NAMES);
   return randomNames[randomNameIndex];
 };
+const MIN_NAMES_LENGTH = 3;
+const MAX_NAMES_LENGTH = 8;
 const getNamesList = () => {
-  const MIN_NAMES_LENGTH = 3;
-  const MAX_NAMES_LENGTH = 8;
   const namesLength = getRandomNum(MIN_NAMES_LENGTH, MAX_NAMES_LENGTH);
   const names = new Set();
   let i = 0;
@@ -174,15 +174,15 @@ const getReleaseDate = (year) => {
   const month = months[getRandomNum(1, 12)];
   return `${monthDay} ${month} ${year}`;
 };
+const MAX_INDEX_OF_COUNTRIES = countries.length - 1;
 const getCountry = () => {
-  const MAX_INDEX_OF_COUNTRIES = countries.length - 1;
   return countries[getRandomNum(0, MAX_INDEX_OF_COUNTRIES)];
 };
+const MAX_INDEX_OF_GENRES = genres.length - 1;
+const GENRES_ADDITIONAL_SUM = getRandomNum(0, 2);
 const getGenresList = (genreName) => {
   const genresList = new Set();
   genresList.add(genreName);
-  const MAX_INDEX_OF_GENRES = genres.length - 1;
-  const GENRES_ADDITIONAL_SUM = getRandomNum(0, 2);
   let i = 0;
   while (i < GENRES_ADDITIONAL_SUM) {
     const randomGenre = genres[getRandomNum(0, MAX_INDEX_OF_GENRES)];
@@ -206,10 +206,10 @@ const getCommentDate = () => {
   }
   return commentDate;
 };
+const LAST_INDEX_OF_EMOJI_PICTURES = emojiPictures.length - 1;
+const LAST_DESTRIPTION_SENTENCE_INDEX = descriptionSentences.length - 1;
+const LAST_INDEX_OF_NAMES = randomNames.length - 1;
 const createRandomComment = () => {
-  const LAST_INDEX_OF_EMOJI_PICTURES = emojiPictures.length - 1;
-  const LAST_DESTRIPTION_SENTENCE_INDEX = descriptionSentences.length - 1;
-  const LAST_INDEX_OF_NAMES = randomNames.length - 1;
   return {
     emojiPictureSrc: emojiPictures[getRandomNum(0, LAST_INDEX_OF_EMOJI_PICTURES)],
     commentText: `${descriptionSentences[getRandomNum(0, LAST_DESTRIPTION_SENTENCE_INDEX)]}.`,
@@ -226,10 +226,20 @@ const createRandomCommentsData = (commentsSum) => {
   }
   return comments;
 };
+const MIN_USER_RATING_VALUE = 1;
+const MAX_USER_RATING_VALUE = 9;
 const generateFilmCardData = () => {
   const releaseYear = getReleaseYear();
   const genre = getGenre();
   const commentsSum = getCommentsSum();
+  const alreadyState = getRandomBoolean();
+  const getUserFilmRating = () => {
+    if (alreadyState) {
+      return getRandomNum(MIN_USER_RATING_VALUE, MAX_USER_RATING_VALUE);
+    } else {
+      return null;
+    }
+  };
   return {
     filmTitle: getFilmTitle(),
     ratingVal: +getRatingVal(),
@@ -247,6 +257,7 @@ const generateFilmCardData = () => {
     countryOfOrigin: getCountry(),
     genres: getGenresList(genre),
     isAlready: getRandomBoolean(),
+    userRatingValue: getUserFilmRating(alreadyState),
     isInWatchlist: getRandomBoolean(),
     isFavorites: getRandomBoolean(),
     comments: createRandomCommentsData(commentsSum)

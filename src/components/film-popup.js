@@ -1,4 +1,4 @@
-import AbstractComponent from './abstract-component.js';
+import AbstractComponent from './abstract-smart-component.js';
 
 const getFilmPopup = (filmData) => {
   const {
@@ -12,19 +12,32 @@ const getFilmPopup = (filmData) => {
     releaseDate,
     filmDuration,
     countryOfOrigin,
+    genre,
     genres,
     description,
     isAlready,
+    userRatingValue,
     isInWatchlist,
     isFavorites,
     comments
   } = filmData;
-  const addGenres = (genresItems) => {
-    let genresList = ``;
-    for (let genresItem of genresItems) {
-      genresList += `<span class="film-details__genre">${genresItem} </span>`;
+  const addUserRating = () => {
+    if (isAlready && userRatingValue) { // && userRatingValue
+      return `<p class="film-details__user-rating">Your rate ${userRatingValue}</p>`;
+    } else {
+      return ``;
     }
-    return genresList;
+  };
+  const addGenres = (genreName, genresItems) => {
+    if (genresItems.length) {
+      let genresList = ``;
+      for (let genresItem of genresItems) {
+        genresList += `<span class="film-details__genre">${genresItem} </span>`;
+      }
+      return genresList;
+    } else {
+      return `<span class="film-details__genre">${genreName}</span>`;
+    }
   };
   const addReactionSection = () => {
     if (isAlready) {
@@ -70,7 +83,7 @@ const getFilmPopup = (filmData) => {
                     <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
                     <label class="film-details__user-rating-label" for="rating-8">8</label>
     
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9" checked="">
+                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
                     <label class="film-details__user-rating-label" for="rating-9">9</label>
     
                     </div>
@@ -134,7 +147,7 @@ const getFilmPopup = (filmData) => {
 
                 <div class="film-details__rating">
                     <p class="film-details__total-rating">${ratingVal}</p>
-                    <p class="film-details__user-rating">${`Your rate 9`}</p> 
+                    ${addUserRating()}
                 </div>
                 </div>
 
@@ -166,7 +179,7 @@ const getFilmPopup = (filmData) => {
                 <tr class="film-details__row">
                     <td class="film-details__term">Genres</td>
                     <td class="film-details__cell">
-                        ${addGenres(genres)}
+                        ${addGenres(genre, genres)}
                     </td>
                 </tr>
                 </table>
@@ -250,12 +263,14 @@ export default class FilmPopup extends AbstractComponent {
     return [...this.getElement().querySelectorAll(`.film-details__control-label`)];
   }
   closeBtnHandler() {
+    this.getElement().remove();
     this.removeElement();
     window.removeEventListener(`keydown`, this.escapeBtnHandler);
   }
   escapeBtnHandler(event) {
     const ESCAPE_KEY_CODE = 27;
     if (event.keyCode === ESCAPE_KEY_CODE) {
+      this.getElement().remove();
       this.removeElement();
       window.removeEventListener(`keydown`, this.escapeBtnHandler);
     }
@@ -276,6 +291,9 @@ export default class FilmPopup extends AbstractComponent {
     const statusBtn = this.getElement().querySelector(`.film-details__control-label--watched`);
     statusBtn.addEventListener(`click`, () => {
       this._data.isAlready = !this._data.isAlready;
+      if (!this._data.isAlready) {
+        this._data.userRatingValue = null;
+      }
       this.onDataChange(this, this._data);
     });
   }
@@ -286,4 +304,33 @@ export default class FilmPopup extends AbstractComponent {
       this.onDataChange(this, this._data);
     });
   }
+  setUserRating() {
+    if (this._data.isAlready) {
+      const ratingLevelsLabels = this.getElement().querySelectorAll(`.film-details__user-rating-label`);
+      for (const label of ratingLevelsLabels) {
+        label.addEventListener(`click`, () => {
+          setTimeout(() => {
+            const currentUserRating = this.getElement().querySelector(`.film-details__user-rating-input:checked`).value;
+            this._data.userRatingValue = currentUserRating;
+            this.onDataChange(this, this._data);
+          }, 0);
+        });
+      }
+    }
+  }
+  selectReactionHandler() {
+    const reactionEmojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
+    const reactionLabels = this.getElement().querySelectorAll(`.film-details__emoji-label`);
+    for (const label of reactionLabels) {
+      label.addEventListener(`click`, (event) => {
+        const emojiPictureSrc = event.currentTarget.querySelector(`img`).getAttribute(`src`);
+        reactionEmojiContainer.innerHTML = `<img src="${emojiPictureSrc}" width="55" height="55" alt="emoji">`;
+      });
+    }
+  }
+  recoveryListeners() {
+    // fdg  
+  }
 }
+// import moment from 'moment';
+// console.log(moment().format(`D MMMM YYYY`));

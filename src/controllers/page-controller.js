@@ -1,4 +1,3 @@
-import FilmCard from '../components/film-card.js';
 import Nav from '../components/nav.js';
 import Sort from '../components/sort.js';
 import StateHeading from '../components/state-heading.js';
@@ -14,7 +13,7 @@ import {removeIt} from '../utils/remove-it.js';
 
 const STATE_LOAD_TEXT = `Loading...`;
 const STATE_NO_MOVIES_TEXT = `There are no movies in our database`;
-const FILMS_PART_FOR_RENDER_ON_PAGE = 5; // размер партии карточек фильмов для вывода на страницу
+const FILMS_PART_FOR_RENDER_ON_PAGE = 5;
 const MIN_WATCHED_FILMS_SUM = 0;
 const MAX_WATCHED_FILMS_SUM = 100;
 const watchedFilmsSum = getRandomNum(MIN_WATCHED_FILMS_SUM, MAX_WATCHED_FILMS_SUM);
@@ -53,7 +52,7 @@ export default class PageController {
     this._filmsInThePage = 0;
   }
   _onDataChange(component, componentData) {
-    //
+    component.rerender();
   }
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
@@ -93,7 +92,7 @@ export default class PageController {
         }
       }
     };
-    if (this._allFilmsData) {
+    if (this._allFilmsData.length) {
       insertElementInMarkup(this._components.searchStateHeading, this._components.filmsSection, `prepend`);
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
       this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
@@ -127,8 +126,7 @@ export default class PageController {
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
       topElementsByParameter.forEach((item) => {
-        const element = new FilmCard(item);
-        insertElementInMarkup(element, extraSectionFilmsContainer);
+        new MovieController(extraSectionFilmsContainer, this._onDataChange).render(item);
       });
       insertElementInMarkup(extraSection, container);
     }

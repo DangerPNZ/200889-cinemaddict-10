@@ -19,7 +19,7 @@ export default class MovieController {
     this._filmPopup.changeInFavoritesStatusHandler();
   }
   showPopup() {
-    insertElementInMarkup(this._filmPopup.getElement(), this._container);
+    insertElementInMarkup(this._filmPopup.getElement(), document.body);
     this._filmPopup.setHandlers();
   }
   render(filmData) {
@@ -28,6 +28,8 @@ export default class MovieController {
     this._filmPopup = new FilmPopup(this._data);
     this._filmCard.setClickHandler(this.showPopup);
     this.setStatusHandlers();
+    this._filmPopup.setUserRating();
+    this._filmPopup.selectReactionHandler();
     insertElementInMarkup(this._filmCard, this._container);
   }
 }
