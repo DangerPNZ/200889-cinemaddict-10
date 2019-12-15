@@ -44,10 +44,10 @@ const getFilmCard = (filmData) => {
 export default class FilmCard extends AbstractSmartComponent {
   constructor(data) {
     super();
-    this._data = data;
+    this.data = data;
   }
   getTemplate() {
-    return getFilmCard(this._data);
+    return getFilmCard(this.data);
   }
   getCallDetailsItems() {
     const poster = this.getElement().querySelector(`.film-card__poster`);

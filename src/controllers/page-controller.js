@@ -53,18 +53,14 @@ export default class PageController {
     this._filmsInThePage = 0;
     this._filmCards = [];
   }
-  rerender(oldData, newData) {
+  _onDataChange(oldData, newData) {
     const cards = this._filmCards.filter((card) => {
-      return card._data === oldData;
+      return card.data === oldData;
     });
-    console.log(cards);
     cards.forEach((cardItem) => {
       cardItem.rerender(newData);
       cardItem.recoveryListeners();
     });
-  }
-  _onDataChange(oldData, newData) {
-    this.rerender(oldData, newData);
   }
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {

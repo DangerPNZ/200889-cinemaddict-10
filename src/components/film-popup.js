@@ -250,11 +250,11 @@ const getFilmPopup = (filmData) => {
 export default class FilmPopup extends AbstractSmartComponent {
   constructor(data) {
     super();
-    this._data = data;
+    this.data = data;
     this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
   }
   getTemplate() {
-    return getFilmPopup(this._data);
+    return getFilmPopup(this.data);
   }
   getStatusControlItems() {
     return [...this.getElement().querySelectorAll(`.film-details__control-label`)];
@@ -289,13 +289,13 @@ export default class FilmPopup extends AbstractSmartComponent {
     }
   }
   setUserRatingChangeHandler() {
-    if (this._data.isAlready) {
+    if (this.data.isAlready) {
       const ratingLevelRadioBtns = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
       for (const radioBtn of ratingLevelRadioBtns) {
         radioBtn.addEventListener(`change`, (event) => {
           const currentUserRating = event.target.value;
-          this._data.userRatingValue = currentUserRating;
-          this.onDataChange(this, this._data);
+          this.data.userRatingValue = currentUserRating;
+          this.onDataChange(this, this.data);
         });
       }
     }
