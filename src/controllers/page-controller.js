@@ -49,16 +49,30 @@ export default class PageController {
       footerFilmTotalSum: document.querySelector(`.footer__statistics p`)
     };
     this.outputFilmParts = this.outputFilmParts.bind(this);
+    this._onDataChange = this._onDataChange.bind(this);
     this._filmsInThePage = 0;
+    this._filmCards = [];
   }
-  _onDataChange(component, componentData) {
-    component.rerender();
+  rerender(oldData, newData) {
+    const cards = this._filmCards.filter((card) => {
+      return card._data === oldData;
+    });
+    console.log(cards);
+    cards.forEach((cardItem) => {
+      cardItem.rerender(newData);
+      cardItem.recoveryListeners();
+    });
+  }
+  _onDataChange(oldData, newData) {
+    this.rerender(oldData, newData);
   }
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this._allFilmsData[index];
-      new MovieController(this._elements.moviesContainer, this._onDataChange).render(thisFilmData);
+      const card = new MovieController(this._elements.moviesContainer, this._onDataChange);
+      this._filmCards.push(card);
+      card.render(thisFilmData);
       this._filmsInThePage++;
       if (this._filmsInThePage === this._allFilmsData.length) {
         removeIt(this._elements.showMoreBtn);
@@ -86,6 +100,7 @@ export default class PageController {
         targenSortBtn.classList.add(ACTIVE_SORT_BTN_CLASS);
         this._elements.moviesContainer.innerHTML = ``;
         this._filmsInThePage = 0;
+        this._filmCards = [];
         this.outputFilmParts();
         if (this._components.filmsSection.getShowMoreBtn() === null) {
           insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
@@ -126,13 +141,16 @@ export default class PageController {
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
       topElementsByParameter.forEach((item) => {
-        new MovieController(extraSectionFilmsContainer, this._onDataChange).render(item);
+        const card = new MovieController(extraSectionFilmsContainer, this._onDataChange);
+        this._filmCards.push(card);
+        card.render(item);
       });
       insertElementInMarkup(extraSection, container);
     }
   }
 
   render(totalFilmsData) {
+    this.totalFilmsData = totalFilmsData;
     this._elements.menu = new Nav(totalFilmsData).getElement();
     this.setFilmsContainerInitialState(totalFilmsData);
     insertElementInMarkup(this._elements.menu, this._elements.main);

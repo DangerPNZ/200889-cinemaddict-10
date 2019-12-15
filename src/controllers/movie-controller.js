@@ -7,29 +7,31 @@ export default class MovieController {
     this._container = container;
     this.onDataChange = onDataChange;
     this.showPopup = this.showPopup.bind(this);
+    this.changeStatus = this.changeStatus.bind(this);
   }
-  setStatusHandlers() {
-    this._filmCard.onDataChange = this.onDataChange;
-    this._filmPopup.onDataChange = this.onDataChange;
-    this._filmCard.changeInWatchlistStatusHandler();
-    this._filmCard.changeInAlreadyStatusHandler();
-    this._filmCard.changeInFavoritesStatusHandler();
-    this._filmPopup.changeInWatchlistStatusHandler();
-    this._filmPopup.changeInAlreadyStatusHandler();
-    this._filmPopup.changeInFavoritesStatusHandler();
+
+  changeStatus(property) {
+    const newData = Object.assign({}, this._data);
+    newData[property] = !newData[property];
+    if (property === `isAlready` && newData[property] === false) {
+      newData.userRatingValue = null;
+    }
+    this.onDataChange(this._data, newData);
   }
   showPopup() {
+    this._filmPopup = new FilmPopup(this._data);
+    this._filmPopup.setCloseHandlers();
+    this._filmPopup.setUserRatingChangeHandler();
+    this._filmPopup.setSelectReactionHandler();
+    this._filmPopup.setChangeStatusHandler(this.changeStatus);
     insertElementInMarkup(this._filmPopup.getElement(), document.body);
-    this._filmPopup.setHandlers();
   }
   render(filmData) {
     this._data = filmData;
     this._filmCard = new FilmCard(this._data);
-    this._filmPopup = new FilmPopup(this._data);
-    this._filmCard.setClickHandler(this.showPopup);
-    this.setStatusHandlers();
-    this._filmPopup.setUserRating();
-    this._filmPopup.selectReactionHandler();
+    this._filmCard.onDataChange = this.onDataChange;
+    this._filmCard.setShowDetailsHandlers(this.showPopup);
+    this._filmCard.setChangeStatusHandler(this.changeStatus);
     insertElementInMarkup(this._filmCard, this._container);
   }
 }

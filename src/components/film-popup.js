@@ -1,4 +1,4 @@
-import AbstractComponent from './abstract-smart-component.js';
+import AbstractSmartComponent from './abstract-smart-component.js';
 
 const getFilmPopup = (filmData) => {
   const {
@@ -247,14 +247,11 @@ const getFilmPopup = (filmData) => {
     </section>`;
 };
 
-export default class FilmPopup extends AbstractComponent {
+export default class FilmPopup extends AbstractSmartComponent {
   constructor(data) {
     super();
     this._data = data;
     this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
-    this.changeInWatchlistStatusHandler = this.changeInWatchlistStatusHandler.bind(this);
-    this.changeInAlreadyStatusHandler = this.changeInAlreadyStatusHandler.bind(this);
-    this.changeInFavoritesStatusHandler = this.changeInFavoritesStatusHandler.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this._data);
@@ -275,50 +272,35 @@ export default class FilmPopup extends AbstractComponent {
       window.removeEventListener(`keydown`, this.escapeBtnHandler);
     }
   }
-  setHandlers() {
+  setCloseHandlers() {
     const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
     closeBtn.addEventListener(`click`, this.closeBtnHandler.bind(this));
     window.addEventListener(`keydown`, this.escapeBtnHandler);
   }
-  changeInWatchlistStatusHandler() {
-    const statusBtn = this.getElement().querySelector(`.film-details__control-label--watchlist`);
-    statusBtn.addEventListener(`click`, () => {
-      this._data.isInWatchlist = !this._data.isInWatchlist;
-      this.onDataChange(this, this._data);
-    });
+  setChangeStatusHandler(handler) {
+    this.changeStatusHandler = handler;
+    const statusControlItems = [...this.getElement().querySelectorAll(`.film-details__control-label`)];
+    for (const btn of statusControlItems) {
+      btn.addEventListener(`click`, (event) => {
+        event.preventDefault();
+        const dataProperty = event.target.dataset.status;
+        handler(dataProperty);
+      });
+    }
   }
-  changeInAlreadyStatusHandler() {
-    const statusBtn = this.getElement().querySelector(`.film-details__control-label--watched`);
-    statusBtn.addEventListener(`click`, () => {
-      this._data.isAlready = !this._data.isAlready;
-      if (!this._data.isAlready) {
-        this._data.userRatingValue = null;
-      }
-      this.onDataChange(this, this._data);
-    });
-  }
-  changeInFavoritesStatusHandler() {
-    const statusBtn = this.getElement().querySelector(`.film-details__control-label--favorite`);
-    statusBtn.addEventListener(`click`, () => {
-      this._data.isFavorites = !this._data.isFavorites;
-      this.onDataChange(this, this._data);
-    });
-  }
-  setUserRating() {
+  setUserRatingChangeHandler() {
     if (this._data.isAlready) {
-      const ratingLevelsLabels = this.getElement().querySelectorAll(`.film-details__user-rating-label`);
-      for (const label of ratingLevelsLabels) {
-        label.addEventListener(`click`, () => {
-          setTimeout(() => {
-            const currentUserRating = this.getElement().querySelector(`.film-details__user-rating-input:checked`).value;
-            this._data.userRatingValue = currentUserRating;
-            this.onDataChange(this, this._data);
-          }, 0);
+      const ratingLevelRadioBtns = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+      for (const radioBtn of ratingLevelRadioBtns) {
+        radioBtn.addEventListener(`change`, (event) => {
+          const currentUserRating = event.target.value;
+          this._data.userRatingValue = currentUserRating;
+          this.onDataChange(this, this._data);
         });
       }
     }
   }
-  selectReactionHandler() {
+  setSelectReactionHandler() {
     const reactionEmojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
     const reactionLabels = this.getElement().querySelectorAll(`.film-details__emoji-label`);
     for (const label of reactionLabels) {
@@ -329,7 +311,10 @@ export default class FilmPopup extends AbstractComponent {
     }
   }
   recoveryListeners() {
-    // fdg  
+    this.setCloseHandlers();
+    this.setUserRatingChangeHandler();
+    this.setSelectReactionHandler();
+    this.setChangeStatusHandler(this.changeStatusHandler);
   }
 }
 // import moment from 'moment';
