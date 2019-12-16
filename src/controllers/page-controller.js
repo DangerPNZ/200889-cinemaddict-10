@@ -156,14 +156,15 @@ export default class PageController {
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
       // привязать к элементам массива
-      topElementsByParameter = this.totalFilmsData.filter((itemOfData) => {
-        return topElementsByParameter.indexOf(itemOfData) >= 0;
-      });
-      topElementsByParameter.forEach((item) => {
-        const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
-        this._controllers.extraSection.push(controller);
-        controller.render(item);
-      });
+      for (let i = 0; i < this.totalFilmsData.length; i++) {
+        for (let j = 0; j < topElementsByParameter.length; j++) {
+          if (this.totalFilmsData[i] === topElementsByParameter[j]) {
+            const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
+            this._controllers.extraSection.push(controller);
+            controller.render(this.totalFilmsData[i]);
+          }
+        }
+      }
       insertElementInMarkup(extraSection, container);
     }
   }
