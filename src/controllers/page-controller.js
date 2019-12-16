@@ -68,8 +68,8 @@ export default class PageController {
         item.filmPopup.rerender(newData);
       }
     });
-    const index = this.totalFilmsData.indexOf(oldData);
-    this.totalFilmsData.splice(index, 1, newData);
+    const index = this._allFilmsData.indexOf(oldData);
+    this._allFilmsData.splice(index, 1, newData);
   }
   _onViewChange() {
     return [...this._controllers.mainSection, ...this._controllers.extraSection];
