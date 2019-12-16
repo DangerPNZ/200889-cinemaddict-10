@@ -63,19 +63,13 @@ export default class PageController {
     });
     controllers.forEach((item) => {
       item.data = newData;
-      item._filmCard.rerender(newData);
-      if (item._filmPopup) {
-        item._filmPopup.rerender(newData);
+      item.filmCard.rerender(newData);
+      if (item.filmPopup) {
+        item.filmPopup.rerender(newData);
       }
     });
-    this.totalFilmsData = this.totalFilmsData.map((item) => {
-      if (item === oldData) {
-        item = newData;
-        return item;
-      } else {
-        return item;
-      }
-    });
+    const index = this.totalFilmsData.indexOf(oldData);
+    this.totalFilmsData.splice(index, 1, newData);
   }
   _onViewChange() {
     return [...this._controllers.mainSection, ...this._controllers.extraSection];
@@ -143,7 +137,7 @@ export default class PageController {
   createExtraSection(sortParameter, container, totalFilmsData) {
     const extraSectionFilmsCardsData = this.getExtraSectionFilmsCardsData(sortParameter, totalFilmsData);
     if (extraSectionFilmsCardsData.length) {
-      let topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
+      const topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
       let headingText = ``;
       switch (sortParameter) {
         case PARAMETER_FOR_CREATE_TOP_RATED_SECTION:
@@ -155,7 +149,6 @@ export default class PageController {
       }
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
-      // привязать к элементам массива
       for (let i = 0; i < this.totalFilmsData.length; i++) {
         for (let j = 0; j < topElementsByParameter.length; j++) {
           if (this.totalFilmsData[i] === topElementsByParameter[j]) {
