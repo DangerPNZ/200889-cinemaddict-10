@@ -192,13 +192,13 @@ const getFilmPopup = (filmData) => {
 
             <section class="film-details__controls">
             <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${setState(isInWatchlist)}>
-            <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
+            <label data-status="isInWatchlist" for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
             <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${setState(isAlready)}>
-            <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
+            <label data-status="isAlready" for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
             <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${setState(isFavorites)}>
-            <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
+            <label data-status="isFavorites" for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
             </section>
         </div>
 
@@ -259,7 +259,7 @@ export default class FilmPopup extends AbstractSmartComponent {
   getStatusControlItems() {
     return [...this.getElement().querySelectorAll(`.film-details__control-label`)];
   }
-  closeBtnHandler() {
+  closeHandler() {
     this.getElement().remove();
     this.removeElement();
     window.removeEventListener(`keydown`, this.escapeBtnHandler);
@@ -274,7 +274,7 @@ export default class FilmPopup extends AbstractSmartComponent {
   }
   setCloseHandlers() {
     const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
-    closeBtn.addEventListener(`click`, this.closeBtnHandler.bind(this));
+    closeBtn.addEventListener(`click`, this.closeHandler.bind(this));
     window.addEventListener(`keydown`, this.escapeBtnHandler);
   }
   setChangeStatusHandler(handler) {

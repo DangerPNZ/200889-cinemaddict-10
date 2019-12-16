@@ -50,25 +50,43 @@ export default class PageController {
     };
     this.outputFilmParts = this.outputFilmParts.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
     this._filmsInThePage = 0;
-    this._filmCards = [];
+    this._controllers = {
+      mainSection: [],
+      extraSection: []
+    };
   }
   _onDataChange(oldData, newData) {
-    const cards = this._filmCards.filter((card) => {
-      return card.data === oldData;
+    const controllers = [...this._controllers.mainSection, ...this._controllers.extraSection].filter((item) => {
+      return item.data === oldData;
     });
-    cards.forEach((cardItem) => {
-      cardItem.rerender(newData);
-      cardItem.recoveryListeners();
+    controllers.forEach((item) => {
+      item.data = newData;
+      item._filmCard.rerender(newData);
+      if (item._filmPopup) {
+        item._filmPopup.rerender(newData);
+      }
     });
+    this.totalFilmsData = this.totalFilmsData.map((item) => {
+      if (item === oldData) {
+        item = newData;
+        return item;
+      } else {
+        return item;
+      }
+    });
+  }
+  _onViewChange() {
+    return [...this._controllers.mainSection, ...this._controllers.extraSection];
   }
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this._allFilmsData[index];
-      const card = new MovieController(this._elements.moviesContainer, this._onDataChange);
-      this._filmCards.push(card);
-      card.render(thisFilmData);
+      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange);
+      this._controllers.mainSection.push(controller);
+      controller.render(thisFilmData);
       this._filmsInThePage++;
       if (this._filmsInThePage === this._allFilmsData.length) {
         removeIt(this._elements.showMoreBtn);
@@ -76,27 +94,28 @@ export default class PageController {
       }
     }
   }
-  setFilmsContainerInitialState(totalFilmsData) {
-    this._allFilmsData = totalFilmsData;
+  setFilmsContainerInitialState() {
+    this._allFilmsData = this.totalFilmsData;
     const sortHandler = (event) => {
+      event.preventDefault();
       const targenSortBtn = event.target;
       if (!targenSortBtn.classList.contains(ACTIVE_SORT_BTN_CLASS)) {
         const sortType = targenSortBtn.getAttribute(DATA_SORT_ATTRIBUTE);
         if (sortType !== SORT_TYPE_VALUES.default) {
           if (sortType === SORT_TYPE_VALUES.byDate) {
-            this._allFilmsData = totalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byDate, true));
+            this._allFilmsData = this.totalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byDate, true));
           } else if (sortType === SORT_TYPE_VALUES.byRating) {
-            this._allFilmsData = totalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byRating));
+            this._allFilmsData = this.totalFilmsData.slice().sort(compare(SORT_TYPE_VALUES.byRating));
           }
         } else {
-          this._allFilmsData = totalFilmsData;
+          this._allFilmsData = this.totalFilmsData;
         }
         const activeSortBtn = this._components.sort.getElement().querySelector(`.${ACTIVE_SORT_BTN_CLASS}`);
         activeSortBtn.classList.remove(ACTIVE_SORT_BTN_CLASS);
         targenSortBtn.classList.add(ACTIVE_SORT_BTN_CLASS);
         this._elements.moviesContainer.innerHTML = ``;
         this._filmsInThePage = 0;
-        this._filmCards = [];
+        this._controllers.mainSection = [];
         this.outputFilmParts();
         if (this._components.filmsSection.getShowMoreBtn() === null) {
           insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
@@ -137,9 +156,9 @@ export default class PageController {
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
       topElementsByParameter.forEach((item) => {
-        const card = new MovieController(extraSectionFilmsContainer, this._onDataChange);
-        this._filmCards.push(card);
-        card.render(item);
+        const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
+        this._controllers.extraSection.push(controller);
+        controller.render(item);
       });
       insertElementInMarkup(extraSection, container);
     }
@@ -148,7 +167,7 @@ export default class PageController {
   render(totalFilmsData) {
     this.totalFilmsData = totalFilmsData;
     this._elements.menu = new Nav(totalFilmsData).getElement();
-    this.setFilmsContainerInitialState(totalFilmsData);
+    this.setFilmsContainerInitialState();
     insertElementInMarkup(this._elements.menu, this._elements.main);
     insertElementInMarkup(this._components.sort, this._elements.main);
     insertElementInMarkup(this._components.films, this._elements.main);

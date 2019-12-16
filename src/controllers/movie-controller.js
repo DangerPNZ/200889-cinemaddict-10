@@ -3,13 +3,21 @@ import FilmPopup from '../components/film-popup.js';
 import {insertElementInMarkup} from '../components/utils.js';
 
 export default class MovieController {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, onViewChange) {
     this._container = container;
     this.onDataChange = onDataChange;
+    this.onViewChange = onViewChange;
     this.showPopup = this.showPopup.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
   }
-
+  setDefaultView() {
+    const controllers = this.onViewChange();
+    controllers.forEach((item) => {
+      if (item._filmPopup) {
+        item._filmPopup.closeHandler();
+      }
+    });
+  }
   changeStatus(property) {
     const newData = Object.assign({}, this.data);
     newData[property] = !newData[property];
@@ -19,6 +27,7 @@ export default class MovieController {
     this.onDataChange(this.data, newData);
   }
   showPopup() {
+    this.setDefaultView();
     this._filmPopup = new FilmPopup(this.data);
     this._filmPopup.onDataChange = this.onDataChange;
     this._filmPopup.setCloseHandlers();

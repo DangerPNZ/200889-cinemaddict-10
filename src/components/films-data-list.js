@@ -171,7 +171,7 @@ const getNamesList = () => {
 };
 const getReleaseDate = (year) => {
   const monthDay = getRandomNum(1, 31);
-  const month = months[getRandomNum(1, 12)];
+  const month = months[getRandomNum(0, 11)];
   return `${monthDay} ${month} ${year}`;
 };
 const MAX_INDEX_OF_COUNTRIES = countries.length - 1;
