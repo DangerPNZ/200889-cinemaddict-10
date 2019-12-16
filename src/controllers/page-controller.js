@@ -143,7 +143,7 @@ export default class PageController {
   createExtraSection(sortParameter, container, totalFilmsData) {
     const extraSectionFilmsCardsData = this.getExtraSectionFilmsCardsData(sortParameter, totalFilmsData);
     if (extraSectionFilmsCardsData.length) {
-      const topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
+      let topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
       let headingText = ``;
       switch (sortParameter) {
         case PARAMETER_FOR_CREATE_TOP_RATED_SECTION:
@@ -155,6 +155,10 @@ export default class PageController {
       }
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
+      // привязать к элементам массива
+      topElementsByParameter = this.totalFilmsData.filter((itemOfData) => {
+        return topElementsByParameter.indexOf(itemOfData) >= 0;
+      });
       topElementsByParameter.forEach((item) => {
         const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
         this._controllers.extraSection.push(controller);
