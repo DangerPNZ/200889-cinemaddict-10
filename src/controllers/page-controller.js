@@ -57,16 +57,19 @@ export default class PageController {
       extraSection: []
     };
   }
+  rerender(controller, newData) {
+    controller.data = newData;
+    controller.filmCard.rerender(newData);
+    if (controller.filmPopup) {
+      controller.filmPopup.rerender(newData);
+    }
+  }
   _onDataChange(oldData, newData) {
     const controllers = [...this._controllers.mainSection, ...this._controllers.extraSection].filter((item) => {
       return item.data === oldData;
     });
     controllers.forEach((item) => {
-      item.data = newData;
-      item.filmCard.rerender(newData);
-      if (item.filmPopup) {
-        item.filmPopup.rerender(newData);
-      }
+      this.rerender(item, newData);
     });
     const index = this._allFilmsData.indexOf(oldData);
     this._allFilmsData.splice(index, 1, newData);
