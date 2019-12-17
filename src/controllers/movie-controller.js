@@ -8,6 +8,7 @@ export default class MovieController {
     this.onDataChange = onDataChange;
     this.onViewChange = onViewChange;
     this.showPopup = this.showPopup.bind(this);
+    this.changeUserRatingValue = this.changeUserRatingValue.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
   }
   setDefaultView() {
@@ -17,6 +18,11 @@ export default class MovieController {
         item.filmPopup.closeHandler();
       }
     });
+  }
+  changeUserRatingValue(value = null) {
+    const newData = Object.assign({}, this.data);
+    newData.userRatingValue = value;
+    this.onDataChange(this.data, newData);
   }
   changeStatus(property) {
     const newData = Object.assign({}, this.data);
@@ -29,19 +35,21 @@ export default class MovieController {
   showPopup() {
     this.setDefaultView();
     this.filmPopup = new FilmPopup(this.data);
+    insertElementInMarkup(this.filmPopup.getElement(), document.body);
+    this.filmPopup.setCurrentUserRating();
     this.filmPopup.onDataChange = this.onDataChange;
     this.filmPopup.setCloseHandlers();
-    this.filmPopup.setUserRatingChangeHandler();
+    this.filmPopup.setUserRatingChangeHandler(this.changeUserRatingValue);
+    this.filmPopup.resetUserRatingChangeHandler(this.changeUserRatingValue);
     this.filmPopup.setSelectReactionHandler();
     this.filmPopup.setChangeStatusHandler(this.changeStatus);
-    insertElementInMarkup(this.filmPopup.getElement(), document.body);
   }
   render(filmData) {
     this.data = filmData;
     this.filmCard = new FilmCard(this.data);
+    insertElementInMarkup(this.filmCard, this._container);
     this.filmCard.onDataChange = this.onDataChange;
     this.filmCard.setShowDetailsHandlers(this.showPopup);
     this.filmCard.setChangeStatusHandler(this.changeStatus);
-    insertElementInMarkup(this.filmCard, this._container);
   }
 }

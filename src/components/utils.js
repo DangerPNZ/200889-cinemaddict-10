@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const compare = (property, byDate = false) => {
   if (byDate === false) {
     return (a, b) => {
@@ -62,4 +64,7 @@ export const insertElementInMarkup = (elementNodeOrComponent, containerNodeOrCom
       containerNode.replaceWith(elementNode);
       break;
   }
+};
+export const formatDate = (date, formatStr) => {
+  return moment(date).format(formatStr);
 };

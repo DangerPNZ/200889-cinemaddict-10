@@ -17,7 +17,7 @@ our wounds. We accepted less than the usual advance Penguin paid for a King nove
 than the usual rights; we exercised control in many areas normally reserved by the publisher; and we 
 licensed them the rights only for a short period of time. This would be an experiment in publishing and 
 I wanted to protect my client as well as I could.`;
-const months = [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`];
+// const months = [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`];
 const randomNames = [`Sofia Black D'Elia`, `Jake Cannavale`, `Pete Davidson`, `Seychelle Gabriel`, `Elizabeth Gillies`,
   `Ariana Grande`, `Rosabell Laurenti Sellers`, `Liana Liberato`, `Ali Lohan`, `Caitlyn Taylor Love`, `Ryan Malgarini`,
   `Gia Mantegna`, `Laura Marano`, `Vanessa Marano`, `Vincent Martella`, `Chris Massoglia`, `Julianna Rose Mauriello`,
@@ -171,8 +171,8 @@ const getNamesList = () => {
 };
 const getReleaseDate = (year) => {
   const monthDay = getRandomNum(1, 31);
-  const month = months[getRandomNum(0, 11)];
-  return `${monthDay} ${month} ${year}`;
+  const month = getRandomNum(1, 12);
+  return `${year}-${(month < 10) ? `0${month}` : `${month}`}-${(monthDay < 10) ? `0${monthDay}` : `${monthDay}`}`;
 };
 const MAX_INDEX_OF_COUNTRIES = countries.length - 1;
 const getCountry = () => {

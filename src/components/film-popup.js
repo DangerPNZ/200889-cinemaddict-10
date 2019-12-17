@@ -1,5 +1,7 @@
 import AbstractSmartComponent from './abstract-smart-component.js';
+import {formatDate} from './utils.js';
 
+const RELEASE_DATE_FORMAT = `D MMMM YYYY`;
 const getFilmPopup = (filmData) => {
   const {
     posterSrc,
@@ -166,7 +168,7 @@ const getFilmPopup = (filmData) => {
                 </tr>
                 <tr class="film-details__row">
                     <td class="film-details__term">Release Date</td>
-                    <td class="film-details__cell">${releaseDate}</td>
+                    <td class="film-details__cell">${formatDate(releaseDate, RELEASE_DATE_FORMAT)}</td>
                 </tr>
                 <tr class="film-details__row">
                     <td class="film-details__term">Runtime</td>
@@ -252,6 +254,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     super();
     this.data = data;
     this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
+    this.setCurrentUserRating = this.setCurrentUserRating.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this.data);
@@ -288,16 +291,28 @@ export default class FilmPopup extends AbstractSmartComponent {
       });
     }
   }
-  setUserRatingChangeHandler() {
+  getUserRatingInputs() {
+    return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+  }
+  setUserRatingChangeHandler(handler) {
     if (this.data.isAlready) {
-      const ratingLevelRadioBtns = this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+      this.changeUserRatindHandler = handler;
+      const ratingLevelRadioBtns = this.getUserRatingInputs();
       for (const radioBtn of ratingLevelRadioBtns) {
         radioBtn.addEventListener(`change`, (event) => {
           const currentUserRating = event.target.value;
-          this.data.userRatingValue = currentUserRating;
-          this.onDataChange(this, this.data);
+          handler(currentUserRating);
         });
       }
+    }
+  }
+  resetUserRatingChangeHandler(handler) {
+    if (this.data.isAlready) {
+      this.changeUserRatindHandler = handler;
+      const resetUserRatingBtn = this.getElement().querySelector(`.film-details__watched-reset`);
+      resetUserRatingBtn.addEventListener(`click`, () => {
+        handler();
+      });
     }
   }
   setSelectReactionHandler() {
@@ -310,12 +325,23 @@ export default class FilmPopup extends AbstractSmartComponent {
       });
     }
   }
+  setCurrentUserRating() {
+    if (this.data.isAlready && this.data.userRatingValue) {
+      const ratingLevelRadioBtns = this.getUserRatingInputs();
+      for (const radioBtn of ratingLevelRadioBtns) {
+        if (+radioBtn.value === +this.data.userRatingValue) {
+          radioBtn.setAttribute(`checked`, true);
+          return;
+        }
+      }
+    }
+  }
   recoveryListeners() {
+    this.setCurrentUserRating();
     this.setCloseHandlers();
-    this.setUserRatingChangeHandler();
+    this.setUserRatingChangeHandler(this.changeUserRatindHandler);
+    this.resetUserRatingChangeHandler(this.changeUserRatindHandler);
     this.setSelectReactionHandler();
     this.setChangeStatusHandler(this.changeStatusHandler);
   }
 }
-// import moment from 'moment';
-// console.log(moment().format(`D MMMM YYYY`));
