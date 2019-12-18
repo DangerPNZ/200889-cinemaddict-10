@@ -22,7 +22,7 @@ export default class MovieController {
   changeUserRatingValue(value = null) {
     const newData = Object.assign({}, this.data);
     newData.userRatingValue = value;
-    this.onDataChange(this.data, newData);
+    this.onDataChange(this.id, newData);
   }
   changeStatus(property) {
     const newData = Object.assign({}, this.data);
@@ -30,7 +30,7 @@ export default class MovieController {
     if (property === `isAlready` && newData[property] === false) {
       newData.userRatingValue = null;
     }
-    this.onDataChange(this.data, newData);
+    this.onDataChange(this.id, newData);
   }
   showPopup() {
     this.setDefaultView();
@@ -46,6 +46,7 @@ export default class MovieController {
   }
   render(filmData) {
     this.data = filmData;
+    this.id = filmData.id;
     this.filmCard = new FilmCard(this.data);
     insertElementInMarkup(this.filmCard, this._container);
     this.filmCard.onDataChange = this.onDataChange;

@@ -31,7 +31,9 @@ const SORT_TYPE_VALUES = {
 };
 
 export default class PageController {
-  constructor(applicationContainer) {
+  constructor(applicationContainer, moviesModel) {
+    this.moviesModel = moviesModel;
+    this.totalFilmsData = this.moviesModel.getMoviesData();
     this._components = {
       sort: new Sort(),
       films: new Films(),
@@ -64,15 +66,19 @@ export default class PageController {
       controller.filmPopup.rerender(newData);
     }
   }
-  _onDataChange(oldData, newData) {
+  refreshFilmDataInFilmsList(id, newData, filmsList) {
+    const index = filmsList.findIndex((item) => item.id === id);
+    filmsList[index] = newData;
+  }
+  _onDataChange(id, newData) {
     const controllers = [...this._controllers.mainSection, ...this._controllers.extraSection].filter((item) => {
-      return item.data === oldData;
+      return item.id === id;
     });
     controllers.forEach((item) => {
       this.rerender(item, newData);
     });
-    const index = this._allFilmsData.indexOf(oldData);
-    this._allFilmsData.splice(index, 1, newData);
+    this.refreshFilmDataInFilmsList(id, newData, this.totalFilmsData);
+    this.refreshFilmDataInFilmsList(id, newData, this._allFilmsData);
   }
   _onViewChange() {
     return [...this._controllers.mainSection, ...this._controllers.extraSection];
@@ -165,17 +171,16 @@ export default class PageController {
     }
   }
 
-  render(totalFilmsData) {
-    this.totalFilmsData = totalFilmsData;
-    this._elements.menu = new Nav(totalFilmsData).getElement();
+  render() {
+    this._elements.menu = new Nav(this.totalFilmsData).getElement();
     this.setFilmsContainerInitialState();
     insertElementInMarkup(this._elements.menu, this._elements.main);
     insertElementInMarkup(this._components.sort, this._elements.main);
     insertElementInMarkup(this._components.films, this._elements.main);
     insertElementInMarkup(this._components.filmsSection, this._components.films);
-    this._elements.footerFilmTotalSum.textContent = `${totalFilmsData.length} movies inside`;
+    this._elements.footerFilmTotalSum.textContent = `${this.totalFilmsData.length} movies inside`;
     insertElementInMarkup(this._elements.userRank, this._elements.header);
-    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, totalFilmsData);
-    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, totalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.totalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.totalFilmsData);
   }
 }
