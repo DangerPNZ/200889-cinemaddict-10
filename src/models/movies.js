@@ -8,14 +8,14 @@ export default class Movies {
   getMoviesData() {
     return this.moviesData;
   }
-  updateMovieData(oldData, newData) {
+  updateMovieData(id, newData) {
     const controllers = [...this._controllers.mainSection, ...this._controllers.extraSection].filter((item) => {
-      return item.data === oldData;
+      return item.id === id;
     });
     controllers.forEach((item) => {
       this.rerender(item, newData);
     });
-    const index = this._allFilmsData.indexOf(oldData);
-    this._allFilmsData.splice(index, 1, newData);
+    this.refreshFilmDataInFilmsList(id, newData, this.totalFilmsData);
+    this.refreshFilmDataInFilmsList(id, newData, this._allFilmsData);
   }
 }

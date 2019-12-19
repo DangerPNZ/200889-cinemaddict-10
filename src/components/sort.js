@@ -23,4 +23,7 @@ export default class Sort extends AbstractComponent {
       btn.addEventListener(`click`, handler);
     });
   }
+  getActiveSortType() {
+    return this.getElement().querySelector(`.sort__button--active`).getAttribute(`sorttype`);
+  }
 }
