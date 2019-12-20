@@ -1,6 +1,5 @@
 import AbstractComponent from "./abstract-component.js";
 
-
 const getNav = (totalFilmsData) => {
   const inWatchlistFilms = totalFilmsData.filter((item) => {
     return item.isInWatchlist;
@@ -22,14 +21,18 @@ const getNav = (totalFilmsData) => {
 };
 
 export default class Nav extends AbstractComponent {
-  constructor(totalFilmsData) {
+  constructor(filmsData) {
     super();
-    this._totalFilmsData = totalFilmsData;
+    this.filmsData = filmsData;
   }
   getTemplate() {
-    return getNav(this._totalFilmsData);
+    return getNav(this.filmsData);
   }
-  getActiveFilterType() {
-    return this.getElement().querySelector(`.main-navigation__item--active:not(.main-navigation__item--additional)`).getAttribute(`data-filtertype`);
+  setHandlers(handler) {
+    this.filterHandler = handler;
+    const filterItems = this.getElement().querySelectorAll(`.main-navigation__item:not(.main-navigation__item--additional)`);
+    for (const item of filterItems) {
+      item.addEventListener(`click`, handler);
+    }
   }
 }
