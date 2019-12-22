@@ -3,10 +3,11 @@ import FilmPopup from '../components/film-popup.js';
 import {insertElementInMarkup} from '../components/utils.js';
 
 export default class MovieController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, onStateCountChange) {
     this._container = container;
     this.onDataChange = onDataChange;
     this.onViewChange = onViewChange;
+    this.onStateCountChange = onStateCountChange;
     this.showPopup = this.showPopup.bind(this);
     this.changeUserRatingValue = this.changeUserRatingValue.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
@@ -31,6 +32,7 @@ export default class MovieController {
       newData.userRatingValue = null;
     }
     this.onDataChange(this.id, newData);
+    this.onStateCountChange();
   }
   showPopup() {
     this.setDefaultView();
@@ -38,6 +40,7 @@ export default class MovieController {
     insertElementInMarkup(this.filmPopup.getElement(), document.body);
     this.filmPopup.setCurrentUserRating();
     this.filmPopup.onDataChange = this.onDataChange;
+    this.filmPopup.onStateCountChange = this.onStateCountChange;
     this.filmPopup.setCloseHandlers();
     this.filmPopup.setUserRatingChangeHandler(this.changeUserRatingValue);
     this.filmPopup.resetUserRatingChangeHandler(this.changeUserRatingValue);
@@ -50,6 +53,7 @@ export default class MovieController {
     this.filmCard = new FilmCard(this.data);
     insertElementInMarkup(this.filmCard, this._container);
     this.filmCard.onDataChange = this.onDataChange;
+    this.filmCard.onStateCountChange = this.onStateCountChange;
     this.filmCard.setShowDetailsHandlers(this.showPopup);
     this.filmCard.setChangeStatusHandler(this.changeStatus);
   }

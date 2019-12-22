@@ -20,6 +20,10 @@ export default class Movies {
   getMoviesData() {
     return this.moviesData;
   }
+  changeMovieData(id, newData) {
+    const index = this.moviesData.findIndex((item) => item.id === id);
+    this.moviesData[index] = newData;
+  }
   sortByType(type) {
     switch (type) {
       case SORT_TYPE_VALUES.byDate:

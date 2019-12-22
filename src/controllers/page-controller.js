@@ -43,6 +43,7 @@ export default class PageController {
     };
     this.outputFilmParts = this.outputFilmParts.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
+    this._onStateCountShange = this._onStateCountShange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
     this._filmsInThePage = 0;
     this._controllers = {
@@ -64,8 +65,10 @@ export default class PageController {
     allControllers.forEach((item) => {
       this.rerenderComponent(item, newData);
     });
-    const index = this.totalFilmsData.findIndex((item) => item.id === id);
-    this.totalFilmsData[index] = newData;
+    this.moviesModel.changeMovieData(id, newData);
+  }
+  _onStateCountShange() {
+    this.filterController.rerender();
   }
   _onViewChange() {
     return [...this._controllers.mainSection, ...this._controllers.extraSection];
@@ -74,7 +77,7 @@ export default class PageController {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this.totalFilmsData[index];
-      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange);
+      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange, this._onStateCountShange);
       this._controllers.mainSection.push(controller);
       controller.render(thisFilmData);
       this._filmsInThePage++;
@@ -89,10 +92,14 @@ export default class PageController {
     this._elements.moviesContainer.innerHTML = ``;
     this._filmsInThePage = 0;
     this._controllers.mainSection = [];
-    if (this._components.filmsSection.getShowMoreBtn() === null) {
+    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== 0) {
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
     }
-    this.outputFilmParts();
+    if (filmsData.length !== 0) {
+      this.outputFilmParts();
+    } else {
+      removeIt(this._elements.showMoreBtn);
+    }
   }
   onFilmsPartsChange(filmsData) {
     this.rerenderMainFilmsContainer(filmsData);
@@ -133,7 +140,7 @@ export default class PageController {
       for (let i = 0; i < this.totalFilmsData.length; i++) {
         for (let j = 0; j < topElementsByParameter.length; j++) {
           if (this.totalFilmsData[i] === topElementsByParameter[j]) {
-            const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
+            const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange, this._onStateCountShange);
             this._controllers.extraSection.push(controller);
             controller.render(this.totalFilmsData[i]);
           }
