@@ -246,6 +246,7 @@ const generateFilmCardData = () => {
     // after the decimal.
     return Math.random().toString(36).substr(2, 9);
   };
+  const comments = createRandomCommentsData(commentsSum);
   return {
     id: createId(),
     filmTitle: getFilmTitle(),
@@ -255,7 +256,6 @@ const generateFilmCardData = () => {
     genre,
     posterSrc: getPosterSrc(),
     description: getDescription(),
-    commentsSum,
     ageLimit: getAgeLimit(),
     directorName: getName(),
     writers: getNamesList(),
@@ -267,7 +267,7 @@ const generateFilmCardData = () => {
     userRatingValue: getUserFilmRating(alreadyState),
     isInWatchlist: getRandomBoolean(),
     isFavorites: getRandomBoolean(),
-    comments: createRandomCommentsData(commentsSum)
+    comments
   };
 };
 export const createFilmsDataList = (amount) => {

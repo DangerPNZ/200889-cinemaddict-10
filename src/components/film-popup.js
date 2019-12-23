@@ -254,7 +254,6 @@ export default class FilmPopup extends AbstractSmartComponent {
     super();
     this.data = data;
     this.escapeBtnHandler = this.escapeBtnHandler.bind(this);
-    this.setCurrentUserRating = this.setCurrentUserRating.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this.data);
@@ -295,8 +294,8 @@ export default class FilmPopup extends AbstractSmartComponent {
     return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
   }
   setUserRatingChangeHandler(handler) {
+    this.changeUserRatindHandler = handler;
     if (this.data.isAlready) {
-      this.changeUserRatindHandler = handler;
       const ratingLevelRadioBtns = this.getUserRatingInputs();
       for (const radioBtn of ratingLevelRadioBtns) {
         radioBtn.addEventListener(`change`, (event) => {
@@ -307,8 +306,8 @@ export default class FilmPopup extends AbstractSmartComponent {
     }
   }
   resetUserRatingChangeHandler(handler) {
+    this.changeUserRatindHandler = handler;
     if (this.data.isAlready) {
-      this.changeUserRatindHandler = handler;
       const resetUserRatingBtn = this.getElement().querySelector(`.film-details__watched-reset`);
       resetUserRatingBtn.addEventListener(`click`, () => {
         handler();
@@ -336,8 +335,19 @@ export default class FilmPopup extends AbstractSmartComponent {
       }
     }
   }
+  setRemoveCommentHandlers(handler) {
+    this.commentRemoveHandler = handler;
+    const removeCommentBtns = this.getElement().querySelectorAll(`.film-details__comment-delete`);
+    removeCommentBtns.forEach((btn, index) => {
+      btn.addEventListener(`click`, (event) => {
+        event.preventDefault();
+        handler(index);
+      });
+    });
+  }
   recoveryListeners() {
     this.setCurrentUserRating();
+    this.setRemoveCommentHandlers(this.commentRemoveHandler);
     this.setCloseHandlers();
     this.setUserRatingChangeHandler(this.changeUserRatindHandler);
     this.resetUserRatingChangeHandler(this.changeUserRatindHandler);

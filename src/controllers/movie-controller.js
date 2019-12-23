@@ -11,6 +11,7 @@ export default class MovieController {
     this.showPopup = this.showPopup.bind(this);
     this.changeUserRatingValue = this.changeUserRatingValue.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
+    this.removeComment = this.removeComment.bind(this);
   }
   setDefaultView() {
     const controllers = this.onViewChange();
@@ -34,11 +35,17 @@ export default class MovieController {
     this.onDataChange(this.id, newData);
     this.onStateCountChange();
   }
+  removeComment(index) {
+    const newData = Object.assign({}, this.data);
+    newData.comments.splice(index, 1);
+    this.onDataChange(this.id, newData);
+  }
   showPopup() {
     this.setDefaultView();
     this.filmPopup = new FilmPopup(this.data);
     insertElementInMarkup(this.filmPopup.getElement(), document.body);
     this.filmPopup.setCurrentUserRating();
+    this.filmPopup.setRemoveCommentHandlers(this.removeComment);
     this.filmPopup.onDataChange = this.onDataChange;
     this.filmPopup.onStateCountChange = this.onStateCountChange;
     this.filmPopup.setCloseHandlers();
