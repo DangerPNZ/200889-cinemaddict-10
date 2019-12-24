@@ -20,6 +20,9 @@ export default class Movies {
   getMoviesData() {
     return this.moviesData;
   }
+  getMoviesDataforRender() {
+    return this.filmsDataForRender;
+  }
   changeMovieData(id, newData) {
     const index = this.moviesData.findIndex((item) => item.id === id);
     this.moviesData[index] = newData;
@@ -54,7 +57,7 @@ export default class Movies {
         break;
     }
   }
-  onChangeSortType(type) {
+  сhangeSortType(type) {
     this.currentSortType = type;
     if (this.currentFilterType) {
       this.sortByType(type);
@@ -64,7 +67,7 @@ export default class Movies {
     }
     this.onFilmsPartsChange(this.filmsDataForRender);
   }
-  onChangeFilterType(type) {
+  сhangeFilterType(type) {
     this.currentFilterType = type;
     if (this.currentSortType) {
       this.sortByType(this.currentSortType);

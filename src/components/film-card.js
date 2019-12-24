@@ -19,7 +19,7 @@ const getFilmCard = (filmData) => {
     isAlready,
     isInWatchlist,
     isFavorites,
-    comments
+    commentsSum
   } = filmData;
 
   return `
@@ -33,7 +33,7 @@ const getFilmCard = (filmData) => {
         </p>
         <img src="${posterSrc}" alt="${`${filmTitle} movie poster`}" class="film-card__poster">
         <p class="film-card__description">${description}</p>
-        <a class="film-card__comments">${comments.length} comments</a>
+        <a class="film-card__comments">${commentsSum} comments</a>
         <form class="film-card__controls">
             <button data-status="isInWatchlist" class="film-card__controls-item button film-card__controls-item--add-to-watchlist${setState(isInWatchlist)}">Add to watchlist</button>
             <button data-status="isAlready" class="film-card__controls-item button film-card__controls-item--mark-as-watched${setState(isAlready)}">Mark as watched</button>
@@ -62,20 +62,20 @@ export default class FilmCard extends AbstractSmartComponent {
       item.addEventListener(`click`, handler);
     }
   }
-  setChangeStatusHandler(handler) {
-    this.changeStatusHandler = handler;
+  setChangeStatusCallbacks(callback) {
+    this.changeStatusCallback = callback;
     const statusControlItems = [...this.getElement().querySelectorAll(`.film-card__controls-item`)];
     for (const btn of statusControlItems) {
       btn.addEventListener(`click`, (event) => {
         event.preventDefault();
         const dataProperty = event.target.dataset.status;
-        handler(dataProperty);
+        callback(dataProperty);
       });
     }
   }
   recoveryListeners() {
     this.setShowDetailsHandlers(this.showDetailsHandler);
-    this.setChangeStatusHandler(this.changeStatusHandler);
+    this.setChangeStatusCallbacks(this.changeStatusCallback);
   }
 }
 // import moment from 'moment';

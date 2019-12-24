@@ -17,7 +17,7 @@ export default class MovieController {
     const controllers = this.onViewChange();
     controllers.forEach((item) => {
       if (item.filmPopup) {
-        item.filmPopup.closeHandler();
+        item.filmPopup.closePopup();
       }
     });
   }
@@ -38,21 +38,30 @@ export default class MovieController {
   removeComment(index) {
     const newData = Object.assign({}, this.data);
     newData.comments.splice(index, 1);
+    newData.commentsSum = newData.comments.length; // вынести в функцию
+    this.onDataChange(this.id, newData);
+  }
+  addNewComment(newCommentData) {
+    const newData = Object.assign({}, this.data);
+    newData.comments.unshift(newCommentData);
+    newData.commentsSum = newData.comments.length; // вынести в функцию
     this.onDataChange(this.id, newData);
   }
   showPopup() {
     this.setDefaultView();
     this.filmPopup = new FilmPopup(this.data);
+    this.filmPopup.addNewCommentCallback = this.addNewComment.bind(this);
     insertElementInMarkup(this.filmPopup.getElement(), document.body);
     this.filmPopup.setCurrentUserRating();
-    this.filmPopup.setRemoveCommentHandlers(this.removeComment);
+    this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
     this.filmPopup.onDataChange = this.onDataChange;
     this.filmPopup.onStateCountChange = this.onStateCountChange;
     this.filmPopup.setCloseHandlers();
-    this.filmPopup.setUserRatingChangeHandler(this.changeUserRatingValue);
-    this.filmPopup.resetUserRatingChangeHandler(this.changeUserRatingValue);
-    this.filmPopup.setSelectReactionHandler();
-    this.filmPopup.setChangeStatusHandler(this.changeStatus);
+    this.filmPopup.setUserRatingChangeCallbacks(this.changeUserRatingValue);
+    this.filmPopup.setUserRatingResetCallback(this.changeUserRatingValue);
+    this.filmPopup.onSelectReaction();
+    this.filmPopup.setChangeStatusCallbacks(this.changeStatus);
+    this.filmPopup.sendNewComment();
   }
   render(filmData) {
     this.data = filmData;
@@ -62,6 +71,6 @@ export default class MovieController {
     this.filmCard.onDataChange = this.onDataChange;
     this.filmCard.onStateCountChange = this.onStateCountChange;
     this.filmCard.setShowDetailsHandlers(this.showPopup);
-    this.filmCard.setChangeStatusHandler(this.changeStatus);
+    this.filmCard.setChangeStatusCallbacks(this.changeStatus);
   }
 }

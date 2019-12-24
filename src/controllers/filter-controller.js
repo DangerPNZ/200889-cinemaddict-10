@@ -22,7 +22,7 @@ export default class FilterController {
       activeBtn.classList.remove(ACTIVE_FILTER_BTN_CLS);
       targetBtn.classList.add(ACTIVE_FILTER_BTN_CLS);
       this.selectedFilterType = filterType;
-      this.model.onChangeFilterType(filterType);
+      this.model.сhangeFilterType(filterType);
     }
   }
   setCurrentActiveItem() {

@@ -50,6 +50,7 @@ export default class PageController {
       mainSection: [],
       extraSection: []
     };
+    this.moviesModel.onFilmsPartsChange = this.onFilmsPartsChange.bind(this);
   }
   rerenderComponent(controller, newData) {
     controller.data = newData;
@@ -76,19 +77,18 @@ export default class PageController {
   outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
-      const thisFilmData = this.totalFilmsData[index];
+      const thisFilmData = this.moviesModel.getMoviesDataforRender()[index];
       const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange, this._onStateCountShange);
       this._controllers.mainSection.push(controller);
       controller.render(thisFilmData);
       this._filmsInThePage++;
-      if (this._filmsInThePage === this.totalFilmsData.length) {
+      if (this._filmsInThePage === this.moviesModel.getMoviesDataforRender().length) {
         removeIt(this._elements.showMoreBtn);
         break;
       }
     }
   }
-  rerenderMainFilmsContainer(filmsData) {
-    this.totalFilmsData = filmsData;
+  onFilmsPartsChange(filmsData) {
     this._elements.moviesContainer.innerHTML = ``;
     this._filmsInThePage = 0;
     this._controllers.mainSection = [];
@@ -98,14 +98,12 @@ export default class PageController {
     if (filmsData.length !== 0) {
       this.outputFilmParts();
     } else {
+      // вывести сообщение отсутствия фильмов, удалить контейнер
       removeIt(this._elements.showMoreBtn);
     }
   }
-  onFilmsPartsChange(filmsData) {
-    this.rerenderMainFilmsContainer(filmsData);
-  }
   setFilmsContainerInitialState() {
-    if (this.totalFilmsData.length) {
+    if (this.moviesModel.getMoviesDataforRender().length) {
       insertElementInMarkup(this._components.searchStateHeading, this._components.filmsSection, `prepend`);
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
       this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
@@ -137,32 +135,29 @@ export default class PageController {
       }
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
-      for (let i = 0; i < this.totalFilmsData.length; i++) {
+      for (let i = 0; i < totalFilmsData.length; i++) {
         for (let j = 0; j < topElementsByParameter.length; j++) {
-          if (this.totalFilmsData[i] === topElementsByParameter[j]) {
+          if (totalFilmsData[i] === topElementsByParameter[j]) {
             const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange, this._onStateCountShange);
             this._controllers.extraSection.push(controller);
-            controller.render(this.totalFilmsData[i]);
+            controller.render(totalFilmsData[i]);
           }
         }
       }
       insertElementInMarkup(extraSection, container);
     }
   }
-
   render() {
-    this.moviesModel.onFilmsPartsChange = this.onFilmsPartsChange.bind(this);
     this.sortController = new SortController(this.moviesModel, this._elements.main);
     this.filterController = new FilterController(this.moviesModel, this._elements.main);
     this.sortController.render();
     this.filterController.render();
-    this.totalFilmsData = this.moviesModel.filmsDataForRender;
     this.setFilmsContainerInitialState();
     insertElementInMarkup(this._components.films, this._elements.main);
     insertElementInMarkup(this._components.filmsSection, this._components.films);
-    this._elements.footerFilmTotalSum.textContent = `${this.totalFilmsData.length} movies inside`;
+    this._elements.footerFilmTotalSum.textContent = `${this.moviesModel.getMoviesData().length} movies inside`;
     insertElementInMarkup(this._elements.userRank, this._elements.header);
-    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.totalFilmsData);
-    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.totalFilmsData);
+    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesData());
+    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesData());
   }
 }

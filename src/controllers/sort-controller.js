@@ -19,7 +19,7 @@ export default class SortController {
       const activeBtn = this.component.getElement().querySelector(`.${ACTIVE_SORT_BTN_CLS}`);
       activeBtn.classList.remove(ACTIVE_SORT_BTN_CLS);
       targetBtn.classList.add(ACTIVE_SORT_BTN_CLS);
-      this.model.onChangeSortType(sortType);
+      this.model.сhangeSortType(sortType);
     }
   }
   render() {

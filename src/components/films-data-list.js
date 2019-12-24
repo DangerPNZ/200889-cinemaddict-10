@@ -267,7 +267,8 @@ const generateFilmCardData = () => {
     userRatingValue: getUserFilmRating(alreadyState),
     isInWatchlist: getRandomBoolean(),
     isFavorites: getRandomBoolean(),
-    comments
+    comments,
+    commentsSum
   };
 };
 export const createFilmsDataList = (amount) => {
