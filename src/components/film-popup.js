@@ -1,6 +1,7 @@
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate} from './utils.js';
 import moment from 'moment';
+import he from 'he';
 
 const RELEASE_DATE_FORMAT = `D MMMM YYYY`;
 const COMMENT_DATE_FORMAT = `YYYY/MM/DD HH:MM`;
@@ -114,7 +115,7 @@ const getFilmPopup = (filmData) => {
                       <img src="./images/emoji/${commentsItem.emojiPictureSrc}" width="55" height="55" alt="emoji">
                   </span>
                   <div>
-                      <p class="film-details__comment-text">${commentsItem.commentText}</p>
+                      <p class="film-details__comment-text">${he.encode(commentsItem.commentText)}</p>
                       <p class="film-details__comment-info">
                       <span class="film-details__comment-author">${commentsItem.commentAuthor}</span>
                       <span class="film-details__comment-day">${commentsItem.commentDate}</span>
@@ -351,7 +352,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     }
   }
   getNewCommentText() {
-    this.newCommentText = this.getElement().querySelector(`.film-details__comment-input`).value;
+    this.newCommentText = he.encode(this.getElement().querySelector(`.film-details__comment-input`).value);
     if (this.newCommentText !== ``) {
       if (this.newCommentText.length > MAX_NEW_COMMENT_LENGTH) {
         this.newCommentText = `${this.newCommentText.substr(0, COMMENT_CUT_START_INDEX)}...`;

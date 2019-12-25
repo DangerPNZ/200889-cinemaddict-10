@@ -19,7 +19,7 @@ const getFilmCard = (filmData) => {
     isAlready,
     isInWatchlist,
     isFavorites,
-    commentsSum
+    comments
   } = filmData;
 
   return `
@@ -33,7 +33,7 @@ const getFilmCard = (filmData) => {
         </p>
         <img src="${posterSrc}" alt="${`${filmTitle} movie poster`}" class="film-card__poster">
         <p class="film-card__description">${description}</p>
-        <a class="film-card__comments">${commentsSum} comments</a>
+        <a class="film-card__comments">${comments.length} comments</a>
         <form class="film-card__controls">
             <button data-status="isInWatchlist" class="film-card__controls-item button film-card__controls-item--add-to-watchlist${setState(isInWatchlist)}">Add to watchlist</button>
             <button data-status="isAlready" class="film-card__controls-item button film-card__controls-item--mark-as-watched${setState(isAlready)}">Mark as watched</button>

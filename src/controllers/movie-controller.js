@@ -12,14 +12,14 @@ export default class MovieController {
     this.changeUserRatingValue = this.changeUserRatingValue.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
     this.removeComment = this.removeComment.bind(this);
+    this.rerenderComponent = this.rerenderComponent.bind(this);
   }
-  setDefaultView() {
-    const controllers = this.onViewChange();
-    controllers.forEach((item) => {
-      if (item.filmPopup) {
-        item.filmPopup.closePopup();
-      }
-    });
+  rerenderComponent(newData) {
+    this.data = newData;
+    this.filmCard.rerender(newData);
+    if (this.filmPopup) {
+      this.filmPopup.rerender(newData);
+    }
   }
   changeUserRatingValue(value = null) {
     const newData = Object.assign({}, this.data);
@@ -36,19 +36,19 @@ export default class MovieController {
     this.onStateCountChange();
   }
   removeComment(index) {
+    const oldData = JSON.parse(JSON.stringify(this.data));
     const newData = Object.assign({}, this.data);
     newData.comments.splice(index, 1);
-    newData.commentsSum = newData.comments.length; // вынести в функцию
-    this.onDataChange(this.id, newData);
+    this.onDataChange(this.id, newData, oldData);
   }
   addNewComment(newCommentData) {
+    const oldData = JSON.parse(JSON.stringify(this.data));
     const newData = Object.assign({}, this.data);
     newData.comments.unshift(newCommentData);
-    newData.commentsSum = newData.comments.length; // вынести в функцию
-    this.onDataChange(this.id, newData);
+    this.onDataChange(this.id, newData, oldData);
   }
   showPopup() {
-    this.setDefaultView();
+    this.onViewChange();
     this.filmPopup = new FilmPopup(this.data);
     this.filmPopup.addNewCommentCallback = this.addNewComment.bind(this);
     insertElementInMarkup(this.filmPopup.getElement(), document.body);
