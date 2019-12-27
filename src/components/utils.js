@@ -68,3 +68,13 @@ export const insertElementInMarkup = (elementNodeOrComponent, containerNodeOrCom
 export const formatDate = (date, formatStr) => {
   return moment(date).format(formatStr);
 };
+const MINUTES_IN_HOUR = 60;
+export const getFilmDuration = (duration) => {
+  const durationInHours = Math.floor(duration / MINUTES_IN_HOUR);
+  const durationInMinutes = Math.floor(duration % MINUTES_IN_HOUR);
+  const durationValues = [
+    durationInHours !== 0 ? `${durationInHours}h ` : ``,
+    durationInMinutes !== 0 ? `${durationInMinutes}m` : ``
+  ];
+  return durationValues.join(``);
+};

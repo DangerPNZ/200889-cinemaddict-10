@@ -100,17 +100,10 @@ const CURRENT_YEAR = new Date().getFullYear();
 const getReleaseYear = () => {
   return getRandomNum(FIRST_CINEMA_RELEASE_YEAR, CURRENT_YEAR);
 };
-const MIN_DURATION = 0;
-const MAX_DURATION_IN_HOURS = 3;
-const MAX_DURATION_IN_MUNUTES = 59;
-const getFilmDuration = () => {
-  const durationInHours = getRandomNum(MIN_DURATION, MAX_DURATION_IN_HOURS);
-  const durationInMinutes = getRandomNum(MIN_DURATION, MAX_DURATION_IN_MUNUTES);
-  const durationValues = [
-    durationInHours !== 0 ? `${durationInHours}h ` : ``,
-    durationInMinutes !== 0 ? `${durationInMinutes}m` : ``
-  ];
-  return durationValues.join(``);
+const MIN_DURATION = 40;
+const MAX_DURATION = 180;
+const getDuration = () => {
+  return getRandomNum(MIN_DURATION, MAX_DURATION);
 };
 const getGenre = () => {
   const randomGenreIndex = getRandomNum(0, (genres.length - 1));
@@ -252,7 +245,7 @@ const generateFilmCardData = () => {
     filmTitle: getFilmTitle(),
     ratingVal: +getRatingVal(),
     releaseYear,
-    filmDuration: getFilmDuration(),
+    filmDuration: getDuration(),
     genre,
     posterSrc: getPosterSrc(),
     description: getDescription(),

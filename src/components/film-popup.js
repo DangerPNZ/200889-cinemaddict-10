@@ -1,5 +1,6 @@
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {formatDate} from './utils.js';
+import {getFilmDuration} from './utils.js';
 import moment from 'moment';
 import he from 'he';
 
@@ -180,7 +181,7 @@ const getFilmPopup = (filmData) => {
                 </tr>
                 <tr class="film-details__row">
                     <td class="film-details__term">Runtime</td>
-                    <td class="film-details__cell">${filmDuration}</td>
+                    <td class="film-details__cell">${getFilmDuration(filmDuration)}</td>
                 </tr>
                 <tr class="film-details__row">
                     <td class="film-details__term">Country</td>

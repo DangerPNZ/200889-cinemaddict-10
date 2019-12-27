@@ -1,4 +1,5 @@
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import {getFilmDuration} from './utils.js';
 
 const setState = (parameter) => {
   if (parameter) {
@@ -28,7 +29,7 @@ const getFilmCard = (filmData) => {
         <p class="film-card__rating">${ratingVal}</p>
         <p class="film-card__info">
             <span class="film-card__year">${releaseYear}</span>
-            <span class="film-card__duration">${filmDuration}</span>
+            <span class="film-card__duration">${getFilmDuration(filmDuration)}</span>
             <span class="film-card__genre">${genre}</span>
         </p>
         <img src="${posterSrc}" alt="${`${filmTitle} movie poster`}" class="film-card__poster">

@@ -28,11 +28,14 @@ export default class Nav extends AbstractComponent {
   getTemplate() {
     return getNav(this.filmsData);
   }
-  setHandlers(handler) {
-    this.filterHandler = handler;
+  setFilterHandlers(handler) {
     const filterItems = this.getElement().querySelectorAll(`.main-navigation__item:not(.main-navigation__item--additional)`);
     for (const item of filterItems) {
       item.addEventListener(`click`, handler);
     }
+  }
+  setToStatisticBtnHandler(handler) {
+    const toStatisticBtn = this.getElement().querySelector(`.main-navigation__item.main-navigation__item--additional`);
+    toStatisticBtn.addEventListener(`click`, handler);
   }
 }

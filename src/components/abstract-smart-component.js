@@ -11,7 +11,9 @@ export default class AbstractSmartComponent extends AbstractComponent {
     this.removeElement();
     this.data = newData;
     const newElement = this.getElement();
-    parent.replaceChild(newElement, oldElement);
+    if (this._element.parentNode) {
+      parent.replaceChild(newElement, oldElement);
+    }
     this.recoveryListeners();
   }
 }

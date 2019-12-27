@@ -13,6 +13,7 @@ export default class MovieController {
     this.changeStatus = this.changeStatus.bind(this);
     this.removeComment = this.removeComment.bind(this);
     this.rerenderComponent = this.rerenderComponent.bind(this);
+    this.closePopup = this.closePopup.bind(this);
   }
   rerenderComponent(newData) {
     this.data = newData;
@@ -46,6 +47,12 @@ export default class MovieController {
     const newData = Object.assign({}, this.data);
     newData.comments.unshift(newCommentData);
     this.onDataChange(this.id, newData, oldData);
+  }
+  closePopup() {
+    if (this.filmPopup) {
+      this.filmPopup.closePopup();
+      this.filmPopup = null;
+    }
   }
   showPopup() {
     this.onViewChange();
