@@ -1,5 +1,7 @@
 import {getRandomNum} from './utils.js';
 import AbstractComponent from "./abstract-component.js";
+import Chart from 'chart.js';
+import chartDataLabels from 'chartjs-plugin-datalabels';
 
 const getWatchedMovies = (movies) => {
   return movies.filter((item) => {
@@ -32,15 +34,27 @@ const getAllMoviesGenres = (movies) => {
   });
   return allGenres;
 };
+const genresLabels = [];
+const values = [];
+const genresCounts = {};
 const getTopGenre = (movies) => {
   const allGenres = getAllMoviesGenres(movies);
-  const genresCounts = {};
   let max = 0;
   const topGenres = [];
   for (const genre of allGenres) {
-    genresCounts[genre] = (genresCounts[genre]) ? genresCounts[genre] + 1 : 1;
+    if (!genresCounts[genre]) {
+      genresCounts[genre] = 1;
+      genresLabels.push(genre);
+    } else {
+      genresCounts[genre] += 1;
+    }
     if (genresCounts[genre] > max) {
       max = genresCounts[genre];
+    }
+  }
+  for (const genre in genresCounts) {
+    if (genresCounts[genre]) {
+      values.push(genresCounts[genre]);
     }
   }
   for (const key in genresCounts) {
@@ -95,7 +109,7 @@ const getStat = (userRank, filmsData) => {
   </ul>
 
   <div class="statistic__chart-wrap">
-    <canvas class="statistic__chart" width="1000"></canvas>
+    <canvas id="genres-chart" class="statistic__chart" width="1000"></canvas>
   </div>
 
 </section>`;
@@ -106,8 +120,72 @@ export default class Stat extends AbstractComponent {
     super();
     this.data = filmsData;
     this.userRank = userRank;
+    this.createChart = this.createChart.bind(this);
   }
   getTemplate() {
     return getStat(this.userRank, this.data);
+  }
+  createChart() {
+    const ctx = this.getElement().querySelector(`#genres-chart`).getContext(`2d`);
+    return new Chart(ctx, {
+      plugins: [chartDataLabels],
+      type: `horizontalBar`,
+      data: {
+        labels: genresLabels,
+        datasets: [{
+          data: values,
+          backgroundColor: `#ffe800`,
+          barThickness: 22,
+          minBarLength: 0
+        }]
+      },
+      gridLines: {
+        display: false
+      },
+      options: {
+        label: {
+          font: {
+            color: `#fff`
+          }
+        },
+        tooltips: {
+          enabled: false // всплывающие подсказки
+        },
+        plugins: {
+          datalabels: {
+            anchor: `start`,
+            align: `start`,
+            offset: 25,
+            color: `#fff`,
+            font: {
+              size: 16
+            }
+          }
+        },
+        legend: false,
+        scales: {
+          xAxes: [{
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              display: false
+            },
+            stacked: true
+          }],
+          yAxes: [{
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              fontSize: 16,
+              fontColor: `#fff`,
+              padding: 60
+            },
+            stacked: true
+          }]
+        }
+      }
+    });
   }
 }

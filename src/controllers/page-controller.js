@@ -180,6 +180,7 @@ export default class PageController {
   // }
   render() {
     this._components.stat = new Stat(this._components.userRank.getRank(), this.moviesModel.getMoviesDataforRender());
+    this._components.stat.createChart();
     this.sortController = new SortController(this.moviesModel, this._elements.main);
     this.navController = new NavController(this.moviesModel, this._elements.main, this.onToStatistic, this.onToFilms);
     this.sortController.render();
