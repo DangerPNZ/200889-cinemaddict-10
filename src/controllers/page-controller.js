@@ -76,9 +76,6 @@ export default class PageController {
     }
   }
   _onDataChange(id, newData, oldData) {
-    if (oldData && oldData.comments.length !== newData.comments.length) {
-      // this.rerenderMostCommentedSection();
-    }
     const allControllers = [...this._controllers.mainSection,
       ...this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT],
       ...this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT]].filter((item) => {
@@ -88,6 +85,9 @@ export default class PageController {
       item.rerenderComponent(newData);
     });
     this.moviesModel.changeMovieData(id, newData);
+    if (oldData && newData.isAlready !== oldData.isAlready) {
+      this._components.stat.rerender();
+    }
   }
   _onStateCountShange() {
     this.navController.rerender();
@@ -168,19 +168,12 @@ export default class PageController {
         this._controllers.extraSections[headingText].push(controller);
         controller.render(item);
       });
-      // if (sortParameter === PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION) {
-      //   this.mostCommentedSection = extraSection;
-      // }
       insertElementInMarkup(extraSection, container);
     }
   }
-  // rerenderMostCommentedSection() {
-  //   this.mostCommentedSection._element.remove();
-  //   this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesData());
-  // }
   render() {
-    this._components.stat = new Stat(this._components.userRank.getRank(), this.moviesModel.getMoviesDataforRender());
-    this._components.stat.createChart();
+    this._components.stat = new Stat(this._components.userRank.getRank(), this.moviesModel.getMoviesDataforRender(), this._elements.main);
+    this._components.stat.render();
     this.sortController = new SortController(this.moviesModel, this._elements.main);
     this.navController = new NavController(this.moviesModel, this._elements.main, this.onToStatistic, this.onToFilms);
     this.sortController.render();
@@ -192,6 +185,5 @@ export default class PageController {
     insertElementInMarkup(this._components.userRank, this._elements.header);
     this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesData());
     this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesData());
-    insertElementInMarkup(this._components.stat, this._elements.main);
   }
 }

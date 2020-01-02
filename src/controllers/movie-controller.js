@@ -28,12 +28,13 @@ export default class MovieController {
     this.onDataChange(this.id, newData);
   }
   changeStatus(property) {
+    const oldData = this.data;
     const newData = Object.assign({}, this.data);
     newData[property] = !newData[property];
     if (property === `isAlready` && newData[property] === false) {
       newData.userRatingValue = null;
     }
-    this.onDataChange(this.id, newData);
+    this.onDataChange(this.id, newData, oldData);
     this.onStateCountChange();
   }
   removeComment(index) {
