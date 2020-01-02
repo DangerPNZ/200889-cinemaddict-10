@@ -6,14 +6,14 @@ export default class AbstractSmartComponent extends AbstractComponent {
     this.data = data;
   }
   rerender(newData) {
-    const oldElement = this.getElement();
-    const parent = oldElement.parentElement;
-    this.removeElement();
-    this.data = newData;
-    const newElement = this.getElement();
-    if (this._element.parentNode) {
+    if (this._element && this._element.parentNode) {
+      const oldElement = this.getElement();
+      const parent = oldElement.parentElement;
+      this.removeElement();
+      this.data = newData;
+      const newElement = this.getElement();
       parent.replaceChild(newElement, oldElement);
+      this.recoveryListeners();
     }
-    this.recoveryListeners();
   }
 }
