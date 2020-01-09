@@ -31,37 +31,30 @@ export default class API {
     this.applicationDataModel.filmsDataForRender = movies;
     this.applicationDataModel.onDataLoad();
   }
-  getCommentsForMovie(index, movies) {
-    this.getComments(movies[index])
-    .then(() => {
-      if (index === (movies.length - 1)) {
-        this.setMoviesData(movies);
-      } else {
-        index += 1;
-        this.getCommentsForMovie(index, movies);
-      }
-    });
-  }
   getComments(film) {
     return this._load(`comments/${film.id}`)
     .then((commentsList) => {
       film.comments = commentsList;
+      this.filmsWithCommentsAmounth += 1;
+      if (this.filmsAmounth === this.filmsWithCommentsAmounth) {
+        console.log(this.moviesDataForRender);
+        this.setMoviesData(this.moviesDataForRender);
+      }
     })
     .catch((err) => {
       throw err;
     });
   }
   structureMoviesDataForRender(filmsData) {
-    const moviesDataForRender = [];
-    let index = 0;
+    this.moviesDataForRender = [];
     for (const movieData of filmsData) {
-      moviesDataForRender.push({
+      this.moviesDataForRender.push({
         id: movieData.id,
         filmTitle: movieData.film_info.title,
         originalTitle: movieData.film_info.alternative_title,
         ratingVal: +movieData.film_info.total_rating,
         filmDuration: movieData.film_info.runtime,
-        genre: movieData.film_info.genre[0],
+        genre: movieData.film_info.genre[0] ? movieData.film_info.genre[0] : ``,
         posterSrc: movieData.film_info.poster,
         description: movieData.film_info.description,
         ageLimit: movieData.film_info.age_rating,
@@ -78,8 +71,11 @@ export default class API {
         watchingDate: movieData.user_details.watching_date,
       });
     }
-    this.getCommentsForMovie(index, moviesDataForRender);
-    return moviesDataForRender;
+    this.filmsAmounth = this.moviesDataForRender.length;
+    this.filmsWithCommentsAmounth = 0;
+    for (const movieData of this.moviesDataForRender) {
+      this.getComments(movieData);
+    }
   }
   getMovies() {
     return this._load(`movies`)
