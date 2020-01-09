@@ -37,6 +37,7 @@ export default class API {
       film.comments = commentsList;
       this.filmsWithCommentsAmounth += 1;
       if (this.filmsAmounth === this.filmsWithCommentsAmounth) {
+        console.log(this.moviesDataForRender);
         this.setMoviesData(this.moviesDataForRender);
       }
     })

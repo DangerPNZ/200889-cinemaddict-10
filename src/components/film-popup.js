@@ -40,6 +40,28 @@ const getFilmPopup = (filmData) => {
       return ``;
     }
   };
+  const SLEEPING_REACTION_IMAGE_SRC = `/images/emoji/sleeping.png`;
+  const PUKE_REACTION_IMAGE_SRC = `/images/emoji/puke.png`;
+  const ANGRY_REACTION_IMAGE_SRC = `/images/emoji/angry.png`;
+  const SMILE_REACTION_IMAGE_SRC = `/images/emoji/smile.png`;
+  const getCommentReactionImageSrc = (emotion) => {
+    let reactionImageSrc = null;
+    switch (emotion) {
+      case `sleeping`:
+        reactionImageSrc = SLEEPING_REACTION_IMAGE_SRC;
+        break;
+      case `puke`:
+        reactionImageSrc = PUKE_REACTION_IMAGE_SRC;
+        break;
+      case `angry`:
+        reactionImageSrc = ANGRY_REACTION_IMAGE_SRC;
+        break;
+      case `smile`:
+        reactionImageSrc = SMILE_REACTION_IMAGE_SRC;
+        break;
+    }
+    return reactionImageSrc;
+  };
   const addGenres = (genreName, genresItems) => {
     if (genresItems.length) {
       let genresList = ``;
@@ -110,18 +132,18 @@ const getFilmPopup = (filmData) => {
   const addComments = (commentsFromData) => {
     let commentsList = ``;
     if (commentsFromData.length) {
-      for (let commentsItem of commentsFromData) {
+      for (let commentItem of commentsFromData) {
         commentsList += `
               <li class="film-details__comment">
                   <span class="film-details__comment-emoji">
-                      <img src="./images/emoji/${commentsItem.emojiPictureSrc}" width="55" height="55" alt="emoji">
+                      <img src="${getCommentReactionImageSrc(commentItem.emotion)}" width="55" height="55" alt="emoji">
                   </span>
                   <div>
-                      <p class="film-details__comment-text">${he.encode(commentsItem.commentText)}</p>
+                      <p class="film-details__comment-text">${he.encode(commentItem.comment)}</p>
                       <p class="film-details__comment-info">
-                      <span class="film-details__comment-author">${commentsItem.commentAuthor}</span>
-                      <span class="film-details__comment-day">${commentsItem.commentDate}</span>
-                      <button class="film-details__comment-delete">Delete</button>
+                      <span class="film-details__comment-author">${commentItem.author}</span>
+                      <span class="film-details__comment-day">${moment(commentItem.date).format(COMMENT_DATE_FORMAT)}</span>
+                      <button class="film-details__comment-delete" data-id="${commentItem.id}">Delete</button>
                       </p>
                   </div>
               </li>`;
