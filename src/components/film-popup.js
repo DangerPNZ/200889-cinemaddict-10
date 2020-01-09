@@ -15,6 +15,7 @@ const getFilmPopup = (filmData) => {
   const {
     posterSrc,
     filmTitle,
+    originalTitle,
     ageLimit,
     ratingVal,
     directorName,
@@ -146,14 +147,14 @@ const getFilmPopup = (filmData) => {
             <div class="film-details__poster">
                 <img class="film-details__poster-img" src="${posterSrc}" alt="${`${filmTitle} movie poster`}">
 
-                <p class="film-details__age">${ageLimit}</p>
+                <p class="film-details__age">${ageLimit}+</p>
             </div>
 
             <div class="film-details__info">
                 <div class="film-details__info-head">
                 <div class="film-details__title-wrap">
                     <h3 class="film-details__title">${filmTitle}</h3>
-                    <p class="film-details__title-original">Original: ${filmTitle}</p>
+                    <p class="film-details__title-original">Original: ${originalTitle}</p>
                 </div>
 
                 <div class="film-details__rating">

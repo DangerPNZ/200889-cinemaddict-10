@@ -9,7 +9,7 @@ const ACTIVE_FILTER_ITEM_SELECTOR = `.${ACTIVE_NAV_BTN_CLS}:not(.main-navigation
 export default class NavController {
   constructor(model, container, onToStatistic, onToFilms) {
     this.model = model;
-    this.component = new Nav(model.getMoviesData());
+    this.component = new Nav(model.getMoviesDataForRender());
     this.container = container;
     this.filterBtnHandler = this.filterBtnHandler.bind(this);
     this.statBtnHandler = this.statBtnHandler.bind(this);
@@ -26,7 +26,7 @@ export default class NavController {
       activeBtn.classList.remove(ACTIVE_NAV_BTN_CLS);
       targetBtn.classList.add(ACTIVE_NAV_BTN_CLS);
       this.selectedFilterType = filterType;
-      this.model.сhangeFilterType(filterType);
+      this.model.changeFilterType(filterType);
       if (!this.filmsShowState) {
         this.onToFilms();
         this.filmsShowState = true;

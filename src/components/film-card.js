@@ -1,6 +1,8 @@
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import {getFilmDuration} from './utils.js';
+import {formatDate} from './utils.js';
 
+const YEAR_FORMAT = `YYYY`;
 const setState = (parameter) => {
   if (parameter) {
     return ` film-card__controls-item--active`;
@@ -12,7 +14,7 @@ const getFilmCard = (filmData) => {
   const {
     filmTitle,
     ratingVal,
-    releaseYear,
+    releaseDate,
     filmDuration,
     genre,
     posterSrc,
@@ -28,7 +30,7 @@ const getFilmCard = (filmData) => {
         <h3 class="film-card__title">${filmTitle}</h3>
         <p class="film-card__rating">${ratingVal}</p>
         <p class="film-card__info">
-            <span class="film-card__year">${releaseYear}</span>
+            <span class="film-card__year">${formatDate(releaseDate, YEAR_FORMAT)}</span>
             <span class="film-card__duration">${getFilmDuration(filmDuration)}</span>
             <span class="film-card__genre">${genre}</span>
         </p>

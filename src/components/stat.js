@@ -1,6 +1,6 @@
 import {getRandomNum} from './utils.js';
 import {insertElementInMarkup} from './utils.js';
-import AbstractComponent from "./abstract-component.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
 import Chart from 'chart.js';
 import chartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -134,7 +134,7 @@ const getStat = (userRank, filmsData) => {
 </section>`;
 };
 
-export default class Stat extends AbstractComponent {
+export default class Stat extends AbstractSmartComponent {
   constructor(userRank, filmsData, container) {
     super();
     this.userRank = userRank;

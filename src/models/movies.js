@@ -1,4 +1,5 @@
 import {compare} from '../components/utils.js';
+import API from '../api.js';
 
 const SORT_TYPE_VALUES = {
   default: `default`,
@@ -13,14 +14,21 @@ const FILTER_TYPE_VALUES = {
 };
 
 export default class Movies {
-  constructor(moviesData) {
-    this.moviesData = moviesData;
-    this.filmsDataForRender = moviesData;
+  constructor() {
+    this.moviesData = [];
+    this.filmsDataForRender = this.moviesData;
+    this.api = new API(this);
   }
   getMoviesData() {
-    return this.moviesData;
+    this.api.getMovies();
   }
-  getMoviesDataforRender() {
+  getMoviesAmounth() {
+    return this.filmsDataForRender.length;
+  }
+  getMovieDataByIndex(index) {
+    return this.filmsDataForRender[index];
+  }
+  getMoviesDataForRender() {
     return this.filmsDataForRender;
   }
   changeMovieData(id, newData) {
@@ -57,7 +65,7 @@ export default class Movies {
         break;
     }
   }
-  сhangeSortType(type) {
+  changeSortType(type) {
     this.currentSortType = type;
     if (this.currentFilterType) {
       this.sortByType(type);
@@ -67,7 +75,7 @@ export default class Movies {
     }
     this.onFilmsPartsChange(this.filmsDataForRender);
   }
-  сhangeFilterType(type) {
+  changeFilterType(type) {
     this.currentFilterType = type;
     if (this.currentSortType) {
       this.sortByType(this.currentSortType);
