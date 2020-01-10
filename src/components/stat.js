@@ -1,10 +1,15 @@
 import {getRandomNum} from './utils.js';
 import {insertElementInMarkup} from './utils.js';
+import moment from 'moment';
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import Chart from 'chart.js';
 import chartDataLabels from 'chartjs-plugin-datalabels';
 
 const DEFAULT_STATISTIC_STATE = `all-time`;
+const TODAY_STATISTIC_STATE = `today`;
+const WEEK_STATISTIC_STATE = `week`;
+const MONTH_STATISTIC_STATE = `month`;
+const YEAR_STATISTIC_STATE = `year`;
 const ZERO_FOR_NUMBER_VALUES = 0;
 const getWatchedMovies = (movies) => {
   return movies.filter((item) => {
@@ -148,12 +153,32 @@ export default class Stat extends AbstractSmartComponent {
   getTemplate() {
     return getStat(this.userRank, this.filmsDataByPeriod);
   }
+  defineStatisticData() {
+    switch (this.staticticState) {
+      case DEFAULT_STATISTIC_STATE:
+        this.filmsDataByPeriod = this.data;
+        break;
+      case TODAY_STATISTIC_STATE:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), `day`));
+        break;
+      case WEEK_STATISTIC_STATE:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(1, `week`)));
+        break;
+      case MONTH_STATISTIC_STATE:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(1, `month`)));
+        break;
+      case YEAR_STATISTIC_STATE:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(1, `year`)));
+        break;
+    }
+  }
   setStatisticPeriodHandlers() {
     const statisticRadioBtns = this.getElement().querySelectorAll(`.statistic__filters-input`);
     for (const radioBtn of statisticRadioBtns) {
       radioBtn.addEventListener(`change`, (event) => {
         event.preventDefault();
         this.staticticState = event.target.value;
+        this.rerender();
       });
     }
   }
@@ -237,6 +262,7 @@ export default class Stat extends AbstractSmartComponent {
   rerender() {
     this.getElement().remove();
     this.removeElement();
+    this.defineStatisticData();
     this.render();
     this.setCurrentStatisticPeriod();
   }
