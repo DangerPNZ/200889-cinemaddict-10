@@ -40,7 +40,7 @@ export default class PageController {
     };
     this.outputFilmParts = this.outputFilmParts.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
-    this._onStateCountChange = this._onStateCountChange.bind(this);
+    this.stateCountChange = this.stateCountChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
     this._onDataLoad = this._onDataLoad.bind(this);
     this.moviesModel.onDataLoad = this._onDataLoad;
@@ -93,6 +93,9 @@ export default class PageController {
     this.hideComponents(this.sortController.component, this._components.films, this._components.stat);
     this._components.stat.show();
   }
+  stateCountChange() {
+    this.navController.rerender();
+  }
   _onDataChange(id, newData, oldData) {
     const onServerDataUpdate = (data) => {
       const allControllers = [...this._controllers.mainSection,
@@ -106,11 +109,9 @@ export default class PageController {
       if (oldData && newData.isAlready !== oldData.isAlready) {
         this._components.stat.rerender();
       }
+      this.stateCountChange();
     };
     this.moviesModel.changeMovieData(id, newData, onServerDataUpdate.bind(this));
-  }
-  _onStateCountChange() {
-    this.navController.rerender();
   }
   _onViewChange() {
     const controllers = [...this._controllers.mainSection,
@@ -125,7 +126,7 @@ export default class PageController {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this.moviesModel.getMovieDataByIndex(index);
-      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange, this._onStateCountChange);
+      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange);
       this._controllers.mainSection.push(controller);
       controller.render(thisFilmData);
       this._filmsInThePage++;
@@ -187,7 +188,7 @@ export default class PageController {
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
       topElementsByParameter.forEach((item) => {
-        const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange, this._onStateCountChange);
+        const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
         this._controllers.extraSections[headingText].push(controller);
         controller.render(item);
       });

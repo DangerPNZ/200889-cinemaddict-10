@@ -4,11 +4,10 @@ import {insertElementInMarkup} from '../components/utils.js';
 import moment from 'moment';
 
 export default class MovieController {
-  constructor(container, onDataChange, onViewChange, onStateCountChange) {
+  constructor(container, onDataChange, onViewChange) {
     this._container = container;
     this.onDataChange = onDataChange;
     this.onViewChange = onViewChange;
-    this.onStateCountChange = onStateCountChange;
     this.showPopup = this.showPopup.bind(this);
     this.changeUserRatingValue = this.changeUserRatingValue.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
@@ -36,7 +35,6 @@ export default class MovieController {
       newData.watchingDate = moment().toISOString();
     }
     this.onDataChange(this.id, newData, oldData);
-    this.onStateCountChange();
   }
   removeComment(index) {
     const oldData = JSON.parse(JSON.stringify(this.data));
@@ -64,7 +62,6 @@ export default class MovieController {
     this.filmPopup.setCurrentUserRating();
     this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
     this.filmPopup.onDataChange = this.onDataChange;
-    this.filmPopup.onStateCountChange = this.onStateCountChange;
     this.filmPopup.setCloseHandlers();
     this.filmPopup.setUserRatingChangeCallbacks(this.changeUserRatingValue);
     this.filmPopup.setUserRatingResetCallback(this.changeUserRatingValue);
@@ -78,7 +75,6 @@ export default class MovieController {
     this.filmCard = new FilmCard(this.data);
     insertElementInMarkup(this.filmCard, this._container);
     this.filmCard.onDataChange = this.onDataChange;
-    this.filmCard.onStateCountChange = this.onStateCountChange;
     this.filmCard.setShowDetailsHandlers(this.showPopup);
     this.filmCard.setChangeStatusCallbacks(this.changeStatus);
   }
