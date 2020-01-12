@@ -54,7 +54,7 @@ export default class NavController {
   rerender() {
     this.component.getElement().remove();
     this.component.removeElement();
-    this.component = new Nav(this.model.getMoviesDataForRender());
+    this.component = new Nav(this.model.moviesData);
     this.render();
     this.setCurrentActiveItem();
   }
