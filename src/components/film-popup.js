@@ -344,7 +344,7 @@ export default class FilmPopup extends AbstractSmartComponent {
       const ratingLevelRadioBtns = this.getUserRatingInputs();
       for (const radioBtn of ratingLevelRadioBtns) {
         radioBtn.addEventListener(`change`, (event) => {
-          const currentUserRating = event.target.value;
+          const currentUserRating = +(event.target.value);
           callback(currentUserRating);
         });
       }

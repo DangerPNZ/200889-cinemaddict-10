@@ -1,6 +1,7 @@
 import FilmCard from '../components/film-card.js';
 import FilmPopup from '../components/film-popup.js';
 import {insertElementInMarkup} from '../components/utils.js';
+import moment from 'moment';
 
 export default class MovieController {
   constructor(container, onDataChange, onViewChange, onStateCountChange) {
@@ -22,7 +23,7 @@ export default class MovieController {
       this.filmPopup.rerender(newData);
     }
   }
-  changeUserRatingValue(value = null) {
+  changeUserRatingValue(value = 0) {
     const newData = Object.assign({}, this.data);
     newData.userRatingValue = value;
     this.onDataChange(this.id, newData);
@@ -31,8 +32,8 @@ export default class MovieController {
     const oldData = this.data;
     const newData = Object.assign({}, this.data);
     newData[property] = !newData[property];
-    if (property === `isAlready` && newData[property] === false) {
-      newData.userRatingValue = null;
+    if (property === `isAlready` && newData[property]) {
+      newData.watchingDate = moment().toISOString();
     }
     this.onDataChange(this.id, newData, oldData);
     this.onStateCountChange();

@@ -31,9 +31,8 @@ export default class Movies {
   getMoviesDataForRender() {
     return this.filmsDataForRender;
   }
-  changeMovieData(id, newData) {
-    const index = this.moviesData.findIndex((item) => item.id === id);
-    this.moviesData[index] = newData;
+  changeMovieData(id, newData, onServerDataUpdate) {
+    this.api.updateMovie(id, newData, onServerDataUpdate);
   }
   sortByType(type) {
     switch (type) {

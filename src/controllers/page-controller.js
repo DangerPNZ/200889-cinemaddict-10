@@ -40,7 +40,7 @@ export default class PageController {
     };
     this.outputFilmParts = this.outputFilmParts.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
-    this._onStateCountShange = this._onStateCountShange.bind(this);
+    this._onStateCountChange = this._onStateCountChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
     this._onDataLoad = this._onDataLoad.bind(this);
     this.moviesModel.onDataLoad = this._onDataLoad;
@@ -94,20 +94,22 @@ export default class PageController {
     this._components.stat.show();
   }
   _onDataChange(id, newData, oldData) {
-    const allControllers = [...this._controllers.mainSection,
-      ...this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT],
-      ...this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT]].filter((item) => {
-      return item.id === id;
-    });
-    allControllers.forEach((item) => {
-      item.rerenderComponent(newData);
-    });
-    this.moviesModel.changeMovieData(id, newData);
-    if (oldData && newData.isAlready !== oldData.isAlready) {
-      this._components.stat.rerender();
-    }
+    const onServerDataUpdate = (data) => {
+      const allControllers = [...this._controllers.mainSection,
+        ...this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT],
+        ...this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT]].filter((item) => {
+        return item.id === id;
+      });
+      allControllers.forEach((item) => {
+        item.rerenderComponent(data);
+      });
+      if (oldData && newData.isAlready !== oldData.isAlready) {
+        this._components.stat.rerender();
+      }
+    };
+    this.moviesModel.changeMovieData(id, newData, onServerDataUpdate.bind(this));
   }
-  _onStateCountShange() {
+  _onStateCountChange() {
     this.navController.rerender();
   }
   _onViewChange() {
@@ -123,7 +125,7 @@ export default class PageController {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this.moviesModel.getMovieDataByIndex(index);
-      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange, this._onStateCountShange);
+      const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange, this._onStateCountChange);
       this._controllers.mainSection.push(controller);
       controller.render(thisFilmData);
       this._filmsInThePage++;
@@ -185,7 +187,7 @@ export default class PageController {
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
       topElementsByParameter.forEach((item) => {
-        const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange, this._onStateCountShange);
+        const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange, this._onStateCountChange);
         this._controllers.extraSections[headingText].push(controller);
         controller.render(item);
       });
