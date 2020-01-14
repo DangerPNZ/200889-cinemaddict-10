@@ -1,5 +1,6 @@
 import {compare} from '../components/utils.js';
 import API from '../api.js';
+import DataAdapter from '../data-adapter.js';
 
 const SORT_TYPE_VALUES = {
   default: `default`,
@@ -17,7 +18,18 @@ export default class Movies {
   constructor() {
     this.moviesData = [];
     this.filmsDataForRender = this.moviesData;
-    this.api = new API(this);
+    this.api = new API(new DataAdapter(this, this.onUpdateMoviesData.bind(this), this.onUpdateMovieDataItem.bind(this)));
+  }
+  onUpdateMoviesData(filmsData) {
+    this.moviesData = filmsData;
+    this.filmsDataForRender = this.moviesData;
+    this.setStateAfterDataLoad();
+  }
+  onUpdateMovieDataItem(movieData) {
+    let index = this.moviesData.findIndex((item) => item.id === movieData.id);
+    this.moviesData[index] = movieData;
+    index = this.filmsDataForRender.findIndex((item) => item.id === movieData.id);
+    this.filmsDataForRender[index] = movieData;
   }
   getMoviesData() {
     this.api.getMovies();
@@ -31,8 +43,14 @@ export default class Movies {
   getMoviesDataForRender() {
     return this.filmsDataForRender;
   }
-  changeMovieData(id, newData, onServerDataUpdate) {
-    this.api.updateMovie(id, newData, onServerDataUpdate);
+  changeMovieData(id, newData, onServerDataUpdate, onError = null) {
+    this.api.updateMovie(id, newData, onServerDataUpdate, onError);
+  }
+  addNewComment(id, commentData, onServerDataUpdate, onError) {
+    this.api.sendComment(id, commentData, onServerDataUpdate, onError);
+  }
+  deleteComment(id, onServerDataUpdate) {
+    this.api.deleteComment(id, onServerDataUpdate);
   }
   sortByType(type) {
     switch (type) {

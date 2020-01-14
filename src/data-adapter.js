@@ -1,4 +1,10 @@
 export default class DataAdapter {
+  constructor(model, onUpdateMoviesData, onUpdateMovieDataItem) {
+    this.model = model;
+    this.onUpdateMoviesData = onUpdateMoviesData;
+    this.onUpdateMovieDataItem = onUpdateMovieDataItem;
+
+  }
   formatFilmDataToAppStructure(movieData) {
     return {
       id: movieData.id,
@@ -60,5 +66,14 @@ export default class DataAdapter {
       },
       comments: movieData.comments.map((item) => item.id)
     });
+  }
+  setMoviesData(movies) {
+    const applicationMoviesData = this.getAllFilmsDataToAppStructure(movies);
+    this.onUpdateMoviesData(applicationMoviesData);
+  }
+  onGetMovieWithUpdatedComments(newMovieData, onUpdateMovieData) {
+    const updatedFilmDataInAppStructure = this.formatFilmDataToAppStructure(newMovieData);
+    this.onUpdateMovieDataItem(updatedFilmDataInAppStructure);
+    onUpdateMovieData(updatedFilmDataInAppStructure);
   }
 }

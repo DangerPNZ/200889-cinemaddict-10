@@ -23,9 +23,10 @@ export default class MovieController {
     }
   }
   changeUserRatingValue(value = 0) {
+    const oldData = this.data;
     const newData = Object.assign({}, this.data);
     newData.userRatingValue = value;
-    this.onDataChange(this.id, newData);
+    this.onDataChange(this.id, newData, oldData);
   }
   changeStatus(property) {
     const oldData = this.data;
@@ -36,32 +37,26 @@ export default class MovieController {
     }
     this.onDataChange(this.id, newData, oldData);
   }
-  removeComment(index) {
-    const oldData = JSON.parse(JSON.stringify(this.data));
-    const newData = Object.assign({}, this.data);
-    newData.comments.splice(index, 1);
-    this.onDataChange(this.id, newData, oldData);
+  removeComment(commentId) {
+    this.onDataChange(commentId);
   }
   addNewComment(newCommentData) {
-    const oldData = JSON.parse(JSON.stringify(this.data));
-    const newData = Object.assign({}, this.data);
-    newData.comments.unshift(newCommentData);
-    this.onDataChange(this.id, newData, oldData);
+    this.onDataChange(this.id, newCommentData);
   }
   closePopup() {
     if (this.filmPopup) {
       this.filmPopup.closePopup();
-      this.filmPopup = null;
+      this.filmPopup = undefined;
     }
   }
   showPopup() {
     this.onViewChange();
     this.filmPopup = new FilmPopup(this.data);
-    this.filmPopup.addNewCommentCallback = this.addNewComment.bind(this);
+    this.filmPopup.addNewComment = this.addNewComment.bind(this);
     insertElementInMarkup(this.filmPopup.getElement(), document.body);
     this.filmPopup.setCurrentUserRating();
-    this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
     this.filmPopup.onDataChange = this.onDataChange;
+    this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
     this.filmPopup.setCloseHandlers();
     this.filmPopup.setUserRatingChangeCallbacks(this.changeUserRatingValue);
     this.filmPopup.setUserRatingResetCallback(this.changeUserRatingValue);

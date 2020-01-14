@@ -158,8 +158,44 @@ const getFilmPopup = (filmData) => {
       return ``;
     }
   };
+  const addFeedbackStyles = () => `
+    <style>
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: translateX(-5px);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: translateX(5px);
+        }
+      }
+      .shake {
+        animation: shake 0.6s;
+      }
+      .selected:checked + .film-details__user-rating-label {
+        background-color: #d8d8d8;
+      }
+      .shake .selected + .film-details__user-rating-label {
+        background-color: #f51a1a;
+      }
+      .film-details__comment-input--no-valid {
+        border-color: #f51a1a;
+      }
+    </style>
+  `;
   return `
     <section class="film-details">
+        ${addFeedbackStyles()}
         <form class="film-details__inner" action="" method="get">
         <div class="form-details__top-container">
             <div class="film-details__close">
@@ -280,6 +316,9 @@ const getFilmPopup = (filmData) => {
         </form>
     </section>`;
 };
+const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
+const SHAKE_ANIMATION_CLS = `shake`;
+
 
 export default class FilmPopup extends AbstractSmartComponent {
   constructor(data) {
@@ -290,6 +329,8 @@ export default class FilmPopup extends AbstractSmartComponent {
     this.firstBtnHandlerForSendComment = this.firstBtnHandlerForSendComment.bind(this);
     this.secondBtnHandlerForSendComment = this.secondBtnHandlerForSendComment.bind(this);
     this.removeSecondBtnHandler = this.removeSecondBtnHandler.bind(this);
+    this.onUserRatingUpdateError = this.onUserRatingUpdateError.bind(this);
+    this.onCommentSendError = this.onCommentSendError.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this.data);
@@ -298,8 +339,8 @@ export default class FilmPopup extends AbstractSmartComponent {
     return [...this.getElement().querySelectorAll(`.film-details__control-label`)];
   }
   removeReaction() {
-    if (this.newCommentReaction) {
-      this.newCommentReaction = null;
+    if (this.selectedReactionId) {
+      this.selectedReactionId = null;
     }
   }
   closePopup() {
@@ -338,13 +379,35 @@ export default class FilmPopup extends AbstractSmartComponent {
   getUserRatingInputs() {
     return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
   }
+  onUserRatingUpdateError() {
+    if (!this.userRatingBlock) {
+      this.userRatingBlock = this.getElement().querySelector(`.film-details__user-rating-score`);
+    }
+    if (!this.userRatingBlock.classList.contains(SHAKE_ANIMATION_CLS)) {
+      this.userRatingBlock.classList.add(SHAKE_ANIMATION_CLS);
+    } else {
+      this.userRatingBlock.classList.remove(SHAKE_ANIMATION_CLS);
+      setInterval(() => {
+        this.userRatingBlock.classList.add(SHAKE_ANIMATION_CLS);
+      }, 0);
+    }
+    for (const btn of this.getUserRatingInputs()) {
+      btn.removeAttribute(`disabled`);
+      btn.checked = false;
+    }
+  }
   setUserRatingChangeCallbacks(callback) {
     this.changeUserRatingCallback = callback;
     if (this.data.isAlready) {
-      const ratingLevelRadioBtns = this.getUserRatingInputs();
-      for (const radioBtn of ratingLevelRadioBtns) {
+      for (const radioBtn of this.getUserRatingInputs()) {
         radioBtn.addEventListener(`change`, (event) => {
           const currentUserRating = +(event.target.value);
+          event.target.classList.add(`selected`);
+          for (const btn of this.getUserRatingInputs()) {
+            btn.setAttribute(`disabled`, true);
+            btn.classList.remove(`selected`);
+          }
+          event.target.classList.add(`selected`);
           callback(currentUserRating);
         });
       }
@@ -355,6 +418,12 @@ export default class FilmPopup extends AbstractSmartComponent {
     if (this.data.isAlready) {
       const resetUserRatingBtn = this.getElement().querySelector(`.film-details__watched-reset`);
       resetUserRatingBtn.addEventListener(`click`, () => {
+        for (const btn of this.getUserRatingInputs()) {
+          btn.setAttribute(`disabled`, true);
+          if (btn.checked === true) {
+            btn.classList.add(`selected`);
+          }
+        }
         callback();
       });
     }
@@ -371,12 +440,15 @@ export default class FilmPopup extends AbstractSmartComponent {
     }
     for (const radio of reactionRadioBtns) {
       radio.addEventListener(`change`, (event) => {
-        this.newCommentReaction = event.target.value;
+        this.selectedReactionId = event.target.getAttribute(`id`);
       });
     }
   }
+  getCommentInput() {
+    return this.getElement().querySelector(`.film-details__comment-input`);
+  }
   getNewCommentText() {
-    this.newCommentText = he.encode(this.getElement().querySelector(`.film-details__comment-input`).value);
+    this.newCommentText = he.encode(this.getCommentInput().value);
     if (this.newCommentText !== ``) {
       if (this.newCommentText.length > MAX_NEW_COMMENT_LENGTH) {
         this.newCommentText = `${this.newCommentText.substr(0, COMMENT_CUT_START_INDEX)}...`;
@@ -386,33 +458,59 @@ export default class FilmPopup extends AbstractSmartComponent {
       return false;
     }
   }
+  getNewCommentReaction(reactionId) {
+    let reaction = null;
+    switch (reactionId) {
+      case `emoji-smile`:
+        reaction = `smile`;
+        break;
+      case `emoji-sleeping`:
+        reaction = `sleeping`;
+        break;
+      case `emoji-gpuke`:
+        reaction = `puke`;
+        break;
+      case `emoji-angry`:
+        reaction = `angry`;
+        break;
+    }
+    return reaction;
+  }
+  getCommentInput() {
+    if (!this.commentInput) {
+      this.commentInput = this.getElement().querySelector(`.film-details__comment-input`);
+    }
+    return this.commentInput;
+  }
+  onCommentSendError() {
+    if (!this.newCommentBlock) {
+      this.newCommentBlock = this.getElement().querySelector(`.film-details__new-comment`);
+    }
+    if (!this.newCommentBlock.classList.contains(SHAKE_ANIMATION_CLS)) {
+      this.newCommentBlock.classList.add(SHAKE_ANIMATION_CLS);
+    } else {
+      this.newCommentBlock.classList.remove(SHAKE_ANIMATION_CLS);
+      setInterval(() => {
+        this.newCommentBlock.classList.add(SHAKE_ANIMATION_CLS);
+      }, 0);
+    }
+    const newCommentInput = this.getCommentInput();
+    newCommentInput.removeAttribute(`disabled`);
+    newCommentInput.classList.add(NO_VALID_COMMENT_INPUT_CLS);
+  }
   createNewComment() {
-    // ТЕСТ!!!
-    const emojiPictures = [
-      `angry.png`,
-      `puke.png`,
-      `sleeping.png`,
-      `smile.png`,
-      `trophy.png`,
-    ];
-    const randomNames = [`Sofia Black D'Elia`, `Jake Cannavale`, `Pete Davidson`, `Seychelle Gabriel`, `Elizabeth Gillies`,
-      `Ariana Grande`, `Rosabell Laurenti Sellers`, `Liana Liberato`, `Ali Lohan`, `Caitlyn Taylor Love`, `Ryan Malgarini`,
-      `Gia Mantegna`, `Laura Marano`, `Vanessa Marano`, `Vincent Martella`, `Chris Massoglia`, `Julianna Rose Mauriello`,
-      `Jennette McCurdy`, `Mitchel Musso`, `Dylan O'Brien`, `Jansen Panettiere`, `Cassie Scerbo`, `Christian Serratos`, `Bella Thorne`];
-    const getRandomNum = (min, max, toRound = true) => {
-      const numbersLengthAfterPoint = 1;
-      const number = Math.random() * (max - min) + min;
-      return toRound ? Math.round(number) : number.toFixed(numbersLengthAfterPoint);
-    };
-    // ТЕСТ!!!
-    if (this.newCommentReaction && this.getNewCommentText()) {
-      const newComment = {
-        emojiPictureSrc: emojiPictures[getRandomNum(0, 4)], //
-        commentText: this.getNewCommentText(),
-        commentAuthor: randomNames[getRandomNum(0, 23)], //
-        commentDate: moment().format(COMMENT_DATE_FORMAT)
-      };
-      this.addNewCommentCallback(newComment);
+    const newCommentInput = this.getCommentInput();
+    if (newCommentInput.classList.contains(NO_VALID_COMMENT_INPUT_CLS)) {
+      newCommentInput.classList.remove(NO_VALID_COMMENT_INPUT_CLS);
+    }
+    if (this.selectedReactionId && this.getNewCommentText() && !newCommentInput.hasAttribute(`disabled`)) {
+      newCommentInput.setAttribute(`disabled`, true);
+      const newCommentData = JSON.stringify({
+        emotion: this.getNewCommentReaction(this.selectedReactionId),
+        comment: this.getNewCommentText(),
+        date: moment().toISOString()
+      });
+      this.addNewComment(newCommentData);
     }
   }
   removeSecondBtnHandler(event) {
@@ -440,7 +538,7 @@ export default class FilmPopup extends AbstractSmartComponent {
       const ratingLevelRadioBtns = this.getUserRatingInputs();
       for (const radioBtn of ratingLevelRadioBtns) {
         if (+radioBtn.value === +this.data.userRatingValue) {
-          radioBtn.setAttribute(`checked`, true);
+          radioBtn.checked = true;
           return;
         }
       }
@@ -449,10 +547,11 @@ export default class FilmPopup extends AbstractSmartComponent {
   setRemoveCommentCallbacks(callback) {
     this.commentRemoveCallback = callback;
     const removeCommentBtns = this.getElement().querySelectorAll(`.film-details__comment-delete`);
-    removeCommentBtns.forEach((btn, index) => {
+    removeCommentBtns.forEach((btn) => {
       btn.addEventListener(`click`, (event) => {
         event.preventDefault();
-        callback(index);
+        const commentId = event.target.getAttribute(`data-id`);
+        callback(commentId);
       });
     });
   }

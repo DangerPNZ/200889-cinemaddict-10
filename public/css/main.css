@@ -988,7 +988,7 @@ button {
   opacity: 0.7;
 }
 .film-details__user-rating-input:checked + .film-details__user-rating-label {
-  background-color: #ffe800;
+  background-color: #ffc800;
 }
 
 .statistic {

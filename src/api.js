@@ -1,4 +1,3 @@
-import DataAdapter from './data-adapter.js';
 const AUTHORIZATION_URL = `Basic cinemaddict_10_200889`;
 const API_URL = `https://htmlacademy-es-10.appspot.com/cinemaddict`;
 const METHOD = {
@@ -13,46 +12,37 @@ const headers = {
 };
 
 export default class API {
-  constructor(applicationDataModel) {
-    this.applicationDataModel = applicationDataModel;
-    this.dataAdapter = new DataAdapter();
+  constructor(dataAdapter) {
+    this.dataAdapter = dataAdapter;
   }
   checkStatus(response) {
     if (response.status >= 200 && response.status < 300) {
-      return response.json();
+      return response;
     } else {
       throw new Error(`${response.status}: ${response.statusText}`);
     }
   }
-  _load(url, method = METHOD.get, body = null) {
+  _load(url, method = METHOD.get, body = null, onError = null) {
     return fetch(`${API_URL}/${url}`, {method, body, headers})
     .then(this.checkStatus)
-    .catch((err) => {
-      throw err;
+    .catch(() => {
+      if (onError) {
+        onError();
+      }
     });
-  }
-  setMoviesData(movies) {
-    const applicationMoviesData = this.dataAdapter.getAllFilmsDataToAppStructure(movies);
-    this.applicationDataModel.moviesData = applicationMoviesData;
-    this.applicationDataModel.filmsDataForRender = applicationMoviesData;
-    this.applicationDataModel.onDataLoad();
   }
   getComments(film, onUpdateMovieData) {
     return this._load(`comments/${film.id}`)
+    .then((response) => response.json())
     .then((commentsList) => {
       film.comments = commentsList;
       if (!onUpdateMovieData) {
         this.filmsWithCommentsAmounth += 1;
         if (this.filmsAmounth === this.filmsWithCommentsAmounth) {
-          this.setMoviesData(this.allMoviesData);
+          this.dataAdapter.setMoviesData(this.allMoviesData);
         }
       } else {
-        const updatedFilmDataInAppStructure = this.dataAdapter.formatFilmDataToAppStructure(film);
-        let index = this.applicationDataModel.moviesData.findIndex((item) => item.id === updatedFilmDataInAppStructure.id);
-        this.applicationDataModel.moviesData[index] = updatedFilmDataInAppStructure;
-        index = this.applicationDataModel.filmsDataForRender.findIndex((item) => item.id === updatedFilmDataInAppStructure.id);
-        this.applicationDataModel.filmsDataForRender[index] = updatedFilmDataInAppStructure;
-        onUpdateMovieData(updatedFilmDataInAppStructure);
+        this.dataAdapter.onGetMovieWithUpdatedComments(film, onUpdateMovieData);
       }
     })
     .catch((err) => {
@@ -69,6 +59,7 @@ export default class API {
   }
   getMovies() {
     return this._load(`movies`)
+    .then((response) => response.json())
     .then((filmsData) => {
       this.getCommentsForAllMovies(filmsData);
     })
@@ -76,25 +67,30 @@ export default class API {
       throw err;
     });
   }
-  updateMovie(id, newData, onMovieUpdated) {
-    return this._load(`movies/${id}`, METHOD.put, this.dataAdapter.formatMovieDataToServerStructure(newData))
-    .then((film) => {
-      this.getComments(film, onMovieUpdated);
+  updateMovie(id, newData, onMovieUpdated, onError) {
+    return this._load(`movies/${id}`, METHOD.put, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
+    .then((response) => response.json())
+    .then((film) => this.getComments(film, onMovieUpdated))
+    .catch((err) => {
+      throw err;
+    });
+  }
+  sendComment(filmId, body, onUpdateMovieData, onError) {
+    return this._load(`comments/${filmId}`, METHOD.post, body, onError)
+    .then((response) => response.json())
+    .then((data) => {
+      data.movie.comments = data.comments;
+      this.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
     })
     .catch((err) => {
       throw err;
     });
   }
-  postComment(filmId, body) {
-    return this._load(`comments/${filmId}`, METHOD.post, body)
-    .then()
-    .catch((err) => {
-      throw err;
-    });
-  }
-  deleteComment(commentId) {
+  deleteComment(commentId, onUpdateMovieData) {
     return this._load(`comments/${commentId}`, METHOD.delete)
-    .then()
+    .then(() => {
+      onUpdateMovieData(commentId);
+    })
     .catch((err) => {
       throw err;
     });
