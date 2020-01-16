@@ -21,12 +21,17 @@ const PARAMETER_FOR_GET_MINUTES = `minutes`;
 const MINUTES_IN_HOUR = 60;
 const getAllWatchedMoviesTime = (movies, parameter) => {
   if (movies.length) {
-    const totalDuration = movies.filter((item) => item.isAlready === true).map((item) => item.filmDuration).reduce((sum, current) => sum + current);
+    const watchedFilms = movies.filter((item) => item.isAlready === true);
     let totalTimeValueByParameter = null;
-    if (parameter === PARAMETER_FOR_GET_HOURS) {
-      totalTimeValueByParameter = Math.floor(totalDuration / MINUTES_IN_HOUR);
-    } else if (parameter === PARAMETER_FOR_GET_MINUTES) {
-      totalTimeValueByParameter = Math.floor(totalDuration % MINUTES_IN_HOUR);
+    if (watchedFilms.length) {
+      const totalDuration = watchedFilms.map((item) => item.filmDuration).reduce((sum, current) => sum + current);
+      if (parameter === PARAMETER_FOR_GET_HOURS) {
+        totalTimeValueByParameter = Math.floor(totalDuration / MINUTES_IN_HOUR);
+      } else if (parameter === PARAMETER_FOR_GET_MINUTES) {
+        totalTimeValueByParameter = Math.floor(totalDuration % MINUTES_IN_HOUR);
+      }
+    } else {
+      totalTimeValueByParameter = ZERO_FOR_NUMBER_VALUES;
     }
     return totalTimeValueByParameter;
   } else {
@@ -149,6 +154,7 @@ export default class Stat extends AbstractSmartComponent {
     this.setStatisticPeriodHandlers = this.setStatisticPeriodHandlers.bind(this);
     this.staticticState = DEFAULT_STATISTIC_STATE;
     this.filmsDataByPeriod = this.data;
+    this.rerender = this.rerender.bind(this);
   }
   getTemplate() {
     return getStat(this.userRank, this.filmsDataByPeriod);
@@ -178,7 +184,7 @@ export default class Stat extends AbstractSmartComponent {
       radioBtn.addEventListener(`change`, (event) => {
         event.preventDefault();
         this.staticticState = event.target.value;
-        this.rerender();
+        this.rerender(this.userRank);
       });
     }
   }
@@ -259,7 +265,8 @@ export default class Stat extends AbstractSmartComponent {
     this.setStatisticPeriodHandlers();
     this.createChart();
   }
-  rerender() {
+  rerender(userRank) {
+    this.userRank = userRank;
     this.getElement().remove();
     this.removeElement();
     this.defineStatisticData();

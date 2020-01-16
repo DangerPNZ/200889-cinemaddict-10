@@ -26,14 +26,12 @@ export default class UserRank extends AbstractComponent {
   }
   getRank() {
     let rank = null;
-    if (this._watchedFilmsSum >= 15) {
-      rank = `Cinema expert`;
-    } else if (this._watchedFilmsSum >= 10 && this._watchedFilmsSum <= 15) {
-      rank = `Cinema connoisseur`;
-    } else if (this._watchedFilmsSum >= 5 && this._watchedFilmsSum <= 10) {
-      rank = `Movie Buff`;
-    } else if (this._watchedFilmsSum < 5 && this._watchedFilmsSum > 0) {
-      rank = `Cinema newbie`;
+    if (this._watchedFilmsSum >= 21) {
+      rank = `movie buff`;
+    } else if (this._watchedFilmsSum >= 11 && this._watchedFilmsSum <= 20) {
+      rank = `fan`;
+    } else if (this._watchedFilmsSum <= 10 && this._watchedFilmsSum > 0) {
+      rank = `novice`;
     }
     return rank;
   }

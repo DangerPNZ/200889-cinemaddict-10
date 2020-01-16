@@ -4,7 +4,7 @@ import Films from '../components/films.js';
 import FilmsListSection from '../components/films-list-section.js';
 import FilmsExtraSection from '../components/films-extra-section.js';
 import {insertElementInMarkup} from '../components/utils.js';
-import {removeIt} from '../utils/remove-it.js';
+import {removeIt} from '../components/utils.js';
 import {compare} from '../components/utils.js';
 import MovieController from '../controllers/movie-controller.js';
 import SortController from '../controllers/sort-controller.js';
@@ -19,6 +19,71 @@ const TOP_RATED_SECTION_HEADING_TEXT = `Top rated`;
 const MOST_COMMENTED_SECTION_HEADING_TEXT = `Most commented`;
 const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;
 const PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION = `comments`;
+const getServerDataUpdateCallback = (that, allControllers, id, newData, oldData) => {
+  const callback = (data) => {
+    let controllersForChange = null;
+    if (newData) {
+      controllersForChange = allControllers.filter((item) => {
+        return item.id === id;
+      });
+    } else {
+      controllersForChange = allControllers.filter((item) => {
+        return item.filmPopup !== null;
+      });
+    }
+    controllersForChange.forEach((item) => {
+      if (!newData) {
+        item.data.comments.forEach((comment, index, array) => {
+          if (comment.id === id) {
+            array.splice(index, 1);
+          }
+          item.rerenderComponent(item.data);
+        });
+      } else {
+        item.rerenderComponent(data);
+      }
+    });
+    if (newData && oldData) {
+      if (newData.isAlready !== oldData.isAlready) {
+        that._getNewUserRank();
+        that._components.stat.rerender(that._components.userRank.getRank());
+      }
+      that.stateCountChange();
+    }
+  };
+  return callback;
+};
+const getErrorCallback = (allControllers, newData, oldData, id) => {
+  let onErrorCallback = null;
+  const controllerWithPopup = allControllers.find((item) => item.filmPopup !== undefined);
+  if (newData) {
+    if (oldData) {
+      if (newData.userRatingValue !== oldData.userRatingValue) {
+        onErrorCallback = () => {
+          controllerWithPopup.filmPopup.onUserRatingUpdateError();
+          controllerWithPopup.filmPopup.enabledChangeStatusBtns();
+        };
+      }
+      if (!controllerWithPopup) {
+        const controllersForChange = allControllers.filter((item) => {
+          return item.id === id;
+        });
+        onErrorCallback = () => {
+          for (const controller of controllersForChange) {
+            controller.filmCard.enabledChangeStatusBtns();
+          }
+        };
+      } else {
+        onErrorCallback = controllerWithPopup.filmPopup.enabledChangeStatusBtns;
+      }
+    } else {
+      onErrorCallback = controllerWithPopup.filmPopup.onCommentSendError;
+    }
+  } else {
+    onErrorCallback = controllerWithPopup.filmPopup.onCommentDeleteError;
+  }
+  return onErrorCallback;
+};
 
 export default class PageController {
   constructor(applicationContainer, moviesModel) {
@@ -54,6 +119,29 @@ export default class PageController {
     this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT] = [];
     this.moviesModel.onFilmsPartsChange = this.onFilmsPartsChange.bind(this);
   }
+  showComponents(...components) {
+    for (const component of components) {
+      component.show();
+    }
+  }
+  hideComponents(...components) {
+    for (const component of components) {
+      component.hide();
+    }
+  }
+  onToFilms() {
+    this.showComponents(this.sortController.component, this._components.films, this._components.stat);
+    this._components.stat.hide();
+  }
+  onToStatistic() {
+    this.hideComponents(this.sortController.component, this._components.films, this._components.stat);
+    this._components.stat.show();
+  }
+  _getNewUserRank() {
+    removeIt(this._components.userRank);
+    this._components.userRank = new UserRank(this.moviesModel.getMoviesDataForRender());
+    insertElementInMarkup(this._components.userRank, this._elements.header);
+  }
   _createStatComponent() {
     this._components.stat = new Stat(this._components.userRank.getRank(), this.moviesModel.getMoviesDataForRender(), this._elements.main);
     this._components.stat.render();
@@ -78,46 +166,20 @@ export default class PageController {
       item.closePopup();
     });
   }
+  stateCountChange() {
+    this.navController.rerender();
+  }
   _onDataChange(id, newData, oldData) {
     const allControllers = [...this._controllers.mainSection,
       ...this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT],
       ...this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT]];
-    const onServerDataUpdate = (data) => {
-      let controllersForChange = null;
-      if (newData) {
-        controllersForChange = allControllers.filter((item) => {
-          return item.id === id;
-        });
-      } else {
-        controllersForChange = allControllers.filter((item) => {
-          return item.filmPopup !== null;
-        });
-      }
-      controllersForChange.forEach((item) => {
-        if (!newData) {
-          item.data.comments.forEach((comment, index, array) => {
-            if (comment.id === id) {
-              array.splice(index, 1);
-            }
-            item.rerenderComponent(item.data);
-          });
-        } else {
-          item.rerenderComponent(data);
-        }
-      });
-      if (newData && oldData) {
-        if (newData.isAlready !== oldData.isAlready) {
-          this._components.stat.rerender();
-        }
-        this.stateCountChange();
-      }
-    };
+
     if (newData && oldData) {
-      this.moviesModel.changeMovieData(id, newData, onServerDataUpdate, this.getErrorCallback(allControllers, newData, oldData));
+      this.moviesModel.changeMovieData(id, newData, getServerDataUpdateCallback(this, allControllers, id, newData, oldData), getErrorCallback(allControllers, newData, oldData, id));
     } else if (newData) {
-      this.moviesModel.addNewComment(id, newData, onServerDataUpdate, this.getErrorCallback(allControllers, newData));
+      this.moviesModel.addNewComment(id, newData, getServerDataUpdateCallback(this, allControllers, id, newData), getErrorCallback(allControllers, newData));
     } else {
-      this.moviesModel.deleteComment(id, onServerDataUpdate);
+      this.moviesModel.deleteComment(id, getServerDataUpdateCallback(this, allControllers, id), getErrorCallback(allControllers));
     }
   }
   getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
@@ -163,6 +225,7 @@ export default class PageController {
       }
     }
   }
+
   setFilmsContainerInitialState(init = false) {
     this.hideComponents(this._components.stat);
     if (this.moviesModel.getMoviesAmounth()) {
@@ -195,41 +258,6 @@ export default class PageController {
     this._setFilmsAmountInFooter();
     this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
     this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
-  }
-  showComponents(...components) {
-    for (const component of components) {
-      component.show();
-    }
-  }
-  hideComponents(...components) {
-    for (const component of components) {
-      component.hide();
-    }
-  }
-  onToFilms() {
-    this.showComponents(this.sortController.component, this._components.films, this._components.stat);
-    this._components.stat.hide();
-  }
-  onToStatistic() {
-    this.hideComponents(this.sortController.component, this._components.films, this._components.stat);
-    this._components.stat.show();
-  }
-  stateCountChange() {
-    this.navController.rerender();
-  }
-  getErrorCallback(allControllers, newData, oldData) {
-    let onErrorCallback = null;
-    if (newData) {
-      const controllerWithPopup = allControllers.find((item) => item.filmPopup !== undefined);
-      if (newData && oldData) {
-        if (newData.userRatingValue !== oldData.userRatingValue) {
-          onErrorCallback = controllerWithPopup.filmPopup.onUserRatingUpdateError;
-        }
-      } else {
-        onErrorCallback = controllerWithPopup.filmPopup.onCommentSendError;
-      }
-    }
-    return onErrorCallback;
   }
   onFilmsPartsChange(filmsData) {
     this._elements.moviesContainer.innerHTML = ``;

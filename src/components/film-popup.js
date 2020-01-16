@@ -5,7 +5,6 @@ import moment from 'moment';
 import he from 'he';
 
 const RELEASE_DATE_FORMAT = `D MMMM YYYY`;
-const COMMENT_DATE_FORMAT = `YYYY/MM/DD HH:MM`;
 const MAX_NEW_COMMENT_LENGTH = 140;
 const COMMENT_CUT_START_INDEX = 139;
 const CTRL_EVENT_KEY = `Control`;
@@ -129,6 +128,31 @@ const getFilmPopup = (filmData) => {
       return ``;
     }
   };
+  const SECONDS_IN_MINUTES = 60;
+  const SECONDS_IN_HOUR = SECONDS_IN_MINUTES * 60;
+  const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
+  const getCommentCreateTime = (date) => {
+    const secondsElapsed = moment().diff(date, `seconds`, false);
+    let createTime = null;
+    if (secondsElapsed < SECONDS_IN_MINUTES) {
+      createTime = `now`;
+    } else if (secondsElapsed >= SECONDS_IN_MINUTES && secondsElapsed <= (SECONDS_IN_MINUTES * 3)) {
+      createTime = `a minute ago`;
+    } else if (secondsElapsed > (SECONDS_IN_MINUTES * 3) && secondsElapsed <= (SECONDS_IN_MINUTES * 59)) {
+      createTime = `a few minutes ago`;
+    } else if (secondsElapsed >= SECONDS_IN_HOUR && secondsElapsed < (SECONDS_IN_HOUR * 2)) {
+      createTime = `a hour ago`;
+    } else if (secondsElapsed >= (SECONDS_IN_HOUR * 2) && secondsElapsed < (SECONDS_IN_HOUR * 24)) {
+      createTime = `a few hours ago`;
+    } else if (secondsElapsed >= SECONDS_IN_DAY && secondsElapsed < (SECONDS_IN_DAY * 2)) {
+      createTime = `a day ago`;
+    } else if (secondsElapsed >= (SECONDS_IN_DAY * 2) && secondsElapsed <= (SECONDS_IN_DAY * 3)) {
+      createTime = `a two days ago`;
+    } else {
+      createTime = moment(date).fromNow();
+    }
+    return createTime;
+  };
   const addComments = (commentsFromData) => {
     let commentsList = ``;
     if (commentsFromData.length) {
@@ -142,7 +166,7 @@ const getFilmPopup = (filmData) => {
                       <p class="film-details__comment-text">${he.encode(commentItem.comment)}</p>
                       <p class="film-details__comment-info">
                       <span class="film-details__comment-author">${commentItem.author}</span>
-                      <span class="film-details__comment-day">${moment(commentItem.date).format(COMMENT_DATE_FORMAT)}</span>
+                      <span class="film-details__comment-day">${getCommentCreateTime(commentItem.date)}</span>
                       <button class="film-details__comment-delete" data-id="${commentItem.id}">Delete</button>
                       </p>
                   </div>
@@ -261,14 +285,14 @@ const getFilmPopup = (filmData) => {
             </div>
 
             <section class="film-details__controls">
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${setState(isInWatchlist)}>
-            <label data-status="isInWatchlist" for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
+            <input type="checkbox" data-status="isInWatchlist" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${setState(isInWatchlist)}>
+            <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${setState(isAlready)}>
-            <label data-status="isAlready" for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
+            <input type="checkbox" data-status="isAlready" class="film-details__control-input visually-hidden" id="watched" name="watched" ${setState(isAlready)}>
+            <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${setState(isFavorites)}>
-            <label data-status="isFavorites" for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
+            <input type="checkbox" data-status="isFavorites" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${setState(isFavorites)}>
+            <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
             </section>
         </div>
 
@@ -318,7 +342,8 @@ const getFilmPopup = (filmData) => {
 };
 const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
 const SHAKE_ANIMATION_CLS = `shake`;
-
+const COMMENT_DELETE_BTN_TEXT = `Delete`;
+const COMMENT_DELETING_BTN_TEXT = `Deleting…`;
 
 export default class FilmPopup extends AbstractSmartComponent {
   constructor(data) {
@@ -328,15 +353,14 @@ export default class FilmPopup extends AbstractSmartComponent {
     this.closePopup = this.closePopup.bind(this);
     this.firstBtnHandlerForSendComment = this.firstBtnHandlerForSendComment.bind(this);
     this.secondBtnHandlerForSendComment = this.secondBtnHandlerForSendComment.bind(this);
-    this.removeSecondBtnHandler = this.removeSecondBtnHandler.bind(this);
+    this.removeFirstBtnKey = this.removeFirstBtnKey.bind(this);
     this.onUserRatingUpdateError = this.onUserRatingUpdateError.bind(this);
     this.onCommentSendError = this.onCommentSendError.bind(this);
+    this.onCommentDeleteError = this.onCommentDeleteError.bind(this);
+    this.enabledChangeStatusBtns = this.enabledChangeStatusBtns.bind(this);
   }
   getTemplate() {
     return getFilmPopup(this.data);
-  }
-  getStatusControlItems() {
-    return [...this.getElement().querySelectorAll(`.film-details__control-label`)];
   }
   removeReaction() {
     if (this.selectedReactionId) {
@@ -348,7 +372,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     this.removeElement();
     window.removeEventListener(`keydown`, this.escapeBtnHandler);
     window.removeEventListener(`keydown`, this.firstBtnHandlerForSendComment);
-    window.removeEventListener(`keyup`, this.removeSecondBtnHandler);
+    window.removeEventListener(`keyup`, this.removeFirstBtnKey);
   }
   escapeBtnHandler(event) {
     const ESCAPE_KEY_CODE = 27;
@@ -357,7 +381,7 @@ export default class FilmPopup extends AbstractSmartComponent {
       this.removeElement();
       window.removeEventListener(`keydown`, this.escapeBtnHandler);
       window.removeEventListener(`keydown`, this.firstBtnHandlerForSendComment);
-      window.removeEventListener(`keyup`, this.removeSecondBtnHandler);
+      window.removeEventListener(`keyup`, this.removeFirstBtnKey);
     }
   }
   setCloseHandlers() {
@@ -365,13 +389,23 @@ export default class FilmPopup extends AbstractSmartComponent {
     closeBtn.addEventListener(`click`, this.closePopup);
     window.addEventListener(`keydown`, this.escapeBtnHandler);
   }
+  getStatusControlItems() {
+    return this.getElement().querySelectorAll(`.film-details__control-input`);
+  }
+  enabledChangeStatusBtns() {
+    for (const item of this.getStatusControlItems()) {
+      item.removeAttribute(`disabled`);
+    }
+  }
   setChangeStatusCallbacks(callback) {
     this.changeStatusCallback = callback;
-    const statusControlItems = [...this.getElement().querySelectorAll(`.film-details__control-label`)];
-    for (const btn of statusControlItems) {
-      btn.addEventListener(`click`, (event) => {
+    for (const item of this.getStatusControlItems()) {
+      item.addEventListener(`click`, (event) => {
         event.preventDefault();
         const dataProperty = event.target.dataset.status;
+        for (const controlItem of this.getStatusControlItems()) {
+          controlItem.setAttribute(`disabled`, true);
+        }
         callback(dataProperty);
       });
     }
@@ -380,9 +414,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
   }
   onUserRatingUpdateError() {
-    if (!this.userRatingBlock) {
-      this.userRatingBlock = this.getElement().querySelector(`.film-details__user-rating-score`);
-    }
+    this.userRatingBlock = this.getElement().querySelector(`.film-details__user-rating-score`);
     if (!this.userRatingBlock.classList.contains(SHAKE_ANIMATION_CLS)) {
       this.userRatingBlock.classList.add(SHAKE_ANIMATION_CLS);
     } else {
@@ -430,17 +462,13 @@ export default class FilmPopup extends AbstractSmartComponent {
   }
   onSelectReaction() {
     const reactionEmojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
-    const reactionLabels = this.getElement().querySelectorAll(`.film-details__emoji-label`);
     const reactionRadioBtns = this.getElement().querySelectorAll(`.film-details__emoji-item`);
-    for (const label of reactionLabels) {
-      label.addEventListener(`click`, (event) => {
-        const emojiPictureSrc = event.currentTarget.querySelector(`img`).getAttribute(`src`);
-        reactionEmojiContainer.innerHTML = `<img src="${emojiPictureSrc}" width="55" height="55" alt="emoji">`;
-      });
-    }
     for (const radio of reactionRadioBtns) {
       radio.addEventListener(`change`, (event) => {
         this.selectedReactionId = event.target.getAttribute(`id`);
+        const selectedReactionLabel = this.getElement().querySelector(`label[for="${this.selectedReactionId}"]`);
+        const emojiPictureSrc = selectedReactionLabel.querySelector(`img`).getAttribute(`src`);
+        reactionEmojiContainer.innerHTML = `<img src="${emojiPictureSrc}" width="55" height="55" alt="emoji">`;
       });
     }
   }
@@ -477,15 +505,10 @@ export default class FilmPopup extends AbstractSmartComponent {
     return reaction;
   }
   getCommentInput() {
-    if (!this.commentInput) {
-      this.commentInput = this.getElement().querySelector(`.film-details__comment-input`);
-    }
-    return this.commentInput;
+    return this.getElement().querySelector(`.film-details__comment-input`);
   }
   onCommentSendError() {
-    if (!this.newCommentBlock) {
-      this.newCommentBlock = this.getElement().querySelector(`.film-details__new-comment`);
-    }
+    this.newCommentBlock = this.getElement().querySelector(`.film-details__new-comment`);
     if (!this.newCommentBlock.classList.contains(SHAKE_ANIMATION_CLS)) {
       this.newCommentBlock.classList.add(SHAKE_ANIMATION_CLS);
     } else {
@@ -513,21 +536,24 @@ export default class FilmPopup extends AbstractSmartComponent {
       this.addNewComment(newCommentData);
     }
   }
-  removeSecondBtnHandler(event) {
+  removeFirstBtnKey(event) {
     if (event.key === this.firstBtnKeyForCommentSend) {
-      window.removeEventListener(`keydown`, this.secondBtnHandlerForSendComment);
+      this.firstBtnKeyForCommentSend = null;
     }
   }
   secondBtnHandlerForSendComment(event) {
     if (event.key === ENTER_EVENT_KEY) {
-      this.createNewComment();
+      event.preventDefault();
+      if (this.firstBtnKeyForCommentSend) {
+        this.createNewComment();
+      }
     }
   }
   firstBtnHandlerForSendComment(event) {
     if (event.key === CTRL_EVENT_KEY || event.key === COMMAND_EVENT_KEY) {
       this.firstBtnKeyForCommentSend = event.key;
+      window.addEventListener(`keyup`, this.removeFirstBtnKey);
       window.addEventListener(`keydown`, this.secondBtnHandlerForSendComment);
-      window.addEventListener(`keyup`, this.removeSecondBtnHandler);
     }
   }
   sendNewComment() {
@@ -544,14 +570,24 @@ export default class FilmPopup extends AbstractSmartComponent {
       }
     }
   }
+  getRemoveCommentBtn() {
+    return this.getElement().querySelectorAll(`.film-details__comment-delete`);
+  }
+  onCommentDeleteError() {
+    const noDeletingCommentRemoveBtn = this.getElement().querySelector(`.film-details__comment-delete[data-id="${this.commentId}"]`);
+    noDeletingCommentRemoveBtn.innerText = COMMENT_DELETE_BTN_TEXT;
+    noDeletingCommentRemoveBtn.removeAttribute(`disabled`);
+  }
   setRemoveCommentCallbacks(callback) {
     this.commentRemoveCallback = callback;
-    const removeCommentBtns = this.getElement().querySelectorAll(`.film-details__comment-delete`);
+    const removeCommentBtns = this.getRemoveCommentBtn();
     removeCommentBtns.forEach((btn) => {
       btn.addEventListener(`click`, (event) => {
         event.preventDefault();
-        const commentId = event.target.getAttribute(`data-id`);
-        callback(commentId);
+        event.target.innerText = COMMENT_DELETING_BTN_TEXT;
+        event.target.setAttribute(`disabled`, true);
+        this.commentId = event.target.getAttribute(`data-id`);
+        callback(this.commentId);
       });
     });
   }
@@ -562,7 +598,8 @@ export default class FilmPopup extends AbstractSmartComponent {
     this.setCloseHandlers();
     this.setUserRatingChangeCallbacks(this.changeUserRatingCallback);
     this.setUserRatingResetCallback(this.changeUserRatingCallback);
-    this.onSelectReaction();
     this.setChangeStatusCallbacks(this.changeStatusCallback);
+    this.sendNewComment();
+    this.onSelectReaction();
   }
 }

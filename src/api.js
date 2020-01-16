@@ -25,10 +25,11 @@ export default class API {
   _load(url, method = METHOD.get, body = null, onError = null) {
     return fetch(`${API_URL}/${url}`, {method, body, headers})
     .then(this.checkStatus)
-    .catch(() => {
+    .catch((err) => {
       if (onError) {
         onError();
       }
+      throw err;
     });
   }
   getComments(film, onUpdateMovieData) {
@@ -80,14 +81,14 @@ export default class API {
     .then((response) => response.json())
     .then((data) => {
       data.movie.comments = data.comments;
-      this.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
+      this.dataAdapter.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
     })
     .catch((err) => {
       throw err;
     });
   }
-  deleteComment(commentId, onUpdateMovieData) {
-    return this._load(`comments/${commentId}`, METHOD.delete)
+  deleteComment(commentId, onUpdateMovieData, onError) {
+    return this._load(`comments/${commentId}`, METHOD.delete, null, onError)
     .then(() => {
       onUpdateMovieData(commentId);
     })

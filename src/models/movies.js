@@ -49,8 +49,8 @@ export default class Movies {
   addNewComment(id, commentData, onServerDataUpdate, onError) {
     this.api.sendComment(id, commentData, onServerDataUpdate, onError);
   }
-  deleteComment(id, onServerDataUpdate) {
-    this.api.deleteComment(id, onServerDataUpdate);
+  deleteComment(id, onServerDataUpdate, onError) {
+    this.api.deleteComment(id, onServerDataUpdate, onError);
   }
   sortByType(type) {
     switch (type) {

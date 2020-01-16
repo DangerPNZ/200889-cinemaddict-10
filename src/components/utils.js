@@ -78,3 +78,11 @@ export const getFilmDuration = (duration) => {
   ];
   return durationValues.join(``);
 };
+export const removeIt = (element) => {
+  if (element instanceof Element) {
+    element.remove();
+  } else {
+    element.getElement().remove();
+    element.removeElement();
+  }
+};
