@@ -1,4 +1,3 @@
-import {getRandomNum} from './utils.js';
 import {insertElementInMarkup} from './utils.js';
 import moment from 'moment';
 import AbstractSmartComponent from "./abstract-smart-component.js";
@@ -55,19 +54,21 @@ const getAllMoviesGenres = (movies) => {
 let genresLabels = [];
 let values = [];
 let genresCounts = {};
+const INDEX_OF_FIRST_ELEMENT = 0;
+const ONE_ELEMENT_FOR_GENGES_COUNT = 1;
 const getTopGenre = (movies) => {
   genresLabels = [];
   values = [];
   genresCounts = {};
   const allGenres = getAllMoviesGenres(movies);
-  let max = 0;
+  let max = ZERO_FOR_NUMBER_VALUES;
   const topGenres = [];
   for (const genre of allGenres) {
     if (!genresCounts[genre]) {
-      genresCounts[genre] = 1;
+      genresCounts[genre] = ONE_ELEMENT_FOR_GENGES_COUNT;
       genresLabels.push(genre);
     } else {
-      genresCounts[genre] += 1;
+      genresCounts[genre] += ONE_ELEMENT_FOR_GENGES_COUNT;
     }
     if (genresCounts[genre] > max) {
       max = genresCounts[genre];
@@ -83,7 +84,7 @@ const getTopGenre = (movies) => {
       topGenres.push(key);
     }
   }
-  return topGenres[getRandomNum(0, (topGenres.length - 1))];
+  return topGenres[INDEX_OF_FIRST_ELEMENT];
 };
 const getUserRank = (userRank) => {
   if (userRank) {
@@ -143,7 +144,28 @@ const getStat = (userRank, filmsData) => {
 
 </section>`;
 };
-
+const CHART_OPTION_VALUE = {
+  chartType: `horizontalBar`,
+  backgroundColor: `#ffe800`,
+  barThickness: 22,
+  minBarLength: 0,
+  displayNoneState: false,
+  color: `#fff`,
+  tooltipsEnabledState: false,
+  fontSize: 16,
+  legendState: false,
+  dataLabelsPosition: `start`,
+  dataLabelsOffset: 25,
+  stackedState: true,
+  ticksPadding: 60
+};
+const AMOUNTH_OF_TIME_UNIT = 1;
+const TIME_UNIT = {
+  day: `day`,
+  week: `week`,
+  month: `month`,
+  year: `year`
+};
 export default class Stat extends AbstractSmartComponent {
   constructor(userRank, filmsData, container) {
     super();
@@ -165,16 +187,16 @@ export default class Stat extends AbstractSmartComponent {
         this.filmsDataByPeriod = this.data;
         break;
       case TODAY_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), `day`));
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TIME_UNIT.day));
         break;
       case WEEK_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(1, `week`)));
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNTH_OF_TIME_UNIT, TIME_UNIT.week)));
         break;
       case MONTH_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(1, `month`)));
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNTH_OF_TIME_UNIT, TIME_UNIT.month)));
         break;
       case YEAR_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(1, `year`)));
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNTH_OF_TIME_UNIT, TIME_UNIT.year)));
         break;
     }
   }
@@ -193,60 +215,60 @@ export default class Stat extends AbstractSmartComponent {
       const ctx = this.getElement().querySelector(`#genres-chart`).getContext(`2d`);
       return new Chart(ctx, {
         plugins: [chartDataLabels],
-        type: `horizontalBar`,
+        type: CHART_OPTION_VALUE.chartType,
         data: {
           labels: genresLabels,
           datasets: [{
             data: values,
-            backgroundColor: `#ffe800`,
-            barThickness: 22,
-            minBarLength: 0
+            backgroundColor: CHART_OPTION_VALUE.backgroundColor,
+            barThickness: CHART_OPTION_VALUE.barThickness,
+            minBarLength: CHART_OPTION_VALUE.minBarLength
           }]
         },
         gridLines: {
-          display: false
+          display: CHART_OPTION_VALUE.displayNoneState
         },
         options: {
           label: {
             font: {
-              color: `#fff`
+              color: CHART_OPTION_VALUE.color
             }
           },
           tooltips: {
-            enabled: false
+            enabled: CHART_OPTION_VALUE.tooltipsEnabledState
           },
           plugins: {
             datalabels: {
-              anchor: `start`,
-              align: `start`,
-              offset: 25,
-              color: `#fff`,
+              anchor: CHART_OPTION_VALUE.dataLabelsPosition,
+              align: CHART_OPTION_VALUE.dataLabelsPosition,
+              offset: CHART_OPTION_VALUE.dataLabelsOffset,
+              color: CHART_OPTION_VALUE.color,
               font: {
-                size: 16
+                size: CHART_OPTION_VALUE.fontSize
               }
             }
           },
-          legend: false,
+          legend: CHART_OPTION_VALUE.legendState,
           scales: {
             xAxes: [{
               gridLines: {
-                display: false
+                display: CHART_OPTION_VALUE.displayNoneState
               },
               ticks: {
-                display: false
+                display: CHART_OPTION_VALUE.displayNoneState
               },
-              stacked: true
+              stacked: CHART_OPTION_VALUE.stackedState
             }],
             yAxes: [{
               gridLines: {
-                display: false
+                display: CHART_OPTION_VALUE.displayNoneState
               },
               ticks: {
-                fontSize: 16,
-                fontColor: `#fff`,
-                padding: 60
+                fontSize: CHART_OPTION_VALUE.fontSize,
+                fontColor: CHART_OPTION_VALUE.color,
+                padding: CHART_OPTION_VALUE.ticksPadding
               },
-              stacked: true
+              stacked: CHART_OPTION_VALUE.stackedState
             }]
           }
         }

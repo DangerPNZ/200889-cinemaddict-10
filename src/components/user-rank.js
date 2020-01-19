@@ -18,6 +18,19 @@ const getUserRank = (rank) => {
     return `<section class="header__profile profile"></section>`;
   }
 };
+const VAL_FOR_RANK = {
+  novice: {
+    min: 1,
+    max: 10
+  },
+  fan: {
+    min: 11,
+    max: 20
+  },
+  movieBuff: {
+    min: 21
+  }
+};
 
 export default class UserRank extends AbstractComponent {
   constructor(moviesData) {
@@ -26,11 +39,11 @@ export default class UserRank extends AbstractComponent {
   }
   getRank() {
     let rank = null;
-    if (this._watchedFilmsSum >= 21) {
+    if (this._watchedFilmsSum >= VAL_FOR_RANK.movieBuff.min) {
       rank = `movie buff`;
-    } else if (this._watchedFilmsSum >= 11 && this._watchedFilmsSum <= 20) {
+    } else if (this._watchedFilmsSum >= VAL_FOR_RANK.fan.min && this._watchedFilmsSum <= VAL_FOR_RANK.fan.max) {
       rank = `fan`;
-    } else if (this._watchedFilmsSum <= 10 && this._watchedFilmsSum > 0) {
+    } else if (this._watchedFilmsSum >= VAL_FOR_RANK.novice.min && this._watchedFilmsSum <= VAL_FOR_RANK.novice.max) {
       rank = `novice`;
     }
     return rank;

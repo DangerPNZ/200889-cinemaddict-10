@@ -92,5 +92,4 @@ export default class FilmCard extends AbstractSmartComponent {
     this.setChangeStatusCallbacks(this.changeStatusCallback);
   }
 }
-// import moment from 'moment';
-// console.log(moment().format(`D MMMM YYYY`));
+

@@ -10,13 +10,17 @@ const headers = {
   Authorization: AUTHORIZATION_URL,
   [`Content-Type`]: `application/json`
 };
+const STATUS = {
+  statusOkCode: 200,
+  statusMultipleChoicesCode: 300
+};
 
 export default class API {
   constructor(dataAdapter) {
     this.dataAdapter = dataAdapter;
   }
   checkStatus(response) {
-    if (response.status >= 200 && response.status < 300) {
+    if (response.status >= STATUS.statusOkCode && response.status < STATUS.statusMultipleChoicesCode) {
       return response;
     } else {
       throw new Error(`${response.status}: ${response.statusText}`);
@@ -63,6 +67,7 @@ export default class API {
     .then((response) => response.json())
     .then((filmsData) => {
       this.getCommentsForAllMovies(filmsData);
+      return filmsData;
     })
     .catch((err) => {
       throw err;

@@ -19,6 +19,8 @@ const TOP_RATED_SECTION_HEADING_TEXT = `Top rated`;
 const MOST_COMMENTED_SECTION_HEADING_TEXT = `Most commented`;
 const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;
 const PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION = `comments`;
+const AMOUNTH_ELEMENTS_WHEN_DELETING_ONE_ELEMENT = 1;
+const ZERO = 0;
 const getServerDataUpdateCallback = (that, allControllers, id, newData, oldData) => {
   const callback = (data) => {
     let controllersForChange = null;
@@ -31,18 +33,18 @@ const getServerDataUpdateCallback = (that, allControllers, id, newData, oldData)
         return item.filmPopup !== null;
       });
     }
-    controllersForChange.forEach((item) => {
+    for (const item of controllersForChange) {
       if (!newData) {
         item.data.comments.forEach((comment, index, array) => {
           if (comment.id === id) {
-            array.splice(index, 1);
+            array.splice(index, AMOUNTH_ELEMENTS_WHEN_DELETING_ONE_ELEMENT);
           }
           item.rerenderComponent(item.data);
         });
       } else {
         item.rerenderComponent(data);
       }
-    });
+    }
     if (newData && oldData) {
       if (newData.isAlready !== oldData.isAlready) {
         that._getNewUserRank();
@@ -110,7 +112,7 @@ export default class PageController {
     this.moviesModel.setStateAfterDataLoad = this.setStateAfterDataLoad.bind(this);
     this.onToFilms = this.onToFilms.bind(this);
     this.onToStatistic = this.onToStatistic.bind(this);
-    this._filmsInThePage = 0;
+    this._filmsInThePage = ZERO;
     this._controllers = {
       mainSection: [],
       extraSections: {}
@@ -162,9 +164,9 @@ export default class PageController {
       ...this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT],
       ...this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT]
     ];
-    controllers.forEach((item) => {
+    for (const item of controllers) {
       item.closePopup();
-    });
+    }
   }
   stateCountChange() {
     this.navController.rerender();
@@ -185,13 +187,13 @@ export default class PageController {
   getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
     const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
     return sortedCardsDataByParameter.filter((item) => {
-      return Array.isArray(item[sortParameter]) ? item[sortParameter].length > 0 : item[sortParameter] > 0;
+      return Array.isArray(item[sortParameter]) ? item[sortParameter].length > ZERO : item[sortParameter] > ZERO;
     });
   }
   createExtraSection(sortParameter, container, totalFilmsData) {
     const extraSectionFilmsCardsData = this.getExtraSectionFilmsCardsData(sortParameter, totalFilmsData);
     if (extraSectionFilmsCardsData.length) {
-      const topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
+      const topElementsByParameter = extraSectionFilmsCardsData.slice(ZERO, MAX_ELEMENTS_IN_EXTRA_SECTION);
       let headingText = ``;
       switch (sortParameter) {
         case PARAMETER_FOR_CREATE_TOP_RATED_SECTION:
@@ -203,16 +205,16 @@ export default class PageController {
       }
       const extraSection = new FilmsExtraSection(headingText);
       const extraSectionFilmsContainer = extraSection.getContainerElement();
-      topElementsByParameter.forEach((item) => {
+      for (const item of topElementsByParameter) {
         const controller = new MovieController(extraSectionFilmsContainer, this._onDataChange, this._onViewChange);
         this._controllers.extraSections[headingText].push(controller);
         controller.render(item);
-      });
+      }
       insertElementInMarkup(extraSection, container);
     }
   }
   outputFilmParts() {
-    for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
+    for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== ZERO; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this.moviesModel.getMovieDataByIndex(index);
       const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange);
@@ -261,12 +263,12 @@ export default class PageController {
   }
   onFilmsPartsChange(filmsData) {
     this._elements.moviesContainer.innerHTML = ``;
-    this._filmsInThePage = 0;
+    this._filmsInThePage = ZERO;
     this._controllers.mainSection = [];
-    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== 0) {
+    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== ZERO) {
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
     }
-    if (filmsData.length !== 0) {
+    if (filmsData.length !== ZERO) {
       this.outputFilmParts();
     } else {
       // вывести сообщение отсутствия фильмов, удалить контейнер (?)

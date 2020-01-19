@@ -1,33 +1,33 @@
 import moment from 'moment';
 
+const RESULT_VAL_FOR_COMPARE = {
+  firstLessSecond: 1,
+  firstMoreSecond: -1,
+  firstEqualSecond: 0
+};
+
 export const compare = (property, byDate = false) => {
   if (byDate === false) {
     return (a, b) => {
       if (a[property] < b[property]) {
-        return 1;
+        return RESULT_VAL_FOR_COMPARE.firstLessSecond;
       }
       if (a[property] > b[property]) {
-        return -1;
+        return RESULT_VAL_FOR_COMPARE.firstMoreSecond;
       }
-      return 0;
+      return RESULT_VAL_FOR_COMPARE.firstEqualSecond;
     };
   } else {
     return (a, b) => {
       if (new Date(a[property]) < new Date(b[property])) {
-        return 1;
+        return RESULT_VAL_FOR_COMPARE.firstLessSecond;
       }
       if (new Date(a[property]) > new Date(b[property])) {
-        return -1;
+        return RESULT_VAL_FOR_COMPARE.firstMoreSecond;
       }
-      return 0;
+      return RESULT_VAL_FOR_COMPARE.firstEqualSecond;
     };
   }
-};
-
-export const getRandomNum = (min, max, toRound = true) => {
-  const numbersLengthAfterPoint = 1;
-  const number = Math.random() * (max - min) + min;
-  return toRound ? Math.round(number) : number.toFixed(numbersLengthAfterPoint);
 };
 
 export const createElement = (templateContent) => {

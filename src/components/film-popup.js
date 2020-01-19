@@ -10,6 +10,7 @@ const COMMENT_CUT_START_INDEX = 139;
 const CTRL_EVENT_KEY = `Control`;
 const COMMAND_EVENT_KEY = `Meta`;
 const ENTER_EVENT_KEY = `Enter`;
+const ESCAPE_EVENT_KEY = `Escape`;
 const getFilmPopup = (filmData) => {
   const {
     posterSrc,
@@ -131,22 +132,27 @@ const getFilmPopup = (filmData) => {
   const SECONDS_IN_MINUTES = 60;
   const SECONDS_IN_HOUR = SECONDS_IN_MINUTES * 60;
   const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
+  const SECONDS_IN_THREE_MINUTES = SECONDS_IN_MINUTES * 3;
+  const SECONDS_IN_FIFTY_NINE_MINUTES = SECONDS_IN_MINUTES * 59;
+  const SECONDS_IN_TWO_HOURS = SECONDS_IN_HOUR * 2;
+  const SECONDS_IN_TWO_DAYS = SECONDS_IN_DAY * 2;
+  const SECONDS_IN_THREE_DAYS = SECONDS_IN_DAY * 3;
   const getCommentCreateTime = (date) => {
     const secondsElapsed = moment().diff(date, `seconds`, false);
     let createTime = null;
     if (secondsElapsed < SECONDS_IN_MINUTES) {
       createTime = `now`;
-    } else if (secondsElapsed >= SECONDS_IN_MINUTES && secondsElapsed <= (SECONDS_IN_MINUTES * 3)) {
+    } else if (secondsElapsed >= SECONDS_IN_MINUTES && secondsElapsed <= SECONDS_IN_THREE_MINUTES) {
       createTime = `a minute ago`;
-    } else if (secondsElapsed > (SECONDS_IN_MINUTES * 3) && secondsElapsed <= (SECONDS_IN_MINUTES * 59)) {
+    } else if (secondsElapsed > SECONDS_IN_THREE_MINUTES && secondsElapsed <= SECONDS_IN_FIFTY_NINE_MINUTES) {
       createTime = `a few minutes ago`;
-    } else if (secondsElapsed >= SECONDS_IN_HOUR && secondsElapsed < (SECONDS_IN_HOUR * 2)) {
+    } else if (secondsElapsed >= SECONDS_IN_HOUR && secondsElapsed < SECONDS_IN_TWO_HOURS) {
       createTime = `a hour ago`;
-    } else if (secondsElapsed >= (SECONDS_IN_HOUR * 2) && secondsElapsed < (SECONDS_IN_HOUR * 24)) {
+    } else if (secondsElapsed >= SECONDS_IN_TWO_HOURS && secondsElapsed < SECONDS_IN_DAY) {
       createTime = `a few hours ago`;
-    } else if (secondsElapsed >= SECONDS_IN_DAY && secondsElapsed < (SECONDS_IN_DAY * 2)) {
+    } else if (secondsElapsed >= SECONDS_IN_DAY && secondsElapsed < SECONDS_IN_TWO_DAYS) {
       createTime = `a day ago`;
-    } else if (secondsElapsed >= (SECONDS_IN_DAY * 2) && secondsElapsed <= (SECONDS_IN_DAY * 3)) {
+    } else if (secondsElapsed >= SECONDS_IN_TWO_DAYS && secondsElapsed <= SECONDS_IN_THREE_DAYS) {
       createTime = `a two days ago`;
     } else {
       createTime = moment(date).fromNow();
@@ -375,8 +381,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     window.removeEventListener(`keyup`, this.removeFirstBtnKey);
   }
   escapeBtnHandler(event) {
-    const ESCAPE_KEY_CODE = 27;
-    if (event.keyCode === ESCAPE_KEY_CODE) {
+    if (event.key === ESCAPE_EVENT_KEY) {
       this.getElement().remove();
       this.removeElement();
       window.removeEventListener(`keydown`, this.escapeBtnHandler);

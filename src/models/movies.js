@@ -1,6 +1,6 @@
 import {compare} from '../components/utils.js';
-import API from '../api.js';
-import DataAdapter from '../data-adapter.js';
+import API from '../api/index.js';
+import DataAdapter from '../api/data-adapter.js';
 
 const SORT_TYPE_VALUES = {
   default: `default`,
@@ -18,7 +18,8 @@ export default class Movies {
   constructor() {
     this.moviesData = [];
     this.filmsDataForRender = this.moviesData;
-    this.api = new API(new DataAdapter(this, this.onUpdateMoviesData.bind(this), this.onUpdateMovieDataItem.bind(this)));
+    this.dataAdapter = new DataAdapter(this, this.onUpdateMoviesData.bind(this), this.onUpdateMovieDataItem.bind(this));
+    this.api = new API(this.dataAdapter);
   }
   onUpdateMoviesData(filmsData) {
     this.moviesData = filmsData;
