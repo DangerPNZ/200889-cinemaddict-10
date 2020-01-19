@@ -1,7 +1,7 @@
 # Личный проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Антон Меднов](https://up.htmlacademy.ru/ecmascript/10/user/200889).
-* Наставник: `Неизвестно`.
+* Наставник: `Сергей Буртылёв`.
 
 ---
 
