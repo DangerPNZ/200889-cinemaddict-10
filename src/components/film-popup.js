@@ -1,16 +1,18 @@
 import AbstractSmartComponent from './abstract-smart-component.js';
-import {formatDate} from './utils.js';
-import {getFilmDuration} from './utils.js';
+import {formatDate} from '../utils/utils.js';
+import {getFilmDuration} from '../utils/utils.js';
 import moment from 'moment';
 import he from 'he';
 
 const RELEASE_DATE_FORMAT = `D MMMM YYYY`;
 const MAX_NEW_COMMENT_LENGTH = 140;
 const COMMENT_CUT_START_INDEX = 139;
-const CTRL_EVENT_KEY = `Control`;
-const COMMAND_EVENT_KEY = `Meta`;
-const ENTER_EVENT_KEY = `Enter`;
-const ESCAPE_EVENT_KEY = `Escape`;
+const EventKey = {
+  CTRL: `Control`,
+  COMMAND: `Meta`,
+  ENTER: `Enter`,
+  ESCAPE: `Escape`
+};
 const getFilmPopup = (filmData) => {
   const {
     posterSrc,
@@ -34,30 +36,28 @@ const getFilmPopup = (filmData) => {
     comments
   } = filmData;
   const addUserRating = () => {
-    if (isAlready && userRatingValue) {
-      return `<p class="film-details__user-rating">Your rate ${userRatingValue}</p>`;
-    } else {
-      return ``;
-    }
+    return (isAlready && userRatingValue) ? `<p class="film-details__user-rating">Your rate ${userRatingValue}</p>` : ``;
   };
-  const SLEEPING_REACTION_IMAGE_SRC = `/images/emoji/sleeping.png`;
-  const PUKE_REACTION_IMAGE_SRC = `/images/emoji/puke.png`;
-  const ANGRY_REACTION_IMAGE_SRC = `/images/emoji/angry.png`;
-  const SMILE_REACTION_IMAGE_SRC = `/images/emoji/smile.png`;
+  const ReactionImageSrc = {
+    SLEEPING: `/images/emoji/sleeping.png`,
+    PUKE: `/images/emoji/puke.png`,
+    ANGRY: `/images/emoji/angry.png`,
+    SMILE: `/images/emoji/smile.png`
+  };
   const getCommentReactionImageSrc = (emotion) => {
     let reactionImageSrc = null;
     switch (emotion) {
       case `sleeping`:
-        reactionImageSrc = SLEEPING_REACTION_IMAGE_SRC;
+        reactionImageSrc = ReactionImageSrc.SLEEPING;
         break;
       case `puke`:
-        reactionImageSrc = PUKE_REACTION_IMAGE_SRC;
+        reactionImageSrc = ReactionImageSrc.PUKE;
         break;
       case `angry`:
-        reactionImageSrc = ANGRY_REACTION_IMAGE_SRC;
+        reactionImageSrc = ReactionImageSrc.ANGRY;
         break;
       case `smile`:
-        reactionImageSrc = SMILE_REACTION_IMAGE_SRC;
+        reactionImageSrc = ReactionImageSrc.SMILE;
         break;
     }
     return reactionImageSrc;
@@ -182,11 +182,7 @@ const getFilmPopup = (filmData) => {
     return commentsList;
   };
   const setState = (parameter) => {
-    if (parameter) {
-      return `checked`;
-    } else {
-      return ``;
-    }
+    return (parameter) ? `checked` : ``;
   };
   const addFeedbackStyles = () => `
     <style>
@@ -348,8 +344,10 @@ const getFilmPopup = (filmData) => {
 };
 const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
 const SHAKE_ANIMATION_CLS = `shake`;
-const COMMENT_DELETE_BTN_TEXT = `Delete`;
-const COMMENT_DELETING_BTN_TEXT = `Deleting…`;
+const CommentDeleteBtnText = {
+  DEFAULT: `Delete`,
+  DELETING: `Deleting…`
+};
 
 export default class FilmPopup extends AbstractSmartComponent {
   constructor(data) {
@@ -381,7 +379,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     window.removeEventListener(`keyup`, this.removeFirstBtnKey);
   }
   escapeBtnHandler(event) {
-    if (event.key === ESCAPE_EVENT_KEY) {
+    if (event.key === EventKey.ESCAPE) {
       this.getElement().remove();
       this.removeElement();
       window.removeEventListener(`keydown`, this.escapeBtnHandler);
@@ -547,7 +545,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     }
   }
   secondBtnHandlerForSendComment(event) {
-    if (event.key === ENTER_EVENT_KEY) {
+    if (event.key === EventKey.ENTER) {
       event.preventDefault();
       if (this.firstBtnKeyForCommentSend) {
         this.createNewComment();
@@ -555,7 +553,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     }
   }
   firstBtnHandlerForSendComment(event) {
-    if (event.key === CTRL_EVENT_KEY || event.key === COMMAND_EVENT_KEY) {
+    if (event.key === EventKey.CTRL || event.key === EventKey.COMMAND) {
       this.firstBtnKeyForCommentSend = event.key;
       window.addEventListener(`keyup`, this.removeFirstBtnKey);
       window.addEventListener(`keydown`, this.secondBtnHandlerForSendComment);
@@ -580,7 +578,7 @@ export default class FilmPopup extends AbstractSmartComponent {
   }
   onCommentDeleteError() {
     const noDeletingCommentRemoveBtn = this.getElement().querySelector(`.film-details__comment-delete[data-id="${this.commentId}"]`);
-    noDeletingCommentRemoveBtn.innerText = COMMENT_DELETE_BTN_TEXT;
+    noDeletingCommentRemoveBtn.innerText = CommentDeleteBtnText.DEFAULT;
     noDeletingCommentRemoveBtn.removeAttribute(`disabled`);
   }
   setRemoveCommentCallbacks(callback) {
@@ -589,7 +587,7 @@ export default class FilmPopup extends AbstractSmartComponent {
     removeCommentBtns.forEach((btn) => {
       btn.addEventListener(`click`, (event) => {
         event.preventDefault();
-        event.target.innerText = COMMENT_DELETING_BTN_TEXT;
+        event.target.innerText = CommentDeleteBtnText.DELETING;
         event.target.setAttribute(`disabled`, true);
         this.commentId = event.target.getAttribute(`data-id`);
         callback(this.commentId);

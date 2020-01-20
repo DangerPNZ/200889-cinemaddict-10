@@ -1,22 +1,26 @@
-import {insertElementInMarkup} from './utils.js';
+import {insertElementInMarkup} from '../utils/utils.js';
 import moment from 'moment';
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import Chart from 'chart.js';
 import chartDataLabels from 'chartjs-plugin-datalabels';
 
-const DEFAULT_STATISTIC_STATE = `all-time`;
-const TODAY_STATISTIC_STATE = `today`;
-const WEEK_STATISTIC_STATE = `week`;
-const MONTH_STATISTIC_STATE = `month`;
-const YEAR_STATISTIC_STATE = `year`;
-const ZERO_FOR_NUMBER_VALUES = 0;
+const StatisticState = {
+  DEFAULT: `all-time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+
 const getWatchedMovies = (movies) => {
   return movies.filter((item) => {
     return item.isAlready === true;
   });
 };
-const PARAMETER_FOR_GET_HOURS = `hours`;
-const PARAMETER_FOR_GET_MINUTES = `minutes`;
+const TimeParameter = {
+  HOURS: `hours`,
+  MINUTES: `minutes`
+};
 const MINUTES_IN_HOUR = 60;
 const getAllWatchedMoviesTime = (movies, parameter) => {
   if (movies.length) {
@@ -24,17 +28,17 @@ const getAllWatchedMoviesTime = (movies, parameter) => {
     let totalTimeValueByParameter = null;
     if (watchedFilms.length) {
       const totalDuration = watchedFilms.map((item) => item.filmDuration).reduce((sum, current) => sum + current);
-      if (parameter === PARAMETER_FOR_GET_HOURS) {
+      if (parameter === TimeParameter.HOURS) {
         totalTimeValueByParameter = Math.floor(totalDuration / MINUTES_IN_HOUR);
-      } else if (parameter === PARAMETER_FOR_GET_MINUTES) {
+      } else if (parameter === TimeParameter.MINUTES) {
         totalTimeValueByParameter = Math.floor(totalDuration % MINUTES_IN_HOUR);
       }
     } else {
-      totalTimeValueByParameter = ZERO_FOR_NUMBER_VALUES;
+      totalTimeValueByParameter = 0;
     }
     return totalTimeValueByParameter;
   } else {
-    return ZERO_FOR_NUMBER_VALUES;
+    return 0;
   }
 };
 const getAllMoviesGenres = (movies) => {
@@ -61,7 +65,7 @@ const getTopGenre = (movies) => {
   values = [];
   genresCounts = {};
   const allGenres = getAllMoviesGenres(movies);
-  let max = ZERO_FOR_NUMBER_VALUES;
+  let max = 0;
   const topGenres = [];
   for (const genre of allGenres) {
     if (!genresCounts[genre]) {
@@ -130,7 +134,7 @@ const getStat = (userRank, filmsData) => {
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Total duration</h4>
-      <p class="statistic__item-text">${getAllWatchedMoviesTime(filmsData, PARAMETER_FOR_GET_HOURS)} <span class="statistic__item-description">h</span> ${getAllWatchedMoviesTime(filmsData, PARAMETER_FOR_GET_MINUTES)} <span class="statistic__item-description">m</span></p>
+      <p class="statistic__item-text">${getAllWatchedMoviesTime(filmsData, TimeParameter.HOURS)} <span class="statistic__item-description">h</span> ${getAllWatchedMoviesTime(filmsData, TimeParameter.MINUTES)} <span class="statistic__item-description">m</span></p>
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Top genre</h4>
@@ -159,12 +163,12 @@ const CHART_OPTION_VALUE = {
   stackedState: true,
   ticksPadding: 60
 };
-const AMOUNTH_OF_TIME_UNIT = 1;
-const TIME_UNIT = {
-  day: `day`,
-  week: `week`,
-  month: `month`,
-  year: `year`
+const AMOUNT_OF_TIME_UNITS = 1;
+const TimeUnit = {
+  DAY: `day`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
 };
 export default class Stat extends AbstractSmartComponent {
   constructor(userRank, filmsData, container) {
@@ -174,7 +178,7 @@ export default class Stat extends AbstractSmartComponent {
     this.statisticContainer = container;
     this.createChart = this.createChart.bind(this);
     this.setStatisticPeriodHandlers = this.setStatisticPeriodHandlers.bind(this);
-    this.staticticState = DEFAULT_STATISTIC_STATE;
+    this.staticticState = StatisticState.DEFAULT;
     this.filmsDataByPeriod = this.data;
     this.rerender = this.rerender.bind(this);
   }
@@ -183,20 +187,20 @@ export default class Stat extends AbstractSmartComponent {
   }
   defineStatisticData() {
     switch (this.staticticState) {
-      case DEFAULT_STATISTIC_STATE:
+      case StatisticState.DEFAULT:
         this.filmsDataByPeriod = this.data;
         break;
-      case TODAY_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TIME_UNIT.day));
+      case StatisticState.TODAY:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TimeUnit.DAY));
         break;
-      case WEEK_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNTH_OF_TIME_UNIT, TIME_UNIT.week)));
+      case StatisticState.WEEK:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.WEEK)));
         break;
-      case MONTH_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNTH_OF_TIME_UNIT, TIME_UNIT.month)));
+      case StatisticState.MONTH:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.MONTH)));
         break;
-      case YEAR_STATISTIC_STATE:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNTH_OF_TIME_UNIT, TIME_UNIT.year)));
+      case StatisticState.YEAR:
+        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.YEAR)));
         break;
     }
   }
@@ -278,7 +282,7 @@ export default class Stat extends AbstractSmartComponent {
     }
   }
   setCurrentStatisticPeriod() {
-    if (this.staticticState !== DEFAULT_STATISTIC_STATE) {
+    if (this.staticticState !== StatisticState.DEFAULT) {
       this.getElement().querySelector(`.statistic__filters-input[value="${this.staticticState}"]`).setAttribute(`checked`, true);
     }
   }

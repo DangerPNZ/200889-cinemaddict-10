@@ -1,14 +1,10 @@
 import AbstractSmartComponent from "./abstract-smart-component.js";
-import {getFilmDuration} from './utils.js';
-import {formatDate} from './utils.js';
+import {getFilmDuration} from '../utils/utils.js';
+import {formatDate} from '../utils/utils.js';
 
 const YEAR_FORMAT = `YYYY`;
 const setState = (parameter) => {
-  if (parameter) {
-    return ` film-card__controls-item--active`;
-  } else {
-    return ``;
-  }
+  return parameter ? ` film-card__controls-item--active` : ``;
 };
 const getFilmCard = (filmData) => {
   const {

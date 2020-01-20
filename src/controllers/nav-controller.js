@@ -1,5 +1,5 @@
 import Nav from '../components/nav.js';
-import {insertElementInMarkup} from '../components/utils.js';
+import {insertElementInMarkup} from '../utils/utils.js';
 
 const ACTIVE_NAV_BTN_CLS = `main-navigation__item--active`;
 const DATA_FILTER_ATTRIBUTE = `data-filtertype`;

@@ -1,18 +1,18 @@
 const AUTHORIZATION_URL = `Basic cinemaddict_10_200889`;
 const API_URL = `https://htmlacademy-es-10.appspot.com/cinemaddict`;
-const METHOD = {
-  post: `POST`,
-  get: `GET`,
-  put: `PUT`,
-  delete: `DELETE`
+const Method = {
+  POST: `POST`,
+  GET: `GET`,
+  PUT: `PUT`,
+  DELETE: `DELETE`
 };
 const headers = {
   Authorization: AUTHORIZATION_URL,
   [`Content-Type`]: `application/json`
 };
-const STATUS = {
-  statusOkCode: 200,
-  statusMultipleChoicesCode: 300
+const Status = {
+  STATUS_OK_CODE: 200,
+  STATUS_MULTIPLE_CHOISES_CODE: 300
 };
 
 export default class API {
@@ -20,13 +20,13 @@ export default class API {
     this.dataAdapter = dataAdapter;
   }
   checkStatus(response) {
-    if (response.status >= STATUS.statusOkCode && response.status < STATUS.statusMultipleChoicesCode) {
+    if (response.status >= Status.STATUS_OK_CODE && response.status < Status.STATUS_MULTIPLE_CHOISES_CODE) {
       return response;
     } else {
       throw new Error(`${response.status}: ${response.statusText}`);
     }
   }
-  _load(url, method = METHOD.get, body = null, onError = null) {
+  _load(url, method = Method.GET, body = null, onError = null) {
     return fetch(`${API_URL}/${url}`, {method, body, headers})
     .then(this.checkStatus)
     .catch((err) => {
@@ -67,14 +67,13 @@ export default class API {
     .then((response) => response.json())
     .then((filmsData) => {
       this.getCommentsForAllMovies(filmsData);
-      return filmsData;
     })
     .catch((err) => {
       throw err;
     });
   }
   updateMovie(id, newData, onMovieUpdated, onError) {
-    return this._load(`movies/${id}`, METHOD.put, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
+    return this._load(`movies/${id}`, Method.PUT, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
     .then((response) => response.json())
     .then((film) => this.getComments(film, onMovieUpdated))
     .catch((err) => {
@@ -82,7 +81,7 @@ export default class API {
     });
   }
   sendComment(filmId, body, onUpdateMovieData, onError) {
-    return this._load(`comments/${filmId}`, METHOD.post, body, onError)
+    return this._load(`comments/${filmId}`, Method.POST, body, onError)
     .then((response) => response.json())
     .then((data) => {
       data.movie.comments = data.comments;
@@ -93,7 +92,7 @@ export default class API {
     });
   }
   deleteComment(commentId, onUpdateMovieData, onError) {
-    return this._load(`comments/${commentId}`, METHOD.delete, null, onError)
+    return this._load(`comments/${commentId}`, Method.DELETE, null, onError)
     .then(() => {
       onUpdateMovieData(commentId);
     })
@@ -101,5 +100,4 @@ export default class API {
       throw err;
     });
   }
-  // добавить метод для syncMovies для 9 раздела
 }

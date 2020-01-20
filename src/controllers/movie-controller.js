@@ -1,6 +1,6 @@
 import FilmCard from '../components/film-card.js';
 import FilmPopup from '../components/film-popup.js';
-import {insertElementInMarkup} from '../components/utils.js';
+import {insertElementInMarkup} from '../utils/utils.js';
 import moment from 'moment';
 
 export default class MovieController {

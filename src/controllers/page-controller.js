@@ -3,9 +3,9 @@ import UserRank from '../components/user-rank.js';
 import Films from '../components/films.js';
 import FilmsListSection from '../components/films-list-section.js';
 import FilmsExtraSection from '../components/films-extra-section.js';
-import {insertElementInMarkup} from '../components/utils.js';
-import {removeIt} from '../components/utils.js';
-import {compare} from '../components/utils.js';
+import {insertElementInMarkup} from '../utils/utils.js';
+import {removeIt} from '../utils/utils.js';
+import {compare} from '../utils/utils.js';
 import MovieController from '../controllers/movie-controller.js';
 import SortController from '../controllers/sort-controller.js';
 import NavController from './nav-controller.js';
@@ -20,7 +20,6 @@ const MOST_COMMENTED_SECTION_HEADING_TEXT = `Most commented`;
 const PARAMETER_FOR_CREATE_TOP_RATED_SECTION = `ratingVal`;
 const PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION = `comments`;
 const AMOUNTH_ELEMENTS_WHEN_DELETING_ONE_ELEMENT = 1;
-const ZERO = 0;
 const getServerDataUpdateCallback = (that, allControllers, id, newData, oldData) => {
   const callback = (data) => {
     let controllersForChange = null;
@@ -112,14 +111,13 @@ export default class PageController {
     this.moviesModel.setStateAfterDataLoad = this.setStateAfterDataLoad.bind(this);
     this.onToFilms = this.onToFilms.bind(this);
     this.onToStatistic = this.onToStatistic.bind(this);
-    this._filmsInThePage = ZERO;
+    this._filmsInThePage = 0;
     this._controllers = {
       mainSection: [],
       extraSections: {}
     };
     this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT] = [];
     this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT] = [];
-    this.moviesModel.onFilmsPartsChange = this.onFilmsPartsChange.bind(this);
   }
   showComponents(...components) {
     for (const component of components) {
@@ -157,7 +155,7 @@ export default class PageController {
     this.navController.render();
   }
   _setFilmsAmountInFooter() {
-    this._elements.footerFilmTotalSum.textContent = `${this.moviesModel.getMoviesAmounth()} movies inside`;
+    this._elements.footerFilmTotalSum.textContent = `${this.moviesModel.getMoviesAmount()} movies inside`;
   }
   _onViewChange() {
     const controllers = [...this._controllers.mainSection,
@@ -187,13 +185,13 @@ export default class PageController {
   getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
     const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
     return sortedCardsDataByParameter.filter((item) => {
-      return Array.isArray(item[sortParameter]) ? item[sortParameter].length > ZERO : item[sortParameter] > ZERO;
+      return Array.isArray(item[sortParameter]) ? item[sortParameter].length > 0 : item[sortParameter] > 0;
     });
   }
   createExtraSection(sortParameter, container, totalFilmsData) {
     const extraSectionFilmsCardsData = this.getExtraSectionFilmsCardsData(sortParameter, totalFilmsData);
     if (extraSectionFilmsCardsData.length) {
-      const topElementsByParameter = extraSectionFilmsCardsData.slice(ZERO, MAX_ELEMENTS_IN_EXTRA_SECTION);
+      const topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
       let headingText = ``;
       switch (sortParameter) {
         case PARAMETER_FOR_CREATE_TOP_RATED_SECTION:
@@ -214,14 +212,14 @@ export default class PageController {
     }
   }
   outputFilmParts() {
-    for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== ZERO; steps--) {
+    for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this.moviesModel.getMovieDataByIndex(index);
       const controller = new MovieController(this._elements.moviesContainer, this._onDataChange, this._onViewChange);
       this._controllers.mainSection.push(controller);
       controller.render(thisFilmData);
       this._filmsInThePage++;
-      if (this._filmsInThePage === this.moviesModel.getMoviesAmounth()) {
+      if (this._filmsInThePage === this.moviesModel.getMoviesAmount()) {
         removeIt(this._elements.showMoreBtn);
         break;
       }
@@ -230,7 +228,7 @@ export default class PageController {
 
   setFilmsContainerInitialState(init = false) {
     this.hideComponents(this._components.stat);
-    if (this.moviesModel.getMoviesAmounth()) {
+    if (this.moviesModel.getMoviesAmount()) {
       removeIt(this._components.loadingStateHeading.getElement());
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
       this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
@@ -263,12 +261,12 @@ export default class PageController {
   }
   onFilmsPartsChange(filmsData) {
     this._elements.moviesContainer.innerHTML = ``;
-    this._filmsInThePage = ZERO;
+    this._filmsInThePage = 0;
     this._controllers.mainSection = [];
-    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== ZERO) {
+    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== 0) {
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
     }
-    if (filmsData.length !== ZERO) {
+    if (filmsData.length !== 0) {
       this.outputFilmParts();
     } else {
       // вывести сообщение отсутствия фильмов, удалить контейнер (?)
@@ -276,6 +274,7 @@ export default class PageController {
     }
   }
   render() {
+    this.moviesModel.setChangeCallback(this.onFilmsPartsChange.bind(this));
     this._createStatComponent();
     this._createSortController();
     this._createNavController();
