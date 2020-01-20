@@ -173,48 +173,48 @@ const TimeUnit = {
 export default class Stat extends AbstractSmartComponent {
   constructor(userRank, filmsData, container) {
     super();
-    this.userRank = userRank;
+    this._userRank = userRank;
     this.data = filmsData;
-    this.statisticContainer = container;
-    this.createChart = this.createChart.bind(this);
-    this.setStatisticPeriodHandlers = this.setStatisticPeriodHandlers.bind(this);
-    this.staticticState = StatisticState.DEFAULT;
-    this.filmsDataByPeriod = this.data;
+    this._statisticContainer = container;
+    this._createChart = this._createChart.bind(this);
+    this._setStatisticPeriodHandlers = this._setStatisticPeriodHandlers.bind(this);
+    this._staticticState = StatisticState.DEFAULT;
+    this._filmsDataByPeriod = this.data;
     this.rerender = this.rerender.bind(this);
   }
   getTemplate() {
-    return getStat(this.userRank, this.filmsDataByPeriod);
+    return getStat(this._userRank, this._filmsDataByPeriod);
   }
-  defineStatisticData() {
-    switch (this.staticticState) {
+  _defineStatisticData() {
+    switch (this._staticticState) {
       case StatisticState.DEFAULT:
-        this.filmsDataByPeriod = this.data;
+        this._filmsDataByPeriod = this.data;
         break;
       case StatisticState.TODAY:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TimeUnit.DAY));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TimeUnit.DAY));
         break;
       case StatisticState.WEEK:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.WEEK)));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.WEEK)));
         break;
       case StatisticState.MONTH:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.MONTH)));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.MONTH)));
         break;
       case StatisticState.YEAR:
-        this.filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.YEAR)));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.YEAR)));
         break;
     }
   }
-  setStatisticPeriodHandlers() {
+  _setStatisticPeriodHandlers() {
     const statisticRadioBtns = this.getElement().querySelectorAll(`.statistic__filters-input`);
     for (const radioBtn of statisticRadioBtns) {
       radioBtn.addEventListener(`change`, (event) => {
         event.preventDefault();
-        this.staticticState = event.target.value;
-        this.rerender(this.userRank);
+        this._staticticState = event.target.value;
+        this.rerender(this._userRank);
       });
     }
   }
-  createChart() {
+  _createChart() {
     if (genresLabels.length && values.length) {
       const ctx = this.getElement().querySelector(`#genres-chart`).getContext(`2d`);
       return new Chart(ctx, {
@@ -281,22 +281,22 @@ export default class Stat extends AbstractSmartComponent {
       return null;
     }
   }
-  setCurrentStatisticPeriod() {
-    if (this.staticticState !== StatisticState.DEFAULT) {
-      this.getElement().querySelector(`.statistic__filters-input[value="${this.staticticState}"]`).setAttribute(`checked`, true);
+  _setCurrentStatisticPeriod() {
+    if (this._staticticState !== StatisticState.DEFAULT) {
+      this.getElement().querySelector(`.statistic__filters-input[value="${this._staticticState}"]`).setAttribute(`checked`, true);
     }
   }
   render() {
-    insertElementInMarkup(this, this.statisticContainer);
-    this.setStatisticPeriodHandlers();
-    this.createChart();
+    insertElementInMarkup(this, this._statisticContainer);
+    this._setStatisticPeriodHandlers();
+    this._createChart();
   }
   rerender(userRank) {
-    this.userRank = userRank;
+    this._userRank = userRank;
     this.getElement().remove();
     this.removeElement();
-    this.defineStatisticData();
+    this._defineStatisticData();
     this.render();
-    this.setCurrentStatisticPeriod();
+    this._setCurrentStatisticPeriod();
   }
 }

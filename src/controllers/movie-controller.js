@@ -52,10 +52,9 @@ export default class MovieController {
   showPopup() {
     this.onViewChange();
     this.filmPopup = new FilmPopup(this.data);
-    this.filmPopup.addNewComment = this.addNewComment.bind(this);
+    this.filmPopup.setAddNewCommentCallback(this.addNewComment.bind(this));
     insertElementInMarkup(this.filmPopup.getElement(), document.body);
     this.filmPopup.setCurrentUserRating();
-    this.filmPopup.onDataChange = this.onDataChange;
     this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
     this.filmPopup.setCloseHandlers();
     this.filmPopup.setUserRatingChangeCallbacks(this.changeUserRatingValue);
@@ -69,7 +68,6 @@ export default class MovieController {
     this.id = filmData.id;
     this.filmCard = new FilmCard(this.data);
     insertElementInMarkup(this.filmCard, this._container);
-    this.filmCard.onDataChange = this.onDataChange;
     this.filmCard.setShowDetailsHandlers(this.showPopup);
     this.filmCard.setChangeStatusCallbacks(this.changeStatus);
   }

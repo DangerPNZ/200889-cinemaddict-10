@@ -49,7 +49,7 @@ export default class FilmCard extends AbstractSmartComponent {
   getTemplate() {
     return getFilmCard(this.data);
   }
-  getCallDetailsItems() {
+  _getCallDetailsItems() {
     const poster = this.getElement().querySelector(`.film-card__poster`);
     const heading = this.getElement().querySelector(`.film-card__title`);
     const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
@@ -57,26 +57,26 @@ export default class FilmCard extends AbstractSmartComponent {
   }
   setShowDetailsHandlers(handler) {
     this.showDetailsHandler = handler;
-    const elements = this.getCallDetailsItems();
+    const elements = this._getCallDetailsItems();
     for (const item of elements) {
       item.addEventListener(`click`, handler);
     }
   }
-  getStatusControlItems() {
+  _getStatusControlItems() {
     return this.getElement().querySelectorAll(`.film-card__controls-item`);
   }
   enabledChangeStatusBtns() {
-    for (const btnItem of this.getStatusControlItems()) {
+    for (const btnItem of this._getStatusControlItems()) {
       btnItem.removeAttribute(`disabled`);
     }
   }
   setChangeStatusCallbacks(callback) {
     this.changeStatusCallback = callback;
-    for (const btn of this.getStatusControlItems()) {
+    for (const btn of this._getStatusControlItems()) {
       btn.addEventListener(`click`, (event) => {
         event.preventDefault();
         const dataProperty = event.target.dataset.status;
-        for (const btnItem of this.getStatusControlItems()) {
+        for (const btnItem of this._getStatusControlItems()) {
           btnItem.setAttribute(`disabled`, true);
         }
         callback(dataProperty);

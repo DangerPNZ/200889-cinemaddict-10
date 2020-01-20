@@ -3,9 +3,8 @@ export default class DataAdapter {
     this.model = model;
     this.onUpdateMoviesData = onUpdateMoviesData;
     this.onUpdateMovieDataItem = onUpdateMovieDataItem;
-
   }
-  formatFilmDataToAppStructure(movieData) {
+  _formatFilmDataToAppStructure(movieData) {
     return {
       id: movieData.id,
       filmTitle: movieData.film_info.title,
@@ -30,10 +29,10 @@ export default class DataAdapter {
       comments: movieData.comments
     };
   }
-  getAllFilmsDataToAppStructure(serverMoviesData) {
+  _getAllFilmsDataToAppStructure(serverMoviesData) {
     const appMoviesData = [];
     for (const movieData of serverMoviesData) {
-      appMoviesData.push(this.formatFilmDataToAppStructure(movieData));
+      appMoviesData.push(this._formatFilmDataToAppStructure(movieData));
     }
     return appMoviesData;
   }
@@ -68,11 +67,11 @@ export default class DataAdapter {
     });
   }
   setMoviesData(movies) {
-    const applicationMoviesData = this.getAllFilmsDataToAppStructure(movies);
+    const applicationMoviesData = this._getAllFilmsDataToAppStructure(movies);
     this.onUpdateMoviesData(applicationMoviesData);
   }
   onGetMovieWithUpdatedComments(newMovieData, onUpdateMovieData) {
-    const updatedFilmDataInAppStructure = this.formatFilmDataToAppStructure(newMovieData);
+    const updatedFilmDataInAppStructure = this._formatFilmDataToAppStructure(newMovieData);
     this.onUpdateMovieDataItem(updatedFilmDataInAppStructure);
     onUpdateMovieData(updatedFilmDataInAppStructure);
   }

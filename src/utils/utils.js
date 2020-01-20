@@ -1,31 +1,31 @@
 import moment from 'moment';
 
-const RESULT_VAL_FOR_COMPARE = {
-  firstLessSecond: 1,
-  firstMoreSecond: -1,
-  firstEqualSecond: 0
+const ResultValueForCompare = {
+  FIRST_LESS_SECOND: 1,
+  FIRST_MORE_SECOND: -1,
+  FIRST_EQUAL_SECOND: 0
 };
 
 export const compare = (property, byDate = false) => {
   if (byDate === false) {
     return (a, b) => {
       if (a[property] < b[property]) {
-        return RESULT_VAL_FOR_COMPARE.firstLessSecond;
+        return ResultValueForCompare.FIRST_LESS_SECOND;
       }
       if (a[property] > b[property]) {
-        return RESULT_VAL_FOR_COMPARE.firstMoreSecond;
+        return ResultValueForCompare.FIRST_MORE_SECOND;
       }
-      return RESULT_VAL_FOR_COMPARE.firstEqualSecond;
+      return ResultValueForCompare.FIRST_EQUAL_SECOND;
     };
   } else {
     return (a, b) => {
       if (new Date(a[property]) < new Date(b[property])) {
-        return RESULT_VAL_FOR_COMPARE.firstLessSecond;
+        return ResultValueForCompare.FIRST_LESS_SECOND;
       }
       if (new Date(a[property]) > new Date(b[property])) {
-        return RESULT_VAL_FOR_COMPARE.firstMoreSecond;
+        return ResultValueForCompare.FIRST_MORE_SECOND;
       }
-      return RESULT_VAL_FOR_COMPARE.firstEqualSecond;
+      return ResultValueForCompare.FIRST_EQUAL_SECOND;
     };
   }
 };

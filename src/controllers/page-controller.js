@@ -49,7 +49,7 @@ const getServerDataUpdateCallback = (that, allControllers, id, newData, oldData)
         that._getNewUserRank();
         that._components.stat.rerender(that._components.userRank.getRank());
       }
-      that.stateCountChange();
+      that._stateCountChange();
     }
   };
   return callback;
@@ -104,11 +104,10 @@ export default class PageController {
       showMoreBtn: this._components.filmsSection.getShowMoreBtn(),
       footerFilmTotalSum: document.querySelector(`.footer__statistics p`)
     };
-    this.outputFilmParts = this.outputFilmParts.bind(this);
+    this._outputFilmParts = this._outputFilmParts.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
-    this.stateCountChange = this.stateCountChange.bind(this);
+    this._stateCountChange = this._stateCountChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
-    this.moviesModel.setStateAfterDataLoad = this.setStateAfterDataLoad.bind(this);
     this.onToFilms = this.onToFilms.bind(this);
     this.onToStatistic = this.onToStatistic.bind(this);
     this._filmsInThePage = 0;
@@ -119,22 +118,22 @@ export default class PageController {
     this._controllers.extraSections[TOP_RATED_SECTION_HEADING_TEXT] = [];
     this._controllers.extraSections[MOST_COMMENTED_SECTION_HEADING_TEXT] = [];
   }
-  showComponents(...components) {
+  _showComponents(...components) {
     for (const component of components) {
       component.show();
     }
   }
-  hideComponents(...components) {
+  _hideComponents(...components) {
     for (const component of components) {
       component.hide();
     }
   }
   onToFilms() {
-    this.showComponents(this.sortController.component, this._components.films, this._components.stat);
+    this._showComponents(this.sortController.component, this._components.films, this._components.stat);
     this._components.stat.hide();
   }
   onToStatistic() {
-    this.hideComponents(this.sortController.component, this._components.films, this._components.stat);
+    this._hideComponents(this.sortController.component, this._components.films, this._components.stat);
     this._components.stat.show();
   }
   _getNewUserRank() {
@@ -166,7 +165,7 @@ export default class PageController {
       item.closePopup();
     }
   }
-  stateCountChange() {
+  _stateCountChange() {
     this.navController.rerender();
   }
   _onDataChange(id, newData, oldData) {
@@ -182,14 +181,14 @@ export default class PageController {
       this.moviesModel.deleteComment(id, getServerDataUpdateCallback(this, allControllers, id), getErrorCallback(allControllers));
     }
   }
-  getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
+  _getExtraSectionFilmsCardsData(sortParameter, totalFilmsData) {
     const sortedCardsDataByParameter = totalFilmsData.slice().sort(compare(sortParameter));
     return sortedCardsDataByParameter.filter((item) => {
       return Array.isArray(item[sortParameter]) ? item[sortParameter].length > 0 : item[sortParameter] > 0;
     });
   }
-  createExtraSection(sortParameter, container, totalFilmsData) {
-    const extraSectionFilmsCardsData = this.getExtraSectionFilmsCardsData(sortParameter, totalFilmsData);
+  _createExtraSection(sortParameter, container, totalFilmsData) {
+    const extraSectionFilmsCardsData = this._getExtraSectionFilmsCardsData(sortParameter, totalFilmsData);
     if (extraSectionFilmsCardsData.length) {
       const topElementsByParameter = extraSectionFilmsCardsData.slice(0, MAX_ELEMENTS_IN_EXTRA_SECTION);
       let headingText = ``;
@@ -211,7 +210,7 @@ export default class PageController {
       insertElementInMarkup(extraSection, container);
     }
   }
-  outputFilmParts() {
+  _outputFilmParts() {
     for (let steps = FILMS_PART_FOR_RENDER_ON_PAGE; steps !== 0; steps--) {
       const index = this._filmsInThePage;
       const thisFilmData = this.moviesModel.getMovieDataByIndex(index);
@@ -225,14 +224,13 @@ export default class PageController {
       }
     }
   }
-
   setFilmsContainerInitialState(init = false) {
-    this.hideComponents(this._components.stat);
+    this._hideComponents(this._components.stat);
     if (this.moviesModel.getMoviesAmount()) {
       removeIt(this._components.loadingStateHeading.getElement());
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
-      this._components.filmsSection.setHandlerForShowMoreBtn(this.outputFilmParts);
-      this.outputFilmParts();
+      this._components.filmsSection.setHandlerForShowMoreBtn(this._outputFilmParts);
+      this._outputFilmParts();
     } else {
       removeIt(this._elements.showMoreBtn);
       removeIt(this._elements.moviesContainer);
@@ -256,8 +254,8 @@ export default class PageController {
     insertElementInMarkup(this._components.filmsSection, this._components.films);
     this.setFilmsContainerInitialState();
     this._setFilmsAmountInFooter();
-    this.createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
-    this.createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
+    this._createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
+    this._createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
   }
   onFilmsPartsChange(filmsData) {
     this._elements.moviesContainer.innerHTML = ``;
@@ -267,7 +265,7 @@ export default class PageController {
       insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
     }
     if (filmsData.length !== 0) {
-      this.outputFilmParts();
+      this._outputFilmParts();
     } else {
       // вывести сообщение отсутствия фильмов, удалить контейнер (?)
       removeIt(this._elements.showMoreBtn);
@@ -275,6 +273,7 @@ export default class PageController {
   }
   render() {
     this.moviesModel.setChangeCallback(this.onFilmsPartsChange.bind(this));
+    this.moviesModel.setAfterDataLoadCallback(this.setStateAfterDataLoad.bind(this));
     this._createStatComponent();
     this._createSortController();
     this._createNavController();

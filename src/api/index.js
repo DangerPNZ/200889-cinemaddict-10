@@ -19,7 +19,7 @@ export default class API {
   constructor(dataAdapter) {
     this.dataAdapter = dataAdapter;
   }
-  checkStatus(response) {
+  _checkStatus(response) {
     if (response.status >= Status.STATUS_OK_CODE && response.status < Status.STATUS_MULTIPLE_CHOISES_CODE) {
       return response;
     } else {
@@ -28,7 +28,7 @@ export default class API {
   }
   _load(url, method = Method.GET, body = null, onError = null) {
     return fetch(`${API_URL}/${url}`, {method, body, headers})
-    .then(this.checkStatus)
+    .then(this._checkStatus)
     .catch((err) => {
       if (onError) {
         onError();
@@ -36,14 +36,14 @@ export default class API {
       throw err;
     });
   }
-  getComments(film, onUpdateMovieData) {
+  _getComments(film, onUpdateMovieData) {
     return this._load(`comments/${film.id}`)
     .then((response) => response.json())
     .then((commentsList) => {
       film.comments = commentsList;
       if (!onUpdateMovieData) {
-        this.filmsWithCommentsAmounth += 1;
-        if (this.filmsAmounth === this.filmsWithCommentsAmounth) {
+        this._filmsWithCommentsAmounth += 1;
+        if (this._filmsAmounth === this._filmsWithCommentsAmounth) {
           this.dataAdapter.setMoviesData(this.allMoviesData);
         }
       } else {
@@ -54,19 +54,19 @@ export default class API {
       throw err;
     });
   }
-  getCommentsForAllMovies(filmsData) {
+  _getCommentsForAllMovies(filmsData) {
     this.allMoviesData = filmsData;
-    this.filmsAmounth = this.allMoviesData.length;
-    this.filmsWithCommentsAmounth = 0;
+    this._filmsAmounth = this.allMoviesData.length;
+    this._filmsWithCommentsAmounth = 0;
     for (const movieData of this.allMoviesData) {
-      this.getComments(movieData);
+      this._getComments(movieData);
     }
   }
   getMovies() {
     return this._load(`movies`)
     .then((response) => response.json())
     .then((filmsData) => {
-      this.getCommentsForAllMovies(filmsData);
+      this._getCommentsForAllMovies(filmsData);
     })
     .catch((err) => {
       throw err;
@@ -75,7 +75,7 @@ export default class API {
   updateMovie(id, newData, onMovieUpdated, onError) {
     return this._load(`movies/${id}`, Method.PUT, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
     .then((response) => response.json())
-    .then((film) => this.getComments(film, onMovieUpdated))
+    .then((film) => this._getComments(film, onMovieUpdated))
     .catch((err) => {
       throw err;
     });

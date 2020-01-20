@@ -15,7 +15,7 @@ export default class NavController {
     this.statBtnHandler = this.statBtnHandler.bind(this);
     this.onToStatistic = onToStatistic;
     this.onToFilms = onToFilms;
-    this.filmsShowState = true;
+    this._filmsShowState = true;
   }
   filterBtnHandler(event) {
     event.preventDefault();
@@ -25,11 +25,11 @@ export default class NavController {
       const activeBtn = this.component.getElement().querySelector(`.${ACTIVE_NAV_BTN_CLS}`);
       activeBtn.classList.remove(ACTIVE_NAV_BTN_CLS);
       targetBtn.classList.add(ACTIVE_NAV_BTN_CLS);
-      this.selectedFilterType = filterType;
+      this._selectedFilterType = filterType;
       this.model.changeFilterType(filterType);
-      if (!this.filmsShowState) {
+      if (!this._filmsShowState) {
         this.onToFilms();
-        this.filmsShowState = true;
+        this._filmsShowState = true;
       }
     }
   }
@@ -40,14 +40,14 @@ export default class NavController {
       const activeBtn = this.component.getElement().querySelector(ACTIVE_FILTER_ITEM_SELECTOR);
       activeBtn.classList.remove(ACTIVE_NAV_BTN_CLS);
       targetBtn.classList.add(ACTIVE_NAV_BTN_CLS);
-      this.filmsShowState = false;
+      this._filmsShowState = false;
       this.onToStatistic();
     }
   }
-  setCurrentActiveItem() {
-    if (this.selectedFilterType && this.selectedFilterType !== DEFAULT_ACTIVE_FILTER_BTN_ATTR) {
+  _setCurrentActiveItem() {
+    if (this._selectedFilterType && this._selectedFilterType !== DEFAULT_ACTIVE_FILTER_BTN_ATTR) {
       this.component.getElement().querySelector(ACTIVE_FILTER_ITEM_SELECTOR).classList.remove(ACTIVE_NAV_BTN_CLS);
-      this.component.getElement().querySelector(`.main-navigation__item[${DATA_FILTER_ATTRIBUTE}="${this.selectedFilterType}"]`)
+      this.component.getElement().querySelector(`.main-navigation__item[${DATA_FILTER_ATTRIBUTE}="${this._selectedFilterType}"]`)
       .classList.add(ACTIVE_NAV_BTN_CLS);
     }
   }
@@ -56,7 +56,7 @@ export default class NavController {
     this.component.removeElement();
     this.component = new Nav(this.model.moviesData);
     this.render();
-    this.setCurrentActiveItem();
+    this._setCurrentActiveItem();
   }
   render() {
     insertElementInMarkup(this.component.getElement(), this.container, `prepend`);

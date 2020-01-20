@@ -24,6 +24,9 @@ export default class Movies {
   setChangeCallback(callback) {
     this.onFilmsPartsChange = callback;
   }
+  setAfterDataLoadCallback(callback) {
+    this.setStateAfterDataLoad = callback;
+  }
   onUpdateMoviesData(filmsData) {
     this.moviesData = filmsData;
     this.filmsDataForRender = this.moviesData;
@@ -56,7 +59,7 @@ export default class Movies {
   deleteComment(id, onServerDataUpdate, onError) {
     this.api.deleteComment(id, onServerDataUpdate, onError);
   }
-  sortByType(type) {
+  _sortByType(type) {
     switch (type) {
       case SortTypeValue.BY_DATE:
         this.filmsDataForRender = this.moviesData.slice().sort(compare(SortTypeValue.BY_DATE, true));
@@ -69,8 +72,8 @@ export default class Movies {
         break;
     }
   }
-  filterByType(type) {
-    const films = this.currentSortType ? this.filmsDataForRender : this.moviesData;
+  _filterByType(type) {
+    const films = this._currentSortType ? this.filmsDataForRender : this.moviesData;
     switch (type) {
       case FilterTypeValue.IN_WATCHLIST:
         this.filmsDataForRender = films.slice().filter((item) => item.isInWatchlist === true);
@@ -87,22 +90,22 @@ export default class Movies {
     }
   }
   changeSortType(type) {
-    this.currentSortType = type;
-    if (this.currentFilterType) {
-      this.sortByType(type);
-      this.filterByType(this.currentFilterType);
+    this._currentSortType = type;
+    if (this._currentFilterType) {
+      this._sortByType(type);
+      this._filterByType(this._currentFilterType);
     } else {
-      this.sortByType(type);
+      this._sortByType(type);
     }
     this.onFilmsPartsChange(this.filmsDataForRender);
   }
   changeFilterType(type) {
-    this.currentFilterType = type;
-    if (this.currentSortType) {
-      this.sortByType(this.currentSortType);
-      this.filterByType(type);
+    this._currentFilterType = type;
+    if (this._currentSortType) {
+      this._sortByType(this._currentSortType);
+      this._filterByType(type);
     } else {
-      this.filterByType(type);
+      this._filterByType(type);
     }
     this.onFilmsPartsChange(this.filmsDataForRender);
   }
