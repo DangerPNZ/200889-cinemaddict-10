@@ -1,7 +1,6 @@
 import Sort from '../components/sort.js';
 import {insertElementInMarkup} from '../utils/utils.js';
 
-
 const ACTIVE_SORT_BTN_CLS = `sort__button--active`;
 const DATA_SORT_ATTRIBUTE = `data-sorttype`;
 
@@ -11,6 +10,13 @@ export default class SortController {
     this.model = model;
     this.component = new Sort();
     this.sortBtnHandler = this.sortBtnHandler.bind(this);
+  }
+  render() {
+    insertElementInMarkup(this.component.getElement(), this.container);
+    this.component.setHandlers(this.sortBtnHandler);
+  }
+  rerender() {
+    this.component.rerender();
   }
   sortBtnHandler(event) {
     event.preventDefault();
@@ -22,12 +28,5 @@ export default class SortController {
       targetBtn.classList.add(ACTIVE_SORT_BTN_CLS);
       this.model.changeSortType(sortType);
     }
-  }
-  render() {
-    insertElementInMarkup(this.component.getElement(), this.container);
-    this.component.setHandlers(this.sortBtnHandler);
-  }
-  rerender() {
-    this.component.rerender();
   }
 }

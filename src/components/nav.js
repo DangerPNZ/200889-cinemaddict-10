@@ -1,15 +1,9 @@
 import AbstractComponent from "./abstract-component.js";
 
 const getNav = (totalFilmsData) => {
-  const inWatchlistFilms = totalFilmsData.filter((item) => {
-    return item.isInWatchlist;
-  });
-  const inHistoryFilms = totalFilmsData.filter((item) => {
-    return item.isAlready;
-  });
-  const inFavoritesFilms = totalFilmsData.filter((item) => {
-    return item.isFavorites;
-  });
+  const inWatchlistFilms = totalFilmsData.filter((item) => item.isInWatchlist);
+  const inHistoryFilms = totalFilmsData.filter((item) => item.isAlready);
+  const inFavoritesFilms = totalFilmsData.filter((item) => item.isFavorites);
   return `
   <nav class="main-navigation">
       <a data-filtertype="#all" href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>

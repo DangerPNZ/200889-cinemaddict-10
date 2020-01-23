@@ -16,16 +16,13 @@ const FilterTypeValue = {
 
 export default class Movies {
   constructor() {
+    this.onUpdateMovieDataItem = this.onUpdateMovieDataItem.bind(this);
+    this.onUpdateMoviesData = this.onUpdateMoviesData.bind(this);
+    this.getAllMoviesData = this.getAllMoviesData.bind(this);
     this.moviesData = [];
     this.filmsDataForRender = this.moviesData;
-    this.dataAdapter = new DataAdapter(this, this.onUpdateMoviesData.bind(this), this.onUpdateMovieDataItem.bind(this));
+    this.dataAdapter = new DataAdapter(this, this.onUpdateMoviesData, this.onUpdateMovieDataItem);
     this.api = new API(this.dataAdapter);
-  }
-  setChangeCallback(callback) {
-    this.onFilmsPartsChange = callback;
-  }
-  setAfterDataLoadCallback(callback) {
-    this.setStateAfterDataLoad = callback;
   }
   onUpdateMoviesData(filmsData) {
     this.moviesData = filmsData;
@@ -38,7 +35,10 @@ export default class Movies {
     const filmsDataFormRenderIndex = this.filmsDataForRender.findIndex((item) => item.id === movieData.id);
     this.filmsDataForRender[filmsDataFormRenderIndex] = movieData;
   }
-  getMoviesData() {
+  getAllMoviesData() {
+    return this.moviesData;
+  }
+  getMoviesDataFromServer() {
     this.api.getMovies();
   }
   getMoviesAmount() {
@@ -49,6 +49,12 @@ export default class Movies {
   }
   getMoviesDataForRender() {
     return this.filmsDataForRender;
+  }
+  setChangeCallback(callback) {
+    this.onFilmsPartsChange = callback;
+  }
+  setAfterDataLoadCallback(callback) {
+    this.setStateAfterDataLoad = callback;
   }
   changeMovieData(id, newData, onServerDataUpdate, onError = null) {
     this.api.updateMovie(id, newData, onServerDataUpdate, onError);

@@ -40,6 +40,7 @@ const getFilmCard = (filmData) => {
         </form>
   </article>`;
 };
+
 export default class FilmCard extends AbstractSmartComponent {
   constructor(data) {
     super();
@@ -54,13 +55,6 @@ export default class FilmCard extends AbstractSmartComponent {
     const heading = this.getElement().querySelector(`.film-card__title`);
     const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
     return [poster, heading, toCommentsLink];
-  }
-  setShowDetailsHandlers(handler) {
-    this.showDetailsHandler = handler;
-    const elements = this._getCallDetailsItems();
-    for (const item of elements) {
-      item.addEventListener(`click`, handler);
-    }
   }
   _getStatusControlItems() {
     return this.getElement().querySelectorAll(`.film-card__controls-item`);
@@ -86,6 +80,13 @@ export default class FilmCard extends AbstractSmartComponent {
   recoveryListeners() {
     this.setShowDetailsHandlers(this.showDetailsHandler);
     this.setChangeStatusCallbacks(this.changeStatusCallback);
+  }
+  setShowDetailsHandlers(handler) {
+    this.showDetailsHandler = handler;
+    const elements = this._getCallDetailsItems();
+    for (const item of elements) {
+      item.addEventListener(`click`, handler);
+    }
   }
 }
 

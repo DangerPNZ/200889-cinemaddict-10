@@ -7,12 +7,210 @@ import he from 'he';
 const RELEASE_DATE_FORMAT = `D MMMM YYYY`;
 const MAX_NEW_COMMENT_LENGTH = 140;
 const COMMENT_CUT_START_INDEX = 139;
+const SECONDS_IN_MINUTES = 60;
+const SECONDS_IN_HOUR = SECONDS_IN_MINUTES * 60;
+const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
+const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
+const SHAKE_ANIMATION_CLS = `shake`;
+const FEEDBACK_STYLE = `
+  <style>
+    @keyframes shake {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: translateX(-5px);
+      }
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: translateX(5px);
+      }
+    }
+    .shake {
+      animation: shake 0.6s;
+    }
+    .selected:checked + .film-details__user-rating-label {
+      background-color: #d8d8d8;
+    }
+    .shake .selected + .film-details__user-rating-label {
+      background-color: #f51a1a;
+    }
+    .film-details__comment-input--no-valid {
+      border-color: #f51a1a;
+    }
+  </style>
+`;
+
+const CommentDeleteBtnText = {
+  STANDART: `Delete`,
+  DELETING: `Deleting…`
+};
 const EventKey = {
   CTRL: `Control`,
   COMMAND: `Meta`,
   ENTER: `Enter`,
   ESCAPE: `Escape`
 };
+const Reaction = {
+  SMILE: `smile`,
+  SLEEPING: `sleeping`,
+  PUKE: `puke`,
+  ANGRY: `angry`
+};
+const ReactionImageSrc = {
+  SLEEPING: `/images/emoji/sleeping.png`,
+  PUKE: `/images/emoji/puke.png`,
+  ANGRY: `/images/emoji/angry.png`,
+  SMILE: `/images/emoji/smile.png`
+};
+const CreateTime = {
+  NOW: `now`,
+  A_MINUTE_AGO: `a minute ago`,
+  A_FEW_MINUTES_AGO: `a few minutes ago`,
+  A_HOUR_AGO: `a hour ago`,
+  A_FEW_HOURS_AGO: `a few hours ago`,
+  A_DAY_AGO: `a day ago`,
+  A_TWO_DAYS_AGO: `a two days ago`
+};
+
+const addUserRating = (isAlready, userRatingValue) => {
+  return (isAlready && userRatingValue) ? `<p class="film-details__user-rating">Your rate ${userRatingValue}</p>` : ``;
+};
+const getCommentReactionImageSrc = (emotion) => {
+  let reactionImageSrc = null;
+  switch (emotion) {
+    case Reaction.SLEEPING:
+      reactionImageSrc = ReactionImageSrc.SLEEPING;
+      break;
+    case Reaction.PUKE:
+      reactionImageSrc = ReactionImageSrc.PUKE;
+      break;
+    case Reaction.ANGRY:
+      reactionImageSrc = ReactionImageSrc.ANGRY;
+      break;
+    case Reaction.SMILE:
+      reactionImageSrc = ReactionImageSrc.SMILE;
+      break;
+  }
+  return reactionImageSrc;
+};
+const addGenres = (genreName, genresItems) => {
+  if (genresItems.length) {
+    let genresList = ``;
+    for (let genresItem of genresItems) {
+      genresList += `<span class="film-details__genre">${genresItem} </span>`;
+    }
+    return genresList;
+  }
+  return `<span class="film-details__genre">${genreName}</span>`;
+};
+const addReactionSection = (isAlready, posterSrc, filmTitle) => {
+  if (isAlready) {
+    return `
+        <div class="form-details__middle-container">
+          <section class="film-details__user-rating-wrap">
+            <div class="film-details__user-rating-controls">
+              <button class="film-details__watched-reset" type="button">Undo</button>
+            </div>
+  
+            <div class="film-details__user-score">
+              <div class="film-details__user-rating-poster">
+                  <img src="${posterSrc}" alt="film-poster" class="film-details__user-rating-img">
+              </div>
+  
+              <section class="film-details__user-rating-inner">
+                  <h3 class="film-details__user-rating-title">${filmTitle}</h3>
+  
+                  <p class="film-details__user-rating-feelings">How you feel it?</p>
+  
+                  <div class="film-details__user-rating-score">
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
+                  <label class="film-details__user-rating-label" for="rating-1">1</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
+                  <label class="film-details__user-rating-label" for="rating-2">2</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
+                  <label class="film-details__user-rating-label" for="rating-3">3</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
+                  <label class="film-details__user-rating-label" for="rating-4">4</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5">
+                  <label class="film-details__user-rating-label" for="rating-5">5</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
+                  <label class="film-details__user-rating-label" for="rating-6">6</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
+                  <label class="film-details__user-rating-label" for="rating-7">7</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
+                  <label class="film-details__user-rating-label" for="rating-8">8</label>
+  
+                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
+                  <label class="film-details__user-rating-label" for="rating-9">9</label>
+  
+                  </div>
+              </section>
+            </div>
+          </section>
+        </div>`;
+  }
+  return ``;
+};
+const getCommentCreateTime = (date) => {
+  const secondsElapsed = moment().diff(date, `seconds`, false);
+  if (secondsElapsed < SECONDS_IN_MINUTES) {
+    return CreateTime.NOW;
+  } else if (secondsElapsed >= SECONDS_IN_MINUTES && secondsElapsed <= SECONDS_IN_MINUTES * 3) {
+    return CreateTime.A_MINUTE_AGO;
+  } else if (secondsElapsed > SECONDS_IN_MINUTES * 3 && secondsElapsed <= SECONDS_IN_MINUTES * 59) {
+    return CreateTime.A_FEW_MINUTES_AGO;
+  } else if (secondsElapsed >= SECONDS_IN_HOUR && secondsElapsed < SECONDS_IN_HOUR * 2) {
+    return CreateTime.A_HOUR_AGO;
+  } else if (secondsElapsed >= SECONDS_IN_HOUR * 2 && secondsElapsed < SECONDS_IN_DAY) {
+    return CreateTime.A_FEW_HOURS_AGO;
+  } else if (secondsElapsed >= SECONDS_IN_DAY && secondsElapsed < SECONDS_IN_DAY * 2) {
+    return CreateTime.A_DAY_AGO;
+  } else if (secondsElapsed >= SECONDS_IN_DAY * 2 && secondsElapsed <= SECONDS_IN_DAY * 3) {
+    return CreateTime.A_TWO_DAYS_AGO;
+  }
+  return moment(date).fromNow();
+};
+const addComments = (commentsFromData) => {
+  let commentsList = ``;
+  if (commentsFromData.length) {
+    for (const commentItem of commentsFromData) {
+      commentsList += `
+            <li class="film-details__comment">
+                <span class="film-details__comment-emoji">
+                    <img src="${getCommentReactionImageSrc(commentItem.emotion)}" width="55" height="55" alt="emoji">
+                </span>
+                <div>
+                    <p class="film-details__comment-text">${he.encode(commentItem.comment)}</p>
+                    <p class="film-details__comment-info">
+                    <span class="film-details__comment-author">${commentItem.author}</span>
+                    <span class="film-details__comment-day">${getCommentCreateTime(commentItem.date)}</span>
+                    <button class="film-details__comment-delete" data-id="${commentItem.id}">Delete</button>
+                    </p>
+                </div>
+            </li>`;
+    }
+  }
+  return commentsList;
+};
+const setState = (parameter) => {
+  return (parameter) ? `checked` : ``;
+};
+
 const getFilmPopup = (filmData) => {
   const {
     posterSrc,
@@ -35,193 +233,9 @@ const getFilmPopup = (filmData) => {
     isFavorites,
     comments
   } = filmData;
-  const addUserRating = () => {
-    return (isAlready && userRatingValue) ? `<p class="film-details__user-rating">Your rate ${userRatingValue}</p>` : ``;
-  };
-  const ReactionImageSrc = {
-    SLEEPING: `/images/emoji/sleeping.png`,
-    PUKE: `/images/emoji/puke.png`,
-    ANGRY: `/images/emoji/angry.png`,
-    SMILE: `/images/emoji/smile.png`
-  };
-  const getCommentReactionImageSrc = (emotion) => {
-    let reactionImageSrc = null;
-    switch (emotion) {
-      case `sleeping`:
-        reactionImageSrc = ReactionImageSrc.SLEEPING;
-        break;
-      case `puke`:
-        reactionImageSrc = ReactionImageSrc.PUKE;
-        break;
-      case `angry`:
-        reactionImageSrc = ReactionImageSrc.ANGRY;
-        break;
-      case `smile`:
-        reactionImageSrc = ReactionImageSrc.SMILE;
-        break;
-    }
-    return reactionImageSrc;
-  };
-  const addGenres = (genreName, genresItems) => {
-    if (genresItems.length) {
-      let genresList = ``;
-      for (let genresItem of genresItems) {
-        genresList += `<span class="film-details__genre">${genresItem} </span>`;
-      }
-      return genresList;
-    } else {
-      return `<span class="film-details__genre">${genreName}</span>`;
-    }
-  };
-  const addReactionSection = () => {
-    if (isAlready) {
-      return `
-          <div class="form-details__middle-container">
-            <section class="film-details__user-rating-wrap">
-              <div class="film-details__user-rating-controls">
-                <button class="film-details__watched-reset" type="button">Undo</button>
-              </div>
-    
-              <div class="film-details__user-score">
-                <div class="film-details__user-rating-poster">
-                    <img src="${posterSrc}" alt="film-poster" class="film-details__user-rating-img">
-                </div>
-    
-                <section class="film-details__user-rating-inner">
-                    <h3 class="film-details__user-rating-title">${filmTitle}</h3>
-    
-                    <p class="film-details__user-rating-feelings">How you feel it?</p>
-    
-                    <div class="film-details__user-rating-score">
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
-                    <label class="film-details__user-rating-label" for="rating-1">1</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
-                    <label class="film-details__user-rating-label" for="rating-2">2</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
-                    <label class="film-details__user-rating-label" for="rating-3">3</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
-                    <label class="film-details__user-rating-label" for="rating-4">4</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5">
-                    <label class="film-details__user-rating-label" for="rating-5">5</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
-                    <label class="film-details__user-rating-label" for="rating-6">6</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
-                    <label class="film-details__user-rating-label" for="rating-7">7</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
-                    <label class="film-details__user-rating-label" for="rating-8">8</label>
-    
-                    <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
-                    <label class="film-details__user-rating-label" for="rating-9">9</label>
-    
-                    </div>
-                </section>
-              </div>
-            </section>
-          </div>`;
-    } else {
-      return ``;
-    }
-  };
-  const SECONDS_IN_MINUTES = 60;
-  const SECONDS_IN_HOUR = SECONDS_IN_MINUTES * 60;
-  const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
-  const SECONDS_IN_THREE_MINUTES = SECONDS_IN_MINUTES * 3;
-  const SECONDS_IN_FIFTY_NINE_MINUTES = SECONDS_IN_MINUTES * 59;
-  const SECONDS_IN_TWO_HOURS = SECONDS_IN_HOUR * 2;
-  const SECONDS_IN_TWO_DAYS = SECONDS_IN_DAY * 2;
-  const SECONDS_IN_THREE_DAYS = SECONDS_IN_DAY * 3;
-  const getCommentCreateTime = (date) => {
-    const secondsElapsed = moment().diff(date, `seconds`, false);
-    let createTime = null;
-    if (secondsElapsed < SECONDS_IN_MINUTES) {
-      createTime = `now`;
-    } else if (secondsElapsed >= SECONDS_IN_MINUTES && secondsElapsed <= SECONDS_IN_THREE_MINUTES) {
-      createTime = `a minute ago`;
-    } else if (secondsElapsed > SECONDS_IN_THREE_MINUTES && secondsElapsed <= SECONDS_IN_FIFTY_NINE_MINUTES) {
-      createTime = `a few minutes ago`;
-    } else if (secondsElapsed >= SECONDS_IN_HOUR && secondsElapsed < SECONDS_IN_TWO_HOURS) {
-      createTime = `a hour ago`;
-    } else if (secondsElapsed >= SECONDS_IN_TWO_HOURS && secondsElapsed < SECONDS_IN_DAY) {
-      createTime = `a few hours ago`;
-    } else if (secondsElapsed >= SECONDS_IN_DAY && secondsElapsed < SECONDS_IN_TWO_DAYS) {
-      createTime = `a day ago`;
-    } else if (secondsElapsed >= SECONDS_IN_TWO_DAYS && secondsElapsed <= SECONDS_IN_THREE_DAYS) {
-      createTime = `a two days ago`;
-    } else {
-      createTime = moment(date).fromNow();
-    }
-    return createTime;
-  };
-  const addComments = (commentsFromData) => {
-    let commentsList = ``;
-    if (commentsFromData.length) {
-      for (let commentItem of commentsFromData) {
-        commentsList += `
-              <li class="film-details__comment">
-                  <span class="film-details__comment-emoji">
-                      <img src="${getCommentReactionImageSrc(commentItem.emotion)}" width="55" height="55" alt="emoji">
-                  </span>
-                  <div>
-                      <p class="film-details__comment-text">${he.encode(commentItem.comment)}</p>
-                      <p class="film-details__comment-info">
-                      <span class="film-details__comment-author">${commentItem.author}</span>
-                      <span class="film-details__comment-day">${getCommentCreateTime(commentItem.date)}</span>
-                      <button class="film-details__comment-delete" data-id="${commentItem.id}">Delete</button>
-                      </p>
-                  </div>
-              </li>`;
-      }
-    }
-    return commentsList;
-  };
-  const setState = (parameter) => {
-    return (parameter) ? `checked` : ``;
-  };
-  const addFeedbackStyles = () => `
-    <style>
-      @keyframes shake {
-        0%,
-        100% {
-          transform: translateX(0);
-        }
-        10%,
-        30%,
-        50%,
-        70%,
-        90% {
-          transform: translateX(-5px);
-        }
-        20%,
-        40%,
-        60%,
-        80% {
-          transform: translateX(5px);
-        }
-      }
-      .shake {
-        animation: shake 0.6s;
-      }
-      .selected:checked + .film-details__user-rating-label {
-        background-color: #d8d8d8;
-      }
-      .shake .selected + .film-details__user-rating-label {
-        background-color: #f51a1a;
-      }
-      .film-details__comment-input--no-valid {
-        border-color: #f51a1a;
-      }
-    </style>
-  `;
   return `
     <section class="film-details">
-        ${addFeedbackStyles()}
+        ${FEEDBACK_STYLE}
         <form class="film-details__inner" action="" method="get">
         <div class="form-details__top-container">
             <div class="film-details__close">
@@ -243,7 +257,7 @@ const getFilmPopup = (filmData) => {
 
                 <div class="film-details__rating">
                     <p class="film-details__total-rating">${ratingVal}</p>
-                    ${addUserRating()}
+                    ${addUserRating(isAlready, userRatingValue)}
                 </div>
                 </div>
 
@@ -298,7 +312,7 @@ const getFilmPopup = (filmData) => {
             </section>
         </div>
 
-        ${addReactionSection()}
+        ${addReactionSection(isAlready, posterSrc, filmTitle)}
 
         <div class="form-details__bottom-container">
             <section class="film-details__comments-wrap">
@@ -342,12 +356,6 @@ const getFilmPopup = (filmData) => {
         </form>
     </section>`;
 };
-const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
-const SHAKE_ANIMATION_CLS = `shake`;
-const CommentDeleteBtnText = {
-  DEFAULT: `Delete`,
-  DELETING: `Deleting…`
-};
 
 export default class FilmPopup extends AbstractSmartComponent {
   constructor(data) {
@@ -374,21 +382,16 @@ export default class FilmPopup extends AbstractSmartComponent {
       this._selectedReactionId = null;
     }
   }
-  _escapeBtnHandler(event) {
-    if (event.key === EventKey.ESCAPE) {
-      this.getElement().remove();
-      this.removeElement();
-      window.removeEventListener(`keydown`, this._escapeBtnHandler);
-      window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
-      window.removeEventListener(`keyup`, this._removeFirstBtnKey);
-    }
+  _removeHandlers() {
+    window.removeEventListener(`keydown`, this._escapeBtnHandler);
+    window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
+    window.removeEventListener(`keydown`, this._secondBtnHandlerForSendComment);
+    window.removeEventListener(`keyup`, this._removeFirstBtnKey);
   }
   closePopup() {
     this.getElement().remove();
     this.removeElement();
-    window.removeEventListener(`keydown`, this._escapeBtnHandler);
-    window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
-    window.removeEventListener(`keyup`, this._removeFirstBtnKey);
+    this._removeHandlers();
   }
   setCloseHandlers() {
     const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
@@ -425,7 +428,7 @@ export default class FilmPopup extends AbstractSmartComponent {
       this.userRatingBlock.classList.add(SHAKE_ANIMATION_CLS);
     } else {
       this.userRatingBlock.classList.remove(SHAKE_ANIMATION_CLS);
-      setInterval(() => {
+      setTimeout(() => {
         this.userRatingBlock.classList.add(SHAKE_ANIMATION_CLS);
       }, 0);
     }
@@ -488,24 +491,23 @@ export default class FilmPopup extends AbstractSmartComponent {
         this._newCommentText = `${this._newCommentText.substr(0, COMMENT_CUT_START_INDEX)}...`;
       }
       return this._newCommentText;
-    } else {
-      return false;
     }
+    return false;
   }
   _getNewCommentReaction(reactionId) {
     let reaction = null;
     switch (reactionId) {
       case `emoji-smile`:
-        reaction = `smile`;
+        reaction = Reaction.SMILE;
         break;
       case `emoji-sleeping`:
-        reaction = `sleeping`;
+        reaction = Reaction.SLEEPING;
         break;
       case `emoji-gpuke`:
-        reaction = `puke`;
+        reaction = Reaction.PUKE;
         break;
       case `emoji-angry`:
-        reaction = `angry`;
+        reaction = Reaction.ANGRY;
         break;
     }
     return reaction;
@@ -516,7 +518,7 @@ export default class FilmPopup extends AbstractSmartComponent {
       this._newCommentBlock.classList.add(SHAKE_ANIMATION_CLS);
     } else {
       this._newCommentBlock.classList.remove(SHAKE_ANIMATION_CLS);
-      setInterval(() => {
+      setTimeout(() => {
         this._newCommentBlock.classList.add(SHAKE_ANIMATION_CLS);
       }, 0);
     }
@@ -539,6 +541,59 @@ export default class FilmPopup extends AbstractSmartComponent {
       this.addNewComment(newCommentData);
     }
   }
+  sendNewComment() {
+    window.addEventListener(`keydown`, this._firstBtnHandlerForSendComment);
+  }
+  setCurrentUserRating() {
+    if (this.data.isAlready && this.data.userRatingValue) {
+      const ratingLevelRadioBtns = this._getUserRatingInputs();
+      for (const radioBtn of ratingLevelRadioBtns) {
+        if (+radioBtn.value === this.data.userRatingValue) {
+          radioBtn.checked = true;
+          return;
+        }
+      }
+    }
+  }
+  getRemoveCommentBtn() {
+    return this.getElement().querySelectorAll(`.film-details__comment-delete`);
+  }
+  onCommentDeleteError() {
+    const noDeletingCommentRemoveBtn = this.getElement().querySelector(`.film-details__comment-delete[data-id="${this.commentId}"]`);
+    noDeletingCommentRemoveBtn.innerText = `${CommentDeleteBtnText.STANDART}`;
+    noDeletingCommentRemoveBtn.removeAttribute(`disabled`);
+  }
+  setRemoveCommentCallbacks(callback) {
+    this._commentRemoveCallback = callback;
+    const removeCommentBtns = this.getRemoveCommentBtn();
+    removeCommentBtns.forEach((btn) => {
+      btn.addEventListener(`click`, (event) => {
+        event.preventDefault();
+        event.target.innerText = `${CommentDeleteBtnText.DELETING}`;
+        event.target.setAttribute(`disabled`, true);
+        const commentId = event.target.getAttribute(`data-id`);
+        callback(commentId);
+      });
+    });
+  }
+  recoveryListeners() {
+    this._removeReaction();
+    this.setCurrentUserRating();
+    this.setRemoveCommentCallbacks(this._commentRemoveCallback);
+    this.setCloseHandlers();
+    this.setUserRatingChangeCallbacks(this._changeUserRatingCallback);
+    this.setUserRatingResetCallback(this._changeUserRatingCallback);
+    this.setChangeStatusCallbacks(this.changeStatusCallback);
+    this.sendNewComment();
+    this.onSelectReaction();
+  }
+  _escapeBtnHandler(event) {
+    if (event.key === EventKey.ESCAPE) {
+      this.getElement().remove();
+      this.removeElement();
+      this._removeHandlers();
+    }
+  }
   _removeFirstBtnKey(event) {
     if (event.key === this._firstBtnKeyForCommentSend) {
       this._firstBtnKeyForCommentSend = null;
@@ -558,51 +613,5 @@ export default class FilmPopup extends AbstractSmartComponent {
       window.addEventListener(`keyup`, this._removeFirstBtnKey);
       window.addEventListener(`keydown`, this._secondBtnHandlerForSendComment);
     }
-  }
-  sendNewComment() {
-    window.addEventListener(`keydown`, this._firstBtnHandlerForSendComment);
-  }
-  setCurrentUserRating() {
-    if (this.data.isAlready && this.data.userRatingValue) {
-      const ratingLevelRadioBtns = this._getUserRatingInputs();
-      for (const radioBtn of ratingLevelRadioBtns) {
-        if (+radioBtn.value === +this.data.userRatingValue) {
-          radioBtn.checked = true;
-          return;
-        }
-      }
-    }
-  }
-  getRemoveCommentBtn() {
-    return this.getElement().querySelectorAll(`.film-details__comment-delete`);
-  }
-  onCommentDeleteError() {
-    const noDeletingCommentRemoveBtn = this.getElement().querySelector(`.film-details__comment-delete[data-id="${this.commentId}"]`);
-    noDeletingCommentRemoveBtn.innerText = CommentDeleteBtnText.DEFAULT;
-    noDeletingCommentRemoveBtn.removeAttribute(`disabled`);
-  }
-  setRemoveCommentCallbacks(callback) {
-    this._commentRemoveCallback = callback;
-    const removeCommentBtns = this.getRemoveCommentBtn();
-    removeCommentBtns.forEach((btn) => {
-      btn.addEventListener(`click`, (event) => {
-        event.preventDefault();
-        event.target.innerText = CommentDeleteBtnText.DELETING;
-        event.target.setAttribute(`disabled`, true);
-        const commentId = event.target.getAttribute(`data-id`);
-        callback(commentId);
-      });
-    });
-  }
-  recoveryListeners() {
-    this._removeReaction();
-    this.setCurrentUserRating();
-    this.setRemoveCommentCallbacks(this._commentRemoveCallback);
-    this.setCloseHandlers();
-    this.setUserRatingChangeCallbacks(this._changeUserRatingCallback);
-    this.setUserRatingResetCallback(this._changeUserRatingCallback);
-    this.setChangeStatusCallbacks(this.changeStatusCallback);
-    this.sendNewComment();
-    this.onSelectReaction();
   }
 }

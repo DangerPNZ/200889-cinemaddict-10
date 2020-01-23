@@ -1,9 +1,16 @@
 import moment from 'moment';
 
+const MINUTES_IN_HOUR = 60;
 const ResultValueForCompare = {
   FIRST_LESS_SECOND: 1,
   FIRST_MORE_SECOND: -1,
   FIRST_EQUAL_SECOND: 0
+};
+const checkElement = (item) => {
+  if (item instanceof Element) {
+    return item;
+  }
+  return item.getElement();
 };
 
 export const compare = (property, byDate = false) => {
@@ -11,23 +18,20 @@ export const compare = (property, byDate = false) => {
     return (a, b) => {
       if (a[property] < b[property]) {
         return ResultValueForCompare.FIRST_LESS_SECOND;
-      }
-      if (a[property] > b[property]) {
-        return ResultValueForCompare.FIRST_MORE_SECOND;
-      }
-      return ResultValueForCompare.FIRST_EQUAL_SECOND;
-    };
-  } else {
-    return (a, b) => {
-      if (new Date(a[property]) < new Date(b[property])) {
-        return ResultValueForCompare.FIRST_LESS_SECOND;
-      }
-      if (new Date(a[property]) > new Date(b[property])) {
+      } else if (a[property] > b[property]) {
         return ResultValueForCompare.FIRST_MORE_SECOND;
       }
       return ResultValueForCompare.FIRST_EQUAL_SECOND;
     };
   }
+  return (a, b) => {
+    if (new Date(a[property]) < new Date(b[property])) {
+      return ResultValueForCompare.FIRST_LESS_SECOND;
+    } else if (new Date(a[property]) > new Date(b[property])) {
+      return ResultValueForCompare.FIRST_MORE_SECOND;
+    }
+    return ResultValueForCompare.FIRST_EQUAL_SECOND;
+  };
 };
 
 export const createElement = (templateContent) => {
@@ -36,13 +40,6 @@ export const createElement = (templateContent) => {
   return element.content.firstElementChild;
 };
 
-const checkElement = (item) => {
-  if (item instanceof Element) {
-    return item;
-  } else {
-    return item.getElement();
-  }
-};
 export const insertElementInMarkup = (elementNodeOrComponent, containerNodeOrComponent, where = `append`) => {
   const elementNode = checkElement(elementNodeOrComponent);
   const containerNode = checkElement(containerNodeOrComponent);
@@ -65,10 +62,8 @@ export const insertElementInMarkup = (elementNodeOrComponent, containerNodeOrCom
       break;
   }
 };
-export const formatDate = (date, formatStr) => {
-  return moment(date).format(formatStr);
-};
-const MINUTES_IN_HOUR = 60;
+export const formatDate = (date, formatStr) => moment(date).format(formatStr);
+
 export const getFilmDuration = (duration) => {
   const durationInHours = Math.floor(duration / MINUTES_IN_HOUR);
   const durationInMinutes = Math.floor(duration % MINUTES_IN_HOUR);
@@ -78,6 +73,7 @@ export const getFilmDuration = (duration) => {
   ];
   return durationValues.join(``);
 };
+
 export const removeIt = (element) => {
   if (element instanceof Element) {
     element.remove();

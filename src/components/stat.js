@@ -4,6 +4,11 @@ import AbstractSmartComponent from "./abstract-smart-component.js";
 import Chart from 'chart.js';
 import chartDataLabels from 'chartjs-plugin-datalabels';
 
+const MINUTES_IN_HOUR = 60;
+const INDEX_OF_FIRST_ELEMENT = 0;
+const ONE_ELEMENT_FOR_GENGES_COUNT = 1;
+const AMOUNT_OF_TIME_PERIOD = 1;
+
 const StatisticState = {
   DEFAULT: `all-time`,
   TODAY: `today`,
@@ -11,35 +16,54 @@ const StatisticState = {
   MONTH: `month`,
   YEAR: `year`
 };
-
-const getWatchedMovies = (movies) => {
-  return movies.filter((item) => {
-    return item.isAlready === true;
-  });
-};
 const TimeParameter = {
   HOURS: `hours`,
   MINUTES: `minutes`
 };
-const MINUTES_IN_HOUR = 60;
+const TimeUnit = {
+  DAY: `day`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
+};
+const ChartOptionValue = {
+  CHART_TYPE: `horizontalBar`,
+  BACKGROUND_COLOR: `#ffe800`,
+  BAR_THICKNESS: 22,
+  MIN_BAR_LENGTH: 0,
+  DISPLAY_NONE_STATE: false,
+  COLOR: `#fff`,
+  TOOLTIPS_ENABLED_STATE: false,
+  FONT_SIZE: 16,
+  LEGEND_STATE: false,
+  DATA_LABELS_POSITION: `start`,
+  DATA_LABELS_OFFSET: 25,
+  STACKED_STATE: true,
+  TICKS_PADDING: 60
+};
+
+let genresLabels = [];
+let values = [];
+let genresCounts = {};
+
+const getWatchedMovies = (movies) => {
+  return movies.filter((item) => item.isAlready === true);
+};
 const getAllWatchedMoviesTime = (movies, parameter) => {
   if (movies.length) {
     const watchedFilms = movies.filter((item) => item.isAlready === true);
-    let totalTimeValueByParameter = null;
     if (watchedFilms.length) {
       const totalDuration = watchedFilms.map((item) => item.filmDuration).reduce((sum, current) => sum + current);
       if (parameter === TimeParameter.HOURS) {
-        totalTimeValueByParameter = Math.floor(totalDuration / MINUTES_IN_HOUR);
+        return Math.floor(totalDuration / MINUTES_IN_HOUR);
       } else if (parameter === TimeParameter.MINUTES) {
-        totalTimeValueByParameter = Math.floor(totalDuration % MINUTES_IN_HOUR);
+        return Math.floor(totalDuration % MINUTES_IN_HOUR);
       }
     } else {
-      totalTimeValueByParameter = 0;
+      return 0;
     }
-    return totalTimeValueByParameter;
-  } else {
-    return 0;
   }
+  return 0;
 };
 const getAllMoviesGenres = (movies) => {
   const allGenres = [];
@@ -55,11 +79,6 @@ const getAllMoviesGenres = (movies) => {
   });
   return allGenres;
 };
-let genresLabels = [];
-let values = [];
-let genresCounts = {};
-const INDEX_OF_FIRST_ELEMENT = 0;
-const ONE_ELEMENT_FOR_GENGES_COUNT = 1;
 const getTopGenre = (movies) => {
   genresLabels = [];
   values = [];
@@ -98,9 +117,8 @@ const getUserRank = (userRank) => {
       <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
       <span class="statistic__rank-label">${userRank}</span>
     </p>`;
-  } else {
-    return ``;
   }
+  return ``;
 };
 
 const getStat = (userRank, filmsData) => {
@@ -148,28 +166,7 @@ const getStat = (userRank, filmsData) => {
 
 </section>`;
 };
-const CHART_OPTION_VALUE = {
-  chartType: `horizontalBar`,
-  backgroundColor: `#ffe800`,
-  barThickness: 22,
-  minBarLength: 0,
-  displayNoneState: false,
-  color: `#fff`,
-  tooltipsEnabledState: false,
-  fontSize: 16,
-  legendState: false,
-  dataLabelsPosition: `start`,
-  dataLabelsOffset: 25,
-  stackedState: true,
-  ticksPadding: 60
-};
-const AMOUNT_OF_TIME_UNITS = 1;
-const TimeUnit = {
-  DAY: `day`,
-  WEEK: `week`,
-  MONTH: `month`,
-  YEAR: `year`
-};
+
 export default class Stat extends AbstractSmartComponent {
   constructor(userRank, filmsData, container) {
     super();
@@ -194,13 +191,13 @@ export default class Stat extends AbstractSmartComponent {
         this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TimeUnit.DAY));
         break;
       case StatisticState.WEEK:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.WEEK)));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.WEEK)));
         break;
       case StatisticState.MONTH:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.MONTH)));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.MONTH)));
         break;
       case StatisticState.YEAR:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_UNITS, TimeUnit.YEAR)));
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.YEAR)));
         break;
     }
   }
@@ -210,7 +207,7 @@ export default class Stat extends AbstractSmartComponent {
       radioBtn.addEventListener(`change`, (event) => {
         event.preventDefault();
         this._staticticState = event.target.value;
-        this.rerender(this._userRank);
+        this.rerender(this._userRank, true);
       });
     }
   }
@@ -219,67 +216,66 @@ export default class Stat extends AbstractSmartComponent {
       const ctx = this.getElement().querySelector(`#genres-chart`).getContext(`2d`);
       return new Chart(ctx, {
         plugins: [chartDataLabels],
-        type: CHART_OPTION_VALUE.chartType,
+        type: ChartOptionValue.CHART_TYPE,
         data: {
           labels: genresLabels,
           datasets: [{
             data: values,
-            backgroundColor: CHART_OPTION_VALUE.backgroundColor,
-            barThickness: CHART_OPTION_VALUE.barThickness,
-            minBarLength: CHART_OPTION_VALUE.minBarLength
+            backgroundColor: ChartOptionValue.BACKGROUND_COLOR,
+            barThickness: ChartOptionValue.BAR_THICKNESS,
+            minBarLength: ChartOptionValue.MIN_BAR_LENGTH
           }]
         },
         gridLines: {
-          display: CHART_OPTION_VALUE.displayNoneState
+          display: ChartOptionValue.DISPLAY_NONE_STATE
         },
         options: {
           label: {
             font: {
-              color: CHART_OPTION_VALUE.color
+              color: ChartOptionValue.COLOR
             }
           },
           tooltips: {
-            enabled: CHART_OPTION_VALUE.tooltipsEnabledState
+            enabled: ChartOptionValue.TOOLTIPS_ENABLED_STATE
           },
           plugins: {
             datalabels: {
-              anchor: CHART_OPTION_VALUE.dataLabelsPosition,
-              align: CHART_OPTION_VALUE.dataLabelsPosition,
-              offset: CHART_OPTION_VALUE.dataLabelsOffset,
-              color: CHART_OPTION_VALUE.color,
+              anchor: ChartOptionValue.DATA_LABELS_POSITION,
+              align: ChartOptionValue.DATA_LABELS_POSITION,
+              offset: ChartOptionValue.DATA_LABELS_OFFSET,
+              color: ChartOptionValue.COLOR,
               font: {
-                size: CHART_OPTION_VALUE.fontSize
+                size: ChartOptionValue.FONT_SIZE
               }
             }
           },
-          legend: CHART_OPTION_VALUE.legendState,
+          legend: ChartOptionValue.LEGEND_STATE,
           scales: {
             xAxes: [{
               gridLines: {
-                display: CHART_OPTION_VALUE.displayNoneState
+                display: ChartOptionValue.DISPLAY_NONE_STATE
               },
               ticks: {
-                display: CHART_OPTION_VALUE.displayNoneState
+                display: ChartOptionValue.DISPLAY_NONE_STATE
               },
-              stacked: CHART_OPTION_VALUE.stackedState
+              stacked: ChartOptionValue.STACKED_STATE
             }],
             yAxes: [{
               gridLines: {
-                display: CHART_OPTION_VALUE.displayNoneState
+                display: ChartOptionValue.DISPLAY_NONE_STATE
               },
               ticks: {
-                fontSize: CHART_OPTION_VALUE.fontSize,
-                fontColor: CHART_OPTION_VALUE.color,
-                padding: CHART_OPTION_VALUE.ticksPadding
+                fontSize: ChartOptionValue.FONT_SIZE,
+                fontColor: ChartOptionValue.COLOR,
+                padding: ChartOptionValue.TICKS_PADDING
               },
-              stacked: CHART_OPTION_VALUE.stackedState
+              stacked: ChartOptionValue.STACKED_STATE
             }]
           }
         }
       });
-    } else {
-      return null;
     }
+    return null;
   }
   _setCurrentStatisticPeriod() {
     if (this._staticticState !== StatisticState.DEFAULT) {
@@ -291,12 +287,15 @@ export default class Stat extends AbstractSmartComponent {
     this._setStatisticPeriodHandlers();
     this._createChart();
   }
-  rerender(userRank) {
+  rerender(userRank, showState) {
     this._userRank = userRank;
     this.getElement().remove();
     this.removeElement();
     this._defineStatisticData();
     this.render();
+    if (!showState) {
+      this.hide();
+    }
     this._setCurrentStatisticPeriod();
   }
 }

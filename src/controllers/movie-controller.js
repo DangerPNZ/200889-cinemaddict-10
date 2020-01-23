@@ -1,6 +1,7 @@
 import FilmCard from '../components/film-card.js';
 import FilmPopup from '../components/film-popup.js';
 import {insertElementInMarkup} from '../utils/utils.js';
+import {removeIt} from '../utils/utils.js';
 import moment from 'moment';
 
 export default class MovieController {
@@ -12,8 +13,10 @@ export default class MovieController {
     this.changeUserRatingValue = this.changeUserRatingValue.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
     this.removeComment = this.removeComment.bind(this);
+    this.addNewComment = this.addNewComment.bind(this);
     this.rerenderComponent = this.rerenderComponent.bind(this);
     this.closePopup = this.closePopup.bind(this);
+    this.removeElements = this.removeElements.bind(this);
   }
   rerenderComponent(newData) {
     this.data = newData;
@@ -21,6 +24,43 @@ export default class MovieController {
     if (this.filmPopup) {
       this.filmPopup.rerender(newData);
     }
+  }
+  closePopup() {
+    if (this.filmPopup) {
+      this.filmPopup.closePopup();
+      this.filmPopup = undefined;
+    }
+  }
+  removeElements() {
+    let hasPopup = false;
+    if (this.filmPopup) {
+      hasPopup = true;
+      this.closePopup();
+    }
+    removeIt(this.filmCard);
+    return hasPopup;
+  }
+  showPopup() {
+    this.onViewChange();
+    this.filmPopup = new FilmPopup(this.data);
+    this.filmPopup.setAddNewCommentCallback(this.addNewComment);
+    insertElementInMarkup(this.filmPopup.getElement(), document.body);
+    this.filmPopup.setCurrentUserRating();
+    this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
+    this.filmPopup.setCloseHandlers();
+    this.filmPopup.setUserRatingChangeCallbacks(this.changeUserRatingValue);
+    this.filmPopup.setUserRatingResetCallback(this.changeUserRatingValue);
+    this.filmPopup.onSelectReaction();
+    this.filmPopup.setChangeStatusCallbacks(this.changeStatus);
+    this.filmPopup.sendNewComment();
+  }
+  render(filmData) {
+    this.data = filmData;
+    this.id = filmData.id;
+    this.filmCard = new FilmCard(this.data);
+    insertElementInMarkup(this.filmCard, this._container);
+    this.filmCard.setShowDetailsHandlers(this.showPopup);
+    this.filmCard.setChangeStatusCallbacks(this.changeStatus);
   }
   changeUserRatingValue(value = 0) {
     const oldData = this.data;
@@ -42,33 +82,5 @@ export default class MovieController {
   }
   addNewComment(newCommentData) {
     this.onDataChange(this.id, newCommentData);
-  }
-  closePopup() {
-    if (this.filmPopup) {
-      this.filmPopup.closePopup();
-      this.filmPopup = undefined;
-    }
-  }
-  showPopup() {
-    this.onViewChange();
-    this.filmPopup = new FilmPopup(this.data);
-    this.filmPopup.setAddNewCommentCallback(this.addNewComment.bind(this));
-    insertElementInMarkup(this.filmPopup.getElement(), document.body);
-    this.filmPopup.setCurrentUserRating();
-    this.filmPopup.setRemoveCommentCallbacks(this.removeComment);
-    this.filmPopup.setCloseHandlers();
-    this.filmPopup.setUserRatingChangeCallbacks(this.changeUserRatingValue);
-    this.filmPopup.setUserRatingResetCallback(this.changeUserRatingValue);
-    this.filmPopup.onSelectReaction();
-    this.filmPopup.setChangeStatusCallbacks(this.changeStatus);
-    this.filmPopup.sendNewComment();
-  }
-  render(filmData) {
-    this.data = filmData;
-    this.id = filmData.id;
-    this.filmCard = new FilmCard(this.data);
-    insertElementInMarkup(this.filmCard, this._container);
-    this.filmCard.setShowDetailsHandlers(this.showPopup);
-    this.filmCard.setChangeStatusCallbacks(this.changeStatus);
   }
 }

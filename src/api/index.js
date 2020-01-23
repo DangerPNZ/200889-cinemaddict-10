@@ -22,9 +22,8 @@ export default class API {
   _checkStatus(response) {
     if (response.status >= Status.STATUS_OK_CODE && response.status < Status.STATUS_MULTIPLE_CHOISES_CODE) {
       return response;
-    } else {
-      throw new Error(`${response.status}: ${response.statusText}`);
     }
+    throw new Error(`${response.status}: ${response.statusText}`);
   }
   _load(url, method = Method.GET, body = null, onError = null) {
     return fetch(`${API_URL}/${url}`, {method, body, headers})
