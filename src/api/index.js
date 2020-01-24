@@ -19,6 +19,48 @@ export default class API {
   constructor(dataAdapter) {
     this.dataAdapter = dataAdapter;
   }
+  getMovies() {
+    return this._load(`movies`)
+    .then((response) => response.json())
+    .then((filmsData) => {
+      for (const film of filmsData) {
+        delete film.comments;
+      }
+      this._getCommentsForAllMovies(filmsData);
+      return filmsData;
+    })
+    .catch((err) => {
+      throw err;
+    });
+  }
+  updateMovie(id, newData, onMovieUpdated, onError) {
+    return this._load(`movies/${id}`, Method.PUT, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
+    .then((response) => response.json())
+    .then((film) => this._getComments(film, onMovieUpdated))
+    .catch((err) => {
+      throw err;
+    });
+  }
+  sendComment(filmId, body, onUpdateMovieData, onError) {
+    return this._load(`comments/${filmId}`, Method.POST, body, onError)
+    .then((response) => response.json())
+    .then((data) => {
+      data.movie.comments = data.comments;
+      this.dataAdapter.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
+    })
+    .catch((err) => {
+      throw err;
+    });
+  }
+  deleteComment(commentId, onUpdateMovieData, onError) {
+    return this._load(`comments/${commentId}`, Method.DELETE, null, onError)
+    .then(() => {
+      onUpdateMovieData(commentId);
+    })
+    .catch((err) => {
+      throw err;
+    });
+  }
   _checkStatus(response) {
     if (response.status >= Status.STATUS_OK_CODE && response.status < Status.STATUS_MULTIPLE_CHOISES_CODE) {
       return response;
@@ -60,43 +102,5 @@ export default class API {
     for (const movieData of this.allMoviesData) {
       this._getComments(movieData);
     }
-  }
-  getMovies() {
-    return this._load(`movies`)
-    .then((response) => response.json())
-    .then((filmsData) => {
-      this._getCommentsForAllMovies(filmsData);
-    })
-    .catch((err) => {
-      throw err;
-    });
-  }
-  updateMovie(id, newData, onMovieUpdated, onError) {
-    return this._load(`movies/${id}`, Method.PUT, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
-    .then((response) => response.json())
-    .then((film) => this._getComments(film, onMovieUpdated))
-    .catch((err) => {
-      throw err;
-    });
-  }
-  sendComment(filmId, body, onUpdateMovieData, onError) {
-    return this._load(`comments/${filmId}`, Method.POST, body, onError)
-    .then((response) => response.json())
-    .then((data) => {
-      data.movie.comments = data.comments;
-      this.dataAdapter.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
-    })
-    .catch((err) => {
-      throw err;
-    });
-  }
-  deleteComment(commentId, onUpdateMovieData, onError) {
-    return this._load(`comments/${commentId}`, Method.DELETE, null, onError)
-    .then(() => {
-      onUpdateMovieData(commentId);
-    })
-    .catch((err) => {
-      throw err;
-    });
   }
 }

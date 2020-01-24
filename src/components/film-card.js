@@ -50,15 +50,6 @@ export default class FilmCard extends AbstractSmartComponent {
   getTemplate() {
     return getFilmCard(this.data);
   }
-  _getCallDetailsItems() {
-    const poster = this.getElement().querySelector(`.film-card__poster`);
-    const heading = this.getElement().querySelector(`.film-card__title`);
-    const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
-    return [poster, heading, toCommentsLink];
-  }
-  _getStatusControlItems() {
-    return this.getElement().querySelectorAll(`.film-card__controls-item`);
-  }
   enabledChangeStatusBtns() {
     for (const btnItem of this._getStatusControlItems()) {
       btnItem.removeAttribute(`disabled`);
@@ -87,6 +78,15 @@ export default class FilmCard extends AbstractSmartComponent {
     for (const item of elements) {
       item.addEventListener(`click`, handler);
     }
+  }
+  _getCallDetailsItems() {
+    const poster = this.getElement().querySelector(`.film-card__poster`);
+    const heading = this.getElement().querySelector(`.film-card__title`);
+    const toCommentsLink = this.getElement().querySelector(`.film-card__comments`);
+    return [poster, heading, toCommentsLink];
+  }
+  _getStatusControlItems() {
+    return this.getElement().querySelectorAll(`.film-card__controls-item`);
   }
 }
 

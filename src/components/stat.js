@@ -182,6 +182,22 @@ export default class Stat extends AbstractSmartComponent {
   getTemplate() {
     return getStat(this._userRank, this._filmsDataByPeriod);
   }
+  render() {
+    insertElementInMarkup(this, this._statisticContainer);
+    this._setStatisticPeriodHandlers();
+    this._createChart();
+  }
+  rerender(userRank, showState) {
+    this._userRank = userRank;
+    this.getElement().remove();
+    this.removeElement();
+    this._defineStatisticData();
+    this.render();
+    if (!showState) {
+      this.hide();
+    }
+    this._setCurrentStatisticPeriod();
+  }
   _defineStatisticData() {
     switch (this._staticticState) {
       case StatisticState.DEFAULT:
@@ -281,21 +297,5 @@ export default class Stat extends AbstractSmartComponent {
     if (this._staticticState !== StatisticState.DEFAULT) {
       this.getElement().querySelector(`.statistic__filters-input[value="${this._staticticState}"]`).setAttribute(`checked`, true);
     }
-  }
-  render() {
-    insertElementInMarkup(this, this._statisticContainer);
-    this._setStatisticPeriodHandlers();
-    this._createChart();
-  }
-  rerender(userRank, showState) {
-    this._userRank = userRank;
-    this.getElement().remove();
-    this.removeElement();
-    this._defineStatisticData();
-    this.render();
-    if (!showState) {
-      this.hide();
-    }
-    this._setCurrentStatisticPeriod();
   }
 }

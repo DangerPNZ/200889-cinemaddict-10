@@ -115,6 +115,69 @@ export default class PageController {
       }
     };
   }
+  onToFilms() {
+    this._showComponents(this.sortController.component, this._components.films, this._components.stat);
+    this._components.stat.hide();
+  }
+  onToStatistic() {
+    this._hideComponents(this.sortController.component, this._components.films, this._components.stat);
+    this._components.stat.show();
+  }
+  setFilmsContainerInitialState(init = false) {
+    this._hideComponents(this._components.stat);
+    if (this.moviesModel.getMoviesAmount()) {
+      removeIt(this._components.loadingStateHeading.getElement());
+      insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
+      this._components.filmsSection.setHandlerForShowMoreBtn(this._outputFilmParts);
+      this._outputFilmParts();
+    } else {
+      removeIt(this._elements.showMoreBtn);
+      removeIt(this._elements.moviesContainer);
+      if (!init) {
+        removeIt(this._components.loadingStateHeading.getElement());
+      }
+      insertElementInMarkup(init ? this._components.loadingStateHeading : this._components.noMoviesStateHeading, this._components.filmsSection);
+    }
+  }
+  setStateAfterDataLoad() {
+    removeIt(this._components.stat.getElement());
+    removeIt(this.sortController.component.getElement());
+    removeIt(this.navController.component.getElement());
+    this._components.userRank = new UserRank(this.moviesModel.getMoviesDataForRender());
+    this._createStatComponent();
+    this._createSortController();
+    this._createNavController();
+    insertElementInMarkup(this._components.userRank, this._elements.header);
+    insertElementInMarkup(this._components.films, this._elements.main);
+    insertElementInMarkup(this._elements.moviesContainer, this._components.filmsSection, `prepend`);
+    insertElementInMarkup(this._components.filmsSection, this._components.films);
+    this.setFilmsContainerInitialState();
+    this._setFilmsAmountInFooter();
+    this._createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
+    this._createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
+    this.onToFilms();
+  }
+  onFilmsPartsChange(filmsData) {
+    this._elements.moviesContainer.innerHTML = ``;
+    this._filmsInThePage = 0;
+    this._controllers.mainSection = [];
+    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== 0) {
+      insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
+    }
+    return filmsData.length !== 0 ? this._outputFilmParts() : removeIt(this._elements.showMoreBtn);
+  }
+  render() {
+    this.moviesModel.setChangeCallback(this.onFilmsPartsChange.bind(this));
+    this.moviesModel.setAfterDataLoadCallback(this.setStateAfterDataLoad.bind(this));
+    this._createStatComponent();
+    this._createSortController();
+    this._createNavController();
+    this.setFilmsContainerInitialState(true);
+    insertElementInMarkup(this._components.films, this._elements.main);
+    insertElementInMarkup(this._components.filmsSection, this._components.films);
+    this._setFilmsAmountInFooter();
+    this.moviesModel.getMoviesDataFromServer();
+  }
   _showComponents(...components) {
     for (const component of components) {
       component.show();
@@ -124,14 +187,6 @@ export default class PageController {
     for (const component of components) {
       component.hide();
     }
-  }
-  onToFilms() {
-    this._showComponents(this.sortController.component, this._components.films, this._components.stat);
-    this._components.stat.hide();
-  }
-  onToStatistic() {
-    this._hideComponents(this.sortController.component, this._components.films, this._components.stat);
-    this._components.stat.show();
   }
   _getNewUserRank() {
     removeIt(this._components.userRank);
@@ -261,60 +316,5 @@ export default class PageController {
         break;
       }
     }
-  }
-  setFilmsContainerInitialState(init = false) {
-    this._hideComponents(this._components.stat);
-    if (this.moviesModel.getMoviesAmount()) {
-      removeIt(this._components.loadingStateHeading.getElement());
-      insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
-      this._components.filmsSection.setHandlerForShowMoreBtn(this._outputFilmParts);
-      this._outputFilmParts();
-    } else {
-      removeIt(this._elements.showMoreBtn);
-      removeIt(this._elements.moviesContainer);
-      if (!init) {
-        removeIt(this._components.loadingStateHeading.getElement());
-      }
-      insertElementInMarkup(init ? this._components.loadingStateHeading : this._components.noMoviesStateHeading, this._components.filmsSection);
-    }
-  }
-  setStateAfterDataLoad() {
-    removeIt(this._components.stat.getElement());
-    removeIt(this.sortController.component.getElement());
-    removeIt(this.navController.component.getElement());
-    this._components.userRank = new UserRank(this.moviesModel.getMoviesDataForRender());
-    this._createStatComponent();
-    this._createSortController();
-    this._createNavController();
-    insertElementInMarkup(this._components.userRank, this._elements.header);
-    insertElementInMarkup(this._components.films, this._elements.main);
-    insertElementInMarkup(this._elements.moviesContainer, this._components.filmsSection, `prepend`);
-    insertElementInMarkup(this._components.filmsSection, this._components.films);
-    this.setFilmsContainerInitialState();
-    this._setFilmsAmountInFooter();
-    this._createExtraSection(PARAMETER_FOR_CREATE_TOP_RATED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
-    this._createExtraSection(PARAMETER_FOR_CREATE_MOST_COMMENTED_SECTION, this._components.films, this.moviesModel.getMoviesDataForRender());
-    this.onToFilms();
-  }
-  onFilmsPartsChange(filmsData) {
-    this._elements.moviesContainer.innerHTML = ``;
-    this._filmsInThePage = 0;
-    this._controllers.mainSection = [];
-    if (this._components.filmsSection.getShowMoreBtn() === null && filmsData.length !== 0) {
-      insertElementInMarkup(this._elements.showMoreBtn, this._components.filmsSection);
-    }
-    return filmsData.length !== 0 ? this._outputFilmParts() : removeIt(this._elements.showMoreBtn);
-  }
-  render() {
-    this.moviesModel.setChangeCallback(this.onFilmsPartsChange.bind(this));
-    this.moviesModel.setAfterDataLoadCallback(this.setStateAfterDataLoad.bind(this));
-    this._createStatComponent();
-    this._createSortController();
-    this._createNavController();
-    this.setFilmsContainerInitialState(true);
-    insertElementInMarkup(this._components.films, this._elements.main);
-    insertElementInMarkup(this._components.filmsSection, this._components.films);
-    this._setFilmsAmountInFooter();
-    this.moviesModel.getMoviesDataFromServer();
   }
 }

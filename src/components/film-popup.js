@@ -12,41 +12,6 @@ const SECONDS_IN_HOUR = SECONDS_IN_MINUTES * 60;
 const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
 const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
 const SHAKE_ANIMATION_CLS = `shake`;
-const FEEDBACK_STYLE = `
-  <style>
-    @keyframes shake {
-      0%,
-      100% {
-        transform: translateX(0);
-      }
-      10%,
-      30%,
-      50%,
-      70%,
-      90% {
-        transform: translateX(-5px);
-      }
-      20%,
-      40%,
-      60%,
-      80% {
-        transform: translateX(5px);
-      }
-    }
-    .shake {
-      animation: shake 0.6s;
-    }
-    .selected:checked + .film-details__user-rating-label {
-      background-color: #d8d8d8;
-    }
-    .shake .selected + .film-details__user-rating-label {
-      background-color: #f51a1a;
-    }
-    .film-details__comment-input--no-valid {
-      border-color: #f51a1a;
-    }
-  </style>
-`;
 
 const CommentDeleteBtnText = {
   STANDART: `Delete`,
@@ -235,7 +200,6 @@ const getFilmPopup = (filmData) => {
   } = filmData;
   return `
     <section class="film-details">
-        ${FEEDBACK_STYLE}
         <form class="film-details__inner" action="" method="get">
         <div class="form-details__top-container">
             <div class="film-details__close">
@@ -377,17 +341,6 @@ export default class FilmPopup extends AbstractSmartComponent {
   setAddNewCommentCallback(callback) {
     this.addNewComment = callback;
   }
-  _removeReaction() {
-    if (this._selectedReactionId) {
-      this._selectedReactionId = null;
-    }
-  }
-  _removeHandlers() {
-    window.removeEventListener(`keydown`, this._escapeBtnHandler);
-    window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
-    window.removeEventListener(`keydown`, this._secondBtnHandlerForSendComment);
-    window.removeEventListener(`keyup`, this._removeFirstBtnKey);
-  }
   closePopup() {
     this.getElement().remove();
     this.removeElement();
@@ -397,9 +350,6 @@ export default class FilmPopup extends AbstractSmartComponent {
     const closeBtn = this.getElement().querySelector(`.film-details__close-btn`);
     closeBtn.addEventListener(`click`, this.closePopup);
     window.addEventListener(`keydown`, this._escapeBtnHandler);
-  }
-  _getStatusControlItems() {
-    return this.getElement().querySelectorAll(`.film-details__control-input`);
   }
   enabledChangeStatusBtns() {
     for (const item of this._getStatusControlItems()) {
@@ -418,9 +368,6 @@ export default class FilmPopup extends AbstractSmartComponent {
         callback(dataProperty);
       });
     }
-  }
-  _getUserRatingInputs() {
-    return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
   }
   onUserRatingUpdateError() {
     this.userRatingBlock = this.getElement().querySelector(`.film-details__user-rating-score`);
@@ -481,37 +428,6 @@ export default class FilmPopup extends AbstractSmartComponent {
       });
     }
   }
-  _getCommentInput() {
-    return this.getElement().querySelector(`.film-details__comment-input`);
-  }
-  _getNewCommentText() {
-    this._newCommentText = he.encode(this._getCommentInput().value);
-    if (this._newCommentText !== ``) {
-      if (this._newCommentText.length > MAX_NEW_COMMENT_LENGTH) {
-        this._newCommentText = `${this._newCommentText.substr(0, COMMENT_CUT_START_INDEX)}...`;
-      }
-      return this._newCommentText;
-    }
-    return false;
-  }
-  _getNewCommentReaction(reactionId) {
-    let reaction = null;
-    switch (reactionId) {
-      case `emoji-smile`:
-        reaction = Reaction.SMILE;
-        break;
-      case `emoji-sleeping`:
-        reaction = Reaction.SLEEPING;
-        break;
-      case `emoji-gpuke`:
-        reaction = Reaction.PUKE;
-        break;
-      case `emoji-angry`:
-        reaction = Reaction.ANGRY;
-        break;
-    }
-    return reaction;
-  }
   onCommentSendError() {
     this._newCommentBlock = this.getElement().querySelector(`.film-details__new-comment`);
     if (!this._newCommentBlock.classList.contains(SHAKE_ANIMATION_CLS)) {
@@ -525,21 +441,6 @@ export default class FilmPopup extends AbstractSmartComponent {
     const newCommentInput = this._getCommentInput();
     newCommentInput.removeAttribute(`disabled`);
     newCommentInput.classList.add(NO_VALID_COMMENT_INPUT_CLS);
-  }
-  _createNewComment() {
-    const newCommentInput = this._getCommentInput();
-    if (newCommentInput.classList.contains(NO_VALID_COMMENT_INPUT_CLS)) {
-      newCommentInput.classList.remove(NO_VALID_COMMENT_INPUT_CLS);
-    }
-    if (this._selectedReactionId && this._getNewCommentText() && !newCommentInput.hasAttribute(`disabled`)) {
-      newCommentInput.setAttribute(`disabled`, true);
-      const newCommentData = JSON.stringify({
-        emotion: this._getNewCommentReaction(this._selectedReactionId),
-        comment: this._getNewCommentText(),
-        date: moment().toISOString()
-      });
-      this.addNewComment(newCommentData);
-    }
   }
   sendNewComment() {
     window.addEventListener(`keydown`, this._firstBtnHandlerForSendComment);
@@ -586,6 +487,69 @@ export default class FilmPopup extends AbstractSmartComponent {
     this.setChangeStatusCallbacks(this.changeStatusCallback);
     this.sendNewComment();
     this.onSelectReaction();
+  }
+  _getCommentInput() {
+    return this.getElement().querySelector(`.film-details__comment-input`);
+  }
+  _getNewCommentText() {
+    this._newCommentText = he.encode(this._getCommentInput().value);
+    if (this._newCommentText !== ``) {
+      if (this._newCommentText.length > MAX_NEW_COMMENT_LENGTH) {
+        this._newCommentText = `${this._newCommentText.substr(0, COMMENT_CUT_START_INDEX)}...`;
+      }
+      return this._newCommentText;
+    }
+    return false;
+  }
+  _getNewCommentReaction(reactionId) {
+    let reaction = null;
+    switch (reactionId) {
+      case `emoji-smile`:
+        reaction = Reaction.SMILE;
+        break;
+      case `emoji-sleeping`:
+        reaction = Reaction.SLEEPING;
+        break;
+      case `emoji-gpuke`:
+        reaction = Reaction.PUKE;
+        break;
+      case `emoji-angry`:
+        reaction = Reaction.ANGRY;
+        break;
+    }
+    return reaction;
+  }
+  _getUserRatingInputs() {
+    return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+  }
+  _getStatusControlItems() {
+    return this.getElement().querySelectorAll(`.film-details__control-input`);
+  }
+  _removeReaction() {
+    if (this._selectedReactionId) {
+      this._selectedReactionId = null;
+    }
+  }
+  _createNewComment() {
+    const newCommentInput = this._getCommentInput();
+    if (newCommentInput.classList.contains(NO_VALID_COMMENT_INPUT_CLS)) {
+      newCommentInput.classList.remove(NO_VALID_COMMENT_INPUT_CLS);
+    }
+    if (this._selectedReactionId && this._getNewCommentText() && !newCommentInput.hasAttribute(`disabled`)) {
+      newCommentInput.setAttribute(`disabled`, true);
+      const newCommentData = JSON.stringify({
+        emotion: this._getNewCommentReaction(this._selectedReactionId),
+        comment: this._getNewCommentText(),
+        date: moment().toISOString()
+      });
+      this.addNewComment(newCommentData);
+    }
+  }
+  _removeHandlers() {
+    window.removeEventListener(`keydown`, this._escapeBtnHandler);
+    window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
+    window.removeEventListener(`keydown`, this._secondBtnHandlerForSendComment);
+    window.removeEventListener(`keyup`, this._removeFirstBtnKey);
   }
   _escapeBtnHandler(event) {
     if (event.key === EventKey.ESCAPE) {
