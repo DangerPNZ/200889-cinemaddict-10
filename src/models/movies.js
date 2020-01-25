@@ -6,6 +6,7 @@ import Provider from '../api/provider.js';
 
 const STORE_KEY = `cinemaddict`;
 const STORE = window.localStorage;
+
 const SortTypeValue = {
   DEFAULT: `default`,
   BY_DATE: `releaseDate`,

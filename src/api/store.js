@@ -2,58 +2,61 @@ import nanoid from 'nanoid';
 
 const INDEX_NO_MATCH = -1;
 const USER_NAME_FOR_NEW_COMMENT = `unknown user`;
+const StoreGroup = {
+  ALL: `all`,
+  MODYFIED: `modyfied`
+};
 
 export default class Store {
   constructor(key, store, dataAdapter) {
-    this.store = store[key];
+    this.storage = store;
+    this.key = key;
     this.dataAdapter = dataAdapter;
   }
+  getStoreData() {
+    return JSON.parse(this.storage.getItem(this.key));
+  }
+  setStoreData(data) {
+    this.storage.setItem(this.key, JSON.stringify(data));
+  }
+  findFilmIndexById(storeData, group, filmId) {
+    return storeData[group].findIndex((item) => item.id === filmId);
+  }
   saveMoviesFromServer(movies) {
-    if (!this.store) {
-      this.store = JSON.stringify({
+    const moviesInAppFormat = this.dataAdapter.getAllFilmsDataToAppStructure(movies);
+    if (!this.storage.getItem(this.key)) {
+      this.storage.setItem(this.key, JSON.stringify({
         synchronized: true,
-        initial: movies,
+        all: moviesInAppFormat,
         modyfied: [],
         deletedComments: [],
         createdComments: []
-      });
+      }));
     } else {
-      const storeData = this.getStoreData;
-      storeData.initial = movies;
+      const storeData = this.getStoreData();
+      storeData.all = moviesInAppFormat;
       this.setStoreData(storeData);
     }
   }
   getMovies() {
     let movies = null;
-    if (!this.store) {
+    if (!this.storage.getItem(this.key)) {
       movies = [];
     } else {
-      movies = this.dataAdapter.setMoviesData([...this.getStoreData().initial, ...this.getStoreData().modyfied]);
+      movies = this.getStoreData().all;
     }
-    this.dataAdapter.setMoviesData(movies);
+    this.dataAdapter.onUpdateMoviesData(movies);
   }
   updateMovieData(id, newData, onMovieUpdated) {
     const storeData = this.getStoreData();
-    let oldMovieDataIndex = storeData.initial.findIndex((item) => item.id === id);
-    if (oldMovieDataIndex !== INDEX_NO_MATCH) {
-      storeData.initial.splice(oldMovieDataIndex, 1);
+    const movieDataIndexInAll = this.findFilmIndexById(storeData, StoreGroup.ALL, id);
+    storeData.all.splice(movieDataIndexInAll, 1, newData);
+    const movieDataIndexInModyfied = this.findFilmIndexById(storeData, StoreGroup.MODYFIED, id);
+    if (movieDataIndexInModyfied !== INDEX_NO_MATCH) {
+      storeData.modyfied.splice(movieDataIndexInModyfied, 1, storeData.all[movieDataIndexInAll]);
     } else {
-      oldMovieDataIndex = storeData.modyfied.findIndex((item) => item.id === id);
-      storeData.modyfied.splice(oldMovieDataIndex, 1);
+      storeData.modyfied.push(storeData.all[movieDataIndexInAll]);
     }
-    // // добавить созданные в оффлайне комментарии
-    // for (const offlineNewComment of storeData.createdComments) {
-    //   if (offlineNewComment.movieId === id) {
-    //     newData.comments.push({
-    //       emotion: offlineNewComment.emotion,
-    //       comment: offlineNewComment.comment,
-    //       date: offlineNewComment.date,
-    //       id: offlineNewComment.id,
-    //       author: offlineNewComment.author
-    //     });
-    //   }
-    // }
-    storeData.modyfied.push(newData);
     storeData.synchronized = false;
     this.setStoreData(storeData);
     this.dataAdapter.onUpdateMovieDataItem(newData);
@@ -61,34 +64,27 @@ export default class Store {
   }
   deleteComment(commentId, onUpdateMovieData) {
     const storeData = this.getStoreData();
-    let isDeleting = false;
-    let deletingCommentIndex = null;
-    storeData.initial.forEach((film, index, arr) => {
-      deletingCommentIndex = film.comments.findIndex((commentItem) => commentItem.id === commentId);
+    storeData.all.forEach((film) => {
+      const deletingCommentIndex = film.comments.findIndex((commentItem) => commentItem.id === commentId);
       if (deletingCommentIndex !== INDEX_NO_MATCH) {
         film.comments.splice(deletingCommentIndex, 1);
-        isDeleting = true;
-        storeData.modyfied.push(film);
-        arr.splice(index, 1);
-        storeData.deletedComments.push(commentId);
-      }
-    });
-    if (!isDeleting) {
-      for (const film of storeData.modyfied) {
-        deletingCommentIndex = film.comments.findIndex((commentItem) => commentItem.id === commentId);
-        film.comments.splice(deletingCommentIndex, 1);
+        let indexInCreatedComments = INDEX_NO_MATCH;
         if (storeData.createdComments.length) {
-          const deletedCommentIndex = storeData.createdComments.findIndex((comment) => comment.id === commentId);
-          if (deletedCommentIndex !== INDEX_NO_MATCH) {
-            storeData.createdComments.splice(deletingCommentIndex, 1);
-          } else {
-            storeData.deletedComments.push(commentId);
-          }
+          indexInCreatedComments = storeData.createdComments.findIndex((comment) => comment.id === commentId);
+        }
+        if (indexInCreatedComments !== INDEX_NO_MATCH) {
+          storeData.createdComments.splice(indexInCreatedComments, 1);
         } else {
           storeData.deletedComments.push(commentId);
         }
+        const filmIndexInModyfied = this.findFilmIndexById(storeData, StoreGroup.MODYFIED, film.id);
+        if (filmIndexInModyfied !== INDEX_NO_MATCH) {
+          storeData.modyfied.splice(filmIndexInModyfied, 1, film);
+        } else {
+          storeData.modyfied.push(film);
+        }
       }
-    }
+    });
     storeData.synchronized = false;
     this.setStoreData(storeData);
     onUpdateMovieData(commentId);
@@ -97,33 +93,23 @@ export default class Store {
     const commentData = JSON.parse(commentBody);
     const storeData = this.getStoreData();
     commentData.id = this._getId();
-    commentData.movieId = filmId;
     commentData.author = USER_NAME_FOR_NEW_COMMENT;
-    storeData.createdComments.push(commentData);
-    const filmIndex = storeData.initial.findIndex((item) => item.id === filmId);
-    let filmData = null;
-    if (filmIndex !== INDEX_NO_MATCH) {
-      storeData.initial[filmIndex].comments.push(commentData);
-      filmData = storeData.initial[filmIndex];
-      storeData.modyfied.push(filmData);
-      storeData.initial.splice(filmIndex, 1);
+    const filmIndexInAll = this.findFilmIndexById(storeData, StoreGroup.ALL, filmId);
+    storeData.all[filmIndexInAll].comments.push(commentData);
+    const filmIndexInModyfied = this.findFilmIndexById(storeData, StoreGroup.MODYFIED, filmId);
+    if (filmIndexInModyfied !== INDEX_NO_MATCH) {
+      storeData.modyfied.splice(filmIndexInModyfied, 1, storeData.all[filmIndexInAll]);
     } else {
-      filmData = storeData.modyfied.find((item) => item.id === filmId);
-      filmData.comments.push(commentData);
+      storeData.modyfied.push(storeData.all[filmIndexInAll]);
     }
+    commentData.movieId = filmId;
+    storeData.createdComments.push(commentData);
     storeData.synchronized = false;
+    this.dataAdapter.onUpdateMovieDataItem(storeData.all[filmIndexInAll]);
+    onUpdateMovieData(storeData.all[filmIndexInAll]);
     this.setStoreData(storeData);
-    this.dataAdapter.onUpdateMovieDataItem(filmData);
-    onUpdateMovieData(filmData);
   }
-
   _getId() {
     return nanoid();
-  }
-  getStoreData() {
-    return JSON.parse(this.store);
-  }
-  setStoreData(data) {
-    this.store = JSON.stringify(data);
   }
 }

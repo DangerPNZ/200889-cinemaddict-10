@@ -22,31 +22,29 @@ export default class API {
   getMovies() {
     return this._load(`movies`)
     .then((response) => response.json())
-    .then((filmsData) => {
-      for (const film of filmsData) {
-        delete film.comments;
-      }
-      this._getCommentsForAllMovies(filmsData);
-      return filmsData;
-    })
-    .catch((err) => {
-      throw err;
+    .then((filmsData) => this._getCommentsForAllMovies(filmsData))
+    .then((allComments) => {
+      this.allMoviesData.forEach((filmData, index) => {
+        filmData.comments = allComments[index];
+      });
+      this.dataAdapter.setMoviesData(this.allMoviesData);
+      return this.allMoviesData;
     });
   }
   updateMovie(id, newData, onMovieUpdated, onError) {
     return this._load(`movies/${id}`, Method.PUT, this.dataAdapter.formatMovieDataToServerStructure(newData), onError)
     .then((response) => response.json())
-    .then((film) => this._getComments(film, onMovieUpdated))
-    .catch((err) => {
-      throw err;
-    });
+    .then((film) => this._getComments(film, onMovieUpdated));
   }
   sendComment(filmId, body, onUpdateMovieData, onError) {
     return this._load(`comments/${filmId}`, Method.POST, body, onError)
     .then((response) => response.json())
     .then((data) => {
       data.movie.comments = data.comments;
-      this.dataAdapter.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
+      if (onUpdateMovieData) {
+        this.dataAdapter.onGetMovieWithUpdatedComments(data.movie, onUpdateMovieData);
+      }
+      return data.movie;
     })
     .catch((err) => {
       throw err;
@@ -55,10 +53,20 @@ export default class API {
   deleteComment(commentId, onUpdateMovieData, onError) {
     return this._load(`comments/${commentId}`, Method.DELETE, null, onError)
     .then(() => {
-      onUpdateMovieData(commentId);
-    })
-    .catch((err) => {
-      throw err;
+      if (onUpdateMovieData) {
+        onUpdateMovieData(commentId);
+      }
+    });
+  }
+  syncMovies(movies) {
+    return this._load(`/movies/sync`, Method.POST, this.dataAdapter.formatAllMoviesDataToServerStructure(movies))
+    .then((response) => response.json())
+    .then((syncMoviesData) => this._getCommentsForAllMovies(syncMoviesData))
+    .then((allComments) => {
+      this.allMoviesData.forEach((filmData, index) => {
+        filmData.comments = allComments[index];
+      });
+      return this.dataAdapter.getAllFilmsDataToAppStructure(this.allMoviesData);
     });
   }
   _checkStatus(response) {
@@ -81,26 +89,15 @@ export default class API {
     return this._load(`comments/${film.id}`)
     .then((response) => response.json())
     .then((commentsList) => {
-      film.comments = commentsList;
-      if (!onUpdateMovieData) {
-        this._filmsWithCommentsAmounth += 1;
-        if (this._filmsAmounth === this._filmsWithCommentsAmounth) {
-          this.dataAdapter.setMoviesData(this.allMoviesData);
-        }
-      } else {
+      if (onUpdateMovieData) {
+        film.comments = commentsList;
         this.dataAdapter.onGetMovieWithUpdatedComments(film, onUpdateMovieData);
       }
-    })
-    .catch((err) => {
-      throw err;
+      return commentsList;
     });
   }
   _getCommentsForAllMovies(filmsData) {
     this.allMoviesData = filmsData;
-    this._filmsAmounth = this.allMoviesData.length;
-    this._filmsWithCommentsAmounth = 0;
-    for (const movieData of this.allMoviesData) {
-      this._getComments(movieData);
-    }
+    return Promise.all(this.allMoviesData.map((data) => this._getComments(data)));
   }
 }
