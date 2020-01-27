@@ -1,11 +1,6 @@
 import {compare} from '../utils/utils.js';
 import API from '../api/index.js';
 import DataAdapter from '../api/data-adapter.js';
-import Store from '../api/store.js';
-import Provider from '../api/provider.js';
-
-const STORE_KEY = `cinemaddict`;
-const STORE = window.localStorage;
 
 const SortTypeValue = {
   DEFAULT: `default`,
@@ -27,10 +22,7 @@ export default class Movies {
     this.moviesData = [];
     this.filmsDataForRender = this.moviesData;
     this.dataAdapter = new DataAdapter(this, this.onUpdateMoviesData, this.onUpdateMovieDataItem);
-    this.store = new Store(STORE_KEY, STORE, this.dataAdapter);
     this.api = new API(this.dataAdapter);
-    this.apiWithProvider = new Provider(this.api, this.store);
-
   }
   onUpdateMoviesData(filmsData) {
     this.moviesData = filmsData;
@@ -46,6 +38,9 @@ export default class Movies {
   getAllMoviesData() {
     return this.moviesData;
   }
+  getMoviesDataFromServer() {
+    this.api.getMovies();
+  }
   getMoviesAmount() {
     return this.filmsDataForRender.length;
   }
@@ -55,9 +50,6 @@ export default class Movies {
   getMoviesDataForRender() {
     return this.filmsDataForRender;
   }
-  getMoviesDataFromServer() {
-    this.apiWithProvider.getMovies();
-  }
   setChangeCallback(callback) {
     this.onFilmsPartsChange = callback;
   }
@@ -65,13 +57,13 @@ export default class Movies {
     this.setStateAfterDataLoad = callback;
   }
   changeMovieData(id, newData, onServerDataUpdate, onError = null) {
-    this.apiWithProvider.updateMovie(id, newData, onServerDataUpdate, onError);
+    this.api.updateMovie(id, newData, onServerDataUpdate, onError);
   }
   addNewComment(id, commentData, onServerDataUpdate, onError) {
-    this.apiWithProvider.sendComment(id, commentData, onServerDataUpdate, onError);
+    this.api.sendComment(id, commentData, onServerDataUpdate, onError);
   }
   deleteComment(id, onServerDataUpdate, onError) {
-    this.apiWithProvider.deleteComment(id, onServerDataUpdate, onError);
+    this.api.deleteComment(id, onServerDataUpdate, onError);
   }
   changeSortType(type) {
     this._currentSortType = type;

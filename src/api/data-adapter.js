@@ -4,8 +4,8 @@ export default class DataAdapter {
     this.onUpdateMoviesData = onUpdateMoviesData;
     this.onUpdateMovieDataItem = onUpdateMovieDataItem;
   }
-  formatMovieDataToServerStructure(movieData, toJSON = true) {
-    const dataInServerStructure = {
+  formatMovieDataToServerStructure(movieData) {
+    return JSON.stringify({
       id: movieData.id,
       [`film_info`]: {
         title: movieData.filmTitle,
@@ -32,25 +32,10 @@ export default class DataAdapter {
         [`watching_date`]: movieData.watchingDate
       },
       comments: movieData.comments.map((item) => item.id)
-    };
-    return toJSON ? JSON.stringify(dataInServerStructure) : dataInServerStructure;
-  }
-  formatAllMoviesDataToServerStructure(moviesInAppStructure) {
-    const moviesInServerStructure = [];
-    for (const dataItem of moviesInAppStructure) {
-      moviesInServerStructure.push(this.formatMovieDataToServerStructure(dataItem, false));
-    }
-    return JSON.stringify(moviesInServerStructure);
-  }
-  getAllFilmsDataToAppStructure(serverMoviesData) {
-    const appMoviesData = [];
-    for (const movieData of serverMoviesData) {
-      appMoviesData.push(this._formatFilmDataToAppStructure(movieData));
-    }
-    return appMoviesData;
+    });
   }
   setMoviesData(movies) {
-    const applicationMoviesData = this.getAllFilmsDataToAppStructure(movies);
+    const applicationMoviesData = this._getAllFilmsDataToAppStructure(movies);
     this.onUpdateMoviesData(applicationMoviesData);
   }
   onGetMovieWithUpdatedComments(newMovieData, onUpdateMovieData) {
@@ -82,5 +67,12 @@ export default class DataAdapter {
       watchingDate: movieData.user_details.watching_date,
       comments: movieData.comments
     };
+  }
+  _getAllFilmsDataToAppStructure(serverMoviesData) {
+    const appMoviesData = [];
+    for (const movieData of serverMoviesData) {
+      appMoviesData.push(this._formatFilmDataToAppStructure(movieData));
+    }
+    return appMoviesData;
   }
 }

@@ -12,7 +12,6 @@ const SECONDS_IN_HOUR = SECONDS_IN_MINUTES * 60;
 const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
 const NO_VALID_COMMENT_INPUT_CLS = `film-details__comment-input--no-valid`;
 const SHAKE_ANIMATION_CLS = `shake`;
-
 const CommentDeleteBtnText = {
   STANDART: `Delete`,
   DELETING: `Deleting…`
@@ -488,6 +487,38 @@ export default class FilmPopup extends AbstractSmartComponent {
     this.sendNewComment();
     this.onSelectReaction();
   }
+  _removeReaction() {
+    if (this._selectedReactionId) {
+      this._selectedReactionId = null;
+    }
+  }
+  _createNewComment() {
+    const newCommentInput = this._getCommentInput();
+    if (newCommentInput.classList.contains(NO_VALID_COMMENT_INPUT_CLS)) {
+      newCommentInput.classList.remove(NO_VALID_COMMENT_INPUT_CLS);
+    }
+    if (this._selectedReactionId && this._getNewCommentText() && !newCommentInput.hasAttribute(`disabled`)) {
+      newCommentInput.setAttribute(`disabled`, true);
+      const newCommentData = JSON.stringify({
+        emotion: this._getNewCommentReaction(this._selectedReactionId),
+        comment: this._getNewCommentText(),
+        date: moment().toISOString()
+      });
+      this.addNewComment(newCommentData);
+    }
+  }
+  _removeHandlers() {
+    window.removeEventListener(`keydown`, this._escapeBtnHandler);
+    window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
+    window.removeEventListener(`keydown`, this._secondBtnHandlerForSendComment);
+    window.removeEventListener(`keyup`, this._removeFirstBtnKey);
+  }
+  _getStatusControlItems() {
+    return this.getElement().querySelectorAll(`.film-details__control-input`);
+  }
+  _getUserRatingInputs() {
+    return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
+  }
   _getCommentInput() {
     return this.getElement().querySelector(`.film-details__comment-input`);
   }
@@ -518,38 +549,6 @@ export default class FilmPopup extends AbstractSmartComponent {
         break;
     }
     return reaction;
-  }
-  _getUserRatingInputs() {
-    return this.getElement().querySelectorAll(`.film-details__user-rating-input`);
-  }
-  _getStatusControlItems() {
-    return this.getElement().querySelectorAll(`.film-details__control-input`);
-  }
-  _removeReaction() {
-    if (this._selectedReactionId) {
-      this._selectedReactionId = null;
-    }
-  }
-  _createNewComment() {
-    const newCommentInput = this._getCommentInput();
-    if (newCommentInput.classList.contains(NO_VALID_COMMENT_INPUT_CLS)) {
-      newCommentInput.classList.remove(NO_VALID_COMMENT_INPUT_CLS);
-    }
-    if (this._selectedReactionId && this._getNewCommentText() && !newCommentInput.hasAttribute(`disabled`)) {
-      newCommentInput.setAttribute(`disabled`, true);
-      const newCommentData = JSON.stringify({
-        emotion: this._getNewCommentReaction(this._selectedReactionId),
-        comment: this._getNewCommentText(),
-        date: moment().toISOString()
-      });
-      this.addNewComment(newCommentData);
-    }
-  }
-  _removeHandlers() {
-    window.removeEventListener(`keydown`, this._escapeBtnHandler);
-    window.removeEventListener(`keydown`, this._firstBtnHandlerForSendComment);
-    window.removeEventListener(`keydown`, this._secondBtnHandlerForSendComment);
-    window.removeEventListener(`keyup`, this._removeFirstBtnKey);
   }
   _escapeBtnHandler(event) {
     if (event.key === EventKey.ESCAPE) {

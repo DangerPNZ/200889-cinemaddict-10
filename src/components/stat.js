@@ -198,25 +198,6 @@ export default class Stat extends AbstractSmartComponent {
     }
     this._setCurrentStatisticPeriod();
   }
-  _defineStatisticData() {
-    switch (this._staticticState) {
-      case StatisticState.DEFAULT:
-        this._filmsDataByPeriod = this.data;
-        break;
-      case StatisticState.TODAY:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TimeUnit.DAY));
-        break;
-      case StatisticState.WEEK:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.WEEK)));
-        break;
-      case StatisticState.MONTH:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.MONTH)));
-        break;
-      case StatisticState.YEAR:
-        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.YEAR)));
-        break;
-    }
-  }
   _setStatisticPeriodHandlers() {
     const statisticRadioBtns = this.getElement().querySelectorAll(`.statistic__filters-input`);
     for (const radioBtn of statisticRadioBtns) {
@@ -296,6 +277,25 @@ export default class Stat extends AbstractSmartComponent {
   _setCurrentStatisticPeriod() {
     if (this._staticticState !== StatisticState.DEFAULT) {
       this.getElement().querySelector(`.statistic__filters-input[value="${this._staticticState}"]`).setAttribute(`checked`, true);
+    }
+  }
+  _defineStatisticData() {
+    switch (this._staticticState) {
+      case StatisticState.DEFAULT:
+        this._filmsDataByPeriod = this.data;
+        break;
+      case StatisticState.TODAY:
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isSame(moment(), TimeUnit.DAY));
+        break;
+      case StatisticState.WEEK:
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.WEEK)));
+        break;
+      case StatisticState.MONTH:
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.MONTH)));
+        break;
+      case StatisticState.YEAR:
+        this._filmsDataByPeriod = this.data.filter((item) => moment(item.watchingDate).isAfter(moment().subtract(AMOUNT_OF_TIME_PERIOD, TimeUnit.YEAR)));
+        break;
     }
   }
 }

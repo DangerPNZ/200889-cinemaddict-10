@@ -72,13 +72,6 @@ export default class FilmCard extends AbstractSmartComponent {
     this.setShowDetailsHandlers(this.showDetailsHandler);
     this.setChangeStatusCallbacks(this.changeStatusCallback);
   }
-  setShowDetailsHandlers(handler) {
-    this.showDetailsHandler = handler;
-    const elements = this._getCallDetailsItems();
-    for (const item of elements) {
-      item.addEventListener(`click`, handler);
-    }
-  }
   _getCallDetailsItems() {
     const poster = this.getElement().querySelector(`.film-card__poster`);
     const heading = this.getElement().querySelector(`.film-card__title`);
@@ -87,6 +80,13 @@ export default class FilmCard extends AbstractSmartComponent {
   }
   _getStatusControlItems() {
     return this.getElement().querySelectorAll(`.film-card__controls-item`);
+  }
+  setShowDetailsHandlers(handler) {
+    this.showDetailsHandler = handler;
+    const elements = this._getCallDetailsItems();
+    for (const item of elements) {
+      item.addEventListener(`click`, handler);
+    }
   }
 }
 
